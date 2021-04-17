@@ -8,23 +8,32 @@ To use any of the utilities it must  be 'included' within your script.
 To do this put:
 
 ```
-. filename.shi  # note the 'dot' (.)
+. filename.shi  
+# note the 'dot' (.)
 ```
 
 and set your PATH variable:
 
-```
-export PATH="/path/to/utilities/directory:$PATH" #
 
-at the top of your file, where filename is taken from the files available in the repository. The easist way top use the utilities is to include utils.shi:
 ```
+
+export PATH="/path/to/utilities/directory:$PATH"
+```
+
+The easist way top use the utilities is to include utils.shi:
+
+```
+
 source utils.shi # source is alternate to 'dot'.
 ```
 or you can include the sub-utility file itself, e.g.
+
 ```
 
 . utils_vb.shi  # will include whatever it needs to work correctly.
 ```
+
+NB: 'including' a bash include file is merely a textual inclusion mechanism. There is no formal 'importing' etc. as you might find in full programming languages. 
 
 ## The Source
 
