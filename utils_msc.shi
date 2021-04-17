@@ -1,0 +1,135 @@
+#!/bin/bash
+
+_MSG="UTILS_MSC INCLUDED"
+if test -z "$___UTILS_MSC"; then
+___UTILS_MSC=$_MSG;
+
+debugutils $_MSG
+. utils_core.shi
+
+
+DELIM=%%
+delimit() {
+	if ! test -z $1; then DELIM=$1; fi
+
+	echo $DELIM$1$DELIM;
+}
+
+stripwhite()	# remove excess whitespace (\t and space) & control chars
+{
+	RES="$1";
+	RES=$(echo $RES | xargs)		# obscure trick.
+
+ 	echo "$RES"
+}
+
+randomString() 
+{
+	NUM=$1
+	if test -z "$NUM"; then NUM=10; fi
+
+	chars="abcdefghijklmnopqrstuvwxyz"
+
+	for ((i=0; i<$NUM; i++))
+	do
+		echo -n ${chars:RANDOM%${#chars}:1}
+	done
+}
+
+
+roundDown()
+{
+	NUM=$1
+	checkNotEmptyString "$(fnname) requires a number argument" $NUM
+
+	echo "$NUM/1" | bc
+}
+
+
+cdscr()
+{
+	
+	checkdirexists $UTS_SCRIPTDIR
+	cd $UTS_SCRIPTDIR
+}
+
+# various small fns intended equally for use on cmd line as in scripts.
+
+xgrep()
+{
+	ne grep "$@" | grep -v "$(getGrepExcludes)";
+}
+
+# END CONTENT
+fi
+
+# if test "$1" = "--test"; then
+# 	chkChkArg() 
+# 	{ 
+# 		NOTHINGHERE=
+# 		chkarg NOTHINGHERE
+# 		NOTHINGHERE="SOMETHING"
+# 		chkarg NOTHINGHERE
+# 		echo "Should be ONE (1) error message above"
+# 	}
+# 	chkChkArg
+
+# 	if checkIfVerbose -v; then echo VERBOSE=$VERBOSE; fi
+
+# 	echo RANDOM: $(randomString 5)
+# 	roundDown 100.776
+
+# 	setcol $RED
+# 	echo RED
+# 	setcol $GREEN
+# 	echo GREEN
+# 	setcol $YELLOW
+# 	echo YELLOW
+# 	setcol $BLUE
+# 	echo BLUE
+# 	setcol $CYAN
+# 	echo CYAN
+# 	setcol $LIGHTRED
+# 	echo LIGHTRED
+# 	setcolnorm
+# 	echo
+# 	echo BACK TO NORMAL COLOR
+
+# 	(
+# 		nostdout
+# 		echo "ERROR IF YOU SEE THIS (STDOUT)"
+# 		errecho "OK TO SEE THIS (STDERR)" 
+# 	)
+
+# 	errecho "THIS IS RED"
+# 	VERBOSE=true
+# 	vbecho "THIS IS BLUE"
+# 	VERBOSE=false
+
+#     echo _createRealKey:
+#     _createRealKey first second third fourth endless
+    
+#     echo set - won\'t print
+#     setMapValue YOU YYYY 1 2 3 4 5
+#     setMapValue ME MMMM 1 2 3
+    
+#     echo get: YOU, ME
+#     getMapValue YOU 1 2 3 4 5
+#     getMapValue ME 1 2 3
+    
+#     echo _allMapKeys:
+#     echo ${!_D[@]}
+#     _allMapKeys
+    
+#     echo _allMapKeyValues:
+#     _allMapKeyValues
+    
+#     echo mapKeys:
+#     mapKeys YOU
+#     mapKeys ME
+    
+#     echo mapKeyValues:
+#     mapKeyValues YOU
+#     mapKeyValues ME
+# fi
+

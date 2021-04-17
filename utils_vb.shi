@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# utils to enable addtional (perhaps debug) information to be printed (to stderr) only when VERBOSE flag is set.
+
+_MSG="UTILS_VB INCLUDED"
+if test -z "$___UTILS_VB"; then 
+___UTILS_VB=$_MSG
+
+debugutils $_MSG
+. utils_core.shi
+
+
+### START CONTENT
+VERBOSE=false;	# if true, show verbose output.
+VERBOSEFLAG=""	# "" or "-v". Use this to pass on -v flag to a script you are calling.
+
+setVerbose() 	{ export VERBOSE=true; export VERBOSEFLAG="-v"; }	# preferred way to set VERBOSE=true;
+
+checkIfVerbose() # quick parse for -v flag as $1.
+{
+	if test "$1" = "-v"; then
+		setVerbose;
+		return 0;
+	fi
+	return 1;
+}
+
+if checkIfVerbose "$1"; then shift; fi 
+# parses $1 (only!) and if '-v' sets verbose, removes -v as arg.#
+# so scripts will *automatically* set VERBOSE if '-v' is first argument
+# and these utils are included (using '.'' or 'source')
+
+vbecho()	{ if $VERBOSE; then setcol $YELLOW; (>&2 echo $*); setcolnorm; fi }
+
+vbfnecho()	{ vbecho "$0 ${FUNCNAME[1]}: $*"; }
+
+vbvar() # debug - vbecho BASHVAR value - no '$'' required.
+{
+	local BASHVAR=$1; chkarg BASHVAR;
+	vbfnecho "$BASHVAR=${!BASHVAR}"
+}
+
+vbsleep() { if $VERBOSE; then sleep $*; fi } # misc helper.
+
+### END CONTENT
+fi

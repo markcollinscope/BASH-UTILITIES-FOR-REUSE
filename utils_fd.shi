@@ -1,0 +1,127 @@
+#!/bin/bash
+
+_MSG="UTILS_FD INCLUDED"
+if test -z "$___UTILS_FD"; then
+___UTILS_FD=$_MSG;
+
+debugutils $_MSG
+. utils_core.shi
+
+### START CONTENT
+
+# checkxxx - check something, exit with error if there's a problem.
+# ensurexxx - check if something is done, if not, do it.
+
+ensuredeleted() 
+{
+	local FILE_OR_DIR=$1; chkarg FILE_OR_DIR;
+	
+	if test -e $FILE_OR_DIR; then
+		vbecho "deleted $FILE_OR_DIR"
+		rm -rf $FILE_OR_DIR
+	fi
+}
+
+checkfileexists()
+{
+	local FILE=$1; chkarg FILE;
+
+	if ! test -f $FILE; then
+		errecho "File <$1> does not exist"
+		callFnIfExists Usage
+		exiterr;
+	fi
+}
+
+checkdirexists()
+{
+	DIR="$1"; chkarg DIR;
+
+	MSG="Directory <$DIR> does not exist"
+	if ! test -z "$2"; then MSG="$2"; fi
+
+	if ! test -d "$DIR"; then
+		errecho "$MSG"
+		callFnIfExists Usage
+		exiterr;
+	fi
+}
+
+ensuredirexists()
+{
+	DIR="$1"; chkarg DIR;
+
+	if ! test -d "$DIR"; then
+		mkdir -p $DIR
+		vbfnecho "Created: $DIR"
+	fi
+	local XC=$?
+	
+	if test $XC -ne 0 ; then 
+		errecho "Unable to create directory $DIR"
+		exiterr; 
+	fi
+}
+
+tmpFile()	# [ <num> ] - number of characters in filename suffix - default 5.
+{
+	LEN=$1;
+
+	PREFIX="utils"
+	if  test -z "$LEN"; then LEN=5; fi
+
+	TMP="/tmp/$PREFIX.$(randomString $LEN)"
+	echo $TMP
+}
+
+
+fileecho() # [--rm] <message> <file> [...<file>] - (write msg to file(s), clear file first if '--rm')
+{
+	local DELETE_FILE_BEFORE_ECHO=false
+	if test "$1" = "--rm"; then DELETE_FILE_BEFORE_ECHO=true; shift; fi
+	#
+	local MSG="$1"; shift; chkarg MSG;
+	local LIST_OF_FILES="$*"; chkarg LIST_OF_FILES;
+
+	for i in $LIST_OF_FILES; do
+		if $DELETE_FILE_BEFORE_ECHO; then
+			rm -rf $i;
+		fi
+		echo "$MSG" >> "$i";
+	done
+}
+
+findFile() # -d <dir> or -h (home director);
+{
+	FLAG=$1 
+
+	DIR=.
+	if test "$FLAG" = "-d"; then 
+		DIR="$2"; shift 2;
+   	elif test "$1" = "-h"; then
+		DIR=~; shift;
+	fi
+
+	FILE=$1
+	chkarg FILE
+
+	find $DIR -name $FILE -print -quit 2>/dev/null
+}
+findfile() { findFile $*; }
+
+backupFile()
+{
+	FILE=$1
+	ensuredirexists $UTS_BACKUPDIR
+	BACKUPFILE=$UTS_BACKUPDIR/$(basename $0).$FILE.$(dateforfile)
+
+	if test -e $FILE; then		
+		vbecho "FILE <$FILE> IS BEING BACKED UP TO <$TMP>"
+		cp -r $FILE $BACKUPFILE;
+	fi
+}
+backupDir() { backupFile $*; }
+
+
+### END
+fi

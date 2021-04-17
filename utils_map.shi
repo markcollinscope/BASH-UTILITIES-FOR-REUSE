@@ -1,0 +1,116 @@
+#!/bin/bash
+
+# NB: This works but has limitations, in particular it is possible to get errors
+# if a Map name is similar (grep wise) to a Key name.
+# Watch for updates. Contributions welcome.
+
+_MSG="UTILS_MAP INCLUDED"
+if test -z "$___UTILS_MAP"; then
+___UTILS_MAP=$_MSG;
+
+debugutils $_MSG
+. utils_core.shi
+
+### START CONTENT
+
+### Simulate Multi Dimentional HASH/MAP/ASSOCIATIVE ARRAY.
+### Todo: fully test and perhaps mv 'value' as last arg...
+
+#
+# e.g. 
+# - name is name of multi-d map.
+# - value is a value to be put into the map.
+# - 1 2 3 - are keys (3d in this case)
+# - AA BB - are keys (2d in this case)
+#
+# setMapValue name value 1 2 3 ... N etc.
+# getMapValue name 1 2 3 ... N
+#
+# name - map name.
+# value - value to be set within map.
+# 1 2 3 ... N - any number of keys that the value will be set against.
+# e.g. setMapValue myMap 25 1 2
+# => 'equivalent to' sets myMap[1][2] = 25, 
+# note the number of keys is important.
+
+# 'local' variable storing multi-d maps.
+declare -A _D
+
+_MANGLE_=_
+_SEP=','
+
+_mangle()	# local usage - convert $1 to its internally used format.
+{
+	echo "$_MANGLE""_$1""$_MANGLE_"
+}
+
+_createRealKey()
+{
+	checkNotEmptyString "error in subscript (at least one value needed)- " $1
+
+	local FULL=
+	for i in $*; do
+		PART=$(_mangle $i)
+		FULL="$FULL$_SEP$PART"
+	done
+	echo $FULL
+}
+
+_allMapKeys()
+{
+	# All mangled.
+	echo ${!_D[@]}
+}
+
+
+_allMapKeyValues()
+{
+	for mangled_key in $(_allMapKeys); do
+		echo $mangled_key: ${_D[$mangled_key]}
+	done
+}
+
+## === 'exported' functions - do not use the above directly, they may change. ====
+
+setMapValue()
+{
+	local MAPNAME=$1; chkarg MAPNAME; 	# not mangled.
+	local VAL=$2; chkarg VAL; 			# never mangled.
+	
+	shift 2
+	# will mangle MAPNAME & $*
+	_D[$(_createRealKey $MAPNAME $*)]=$VAL
+}
+
+getMapValue()
+{
+	local MAPNAME=$1; chkarg MAPNAME;	# not mangled.
+
+	shift
+	echo "${_D[$(_createRealKey $MAPNAME $*)]}"
+}
+
+
+mapKeys()
+{
+	local MAPNAME=$1; chkarg MAPNAME;
+
+	local MANGLED_MAPNAME=$(_mangle $MAPNAME)
+	for mangled_key in $(_allMapKeys); do
+		if [[ "$mangled_key" =~ $MANGLED_MAPNAME ]]; then 
+			echo $mangled_key
+		fi
+	done
+}
+
+mapKeyValues()
+{
+	MAPNAME=$1; chkarg MAPNAME;
+
+	for mangled_key in $(mapKeys $MAPNAME); do
+		echo "$mangled_key: ${_D[$mangled_key]}"
+	done
+}
+
+# END CONTENT
+fi

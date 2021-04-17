@@ -1,0 +1,69 @@
+#!/bin/bash
+
+_MSG="UTILS_UIO INCLUDED"
+if test -z "$___UTILS_UIO"; then
+___UTILS_UIO=$_MSG
+# CONTENT STARTS
+
+debugutils $_MSG
+. utils_core.shi
+
+FORCE=false;	# override manual intervention requests
+FORCEFLAG="";	# empty or "-f" (pass onto subscripts - subscript $FORCEFLAG)
+setForce() 		{ export FORCE=true; export FORCEFLAG="-f"; }
+
+checkIfForce()
+{
+	if test "$1" = "-f"; then setForce; shift; fi	
+}
+checkIfForce;	# NB: this called after checkIfVerbose, so $ scriptname -v -f ...
+
+hitKeyToContinue() # [<message>]
+{
+	local MSG=$1
+
+	if $FORCE; then return; fi
+	
+	MSG="$MSG - hit any key to continue - ctl-c to exit"
+	errecho $MSG
+	read x
+}
+
+Warning() # [-n] [<message-to-show>] (-n - do not exit on "no")
+{
+	local EXITONNO=true; if test "$1" = "-n"; then EXITONNO=false; shift; fi
+	local OPTIONAL_MSG=$1;
+	local MSG="CONTINUE?" # default.
+
+	local RETURN_VAL=0;
+	if $FORCE; then return $RETURN_VAL; fi
+
+	if ! test -z "$OPTIONAL_MSG"; then MSG="$OPTIONAL_MSG"; fi
+	MSG="$MSG [yes|n]"
+
+	while true; do
+		errecho $MSG
+		read yn
+		case $yn in
+			[Yy]es ) 
+				break;;
+			[Nn]* ) 
+				if "$EXITONNO";
+				then 
+					exiterr;
+				else 
+					RETURN_VAL=1; break; 
+				fi;;
+			* ) errecho "Please answer yes or no.";;
+		esac
+	done
+	return $RETURN_VAL;
+}
+
+if test "$1" = "--testme"; then # $0 --testme [-f] [-n] - to see how Warning works.
+	shift;
+	if Warning $*; then echo "$0: YES, AND FORCE=$FORCE" ; else echo "$0: NO"; fi
+fi
+
+#CONTENT ENDS
+fi

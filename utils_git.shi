@@ -1,0 +1,59 @@
+#!/bin/bash
+
+_MSG="UTILS_GIT INCLUDED"
+if test -z "$___UTILS_GIT"; then 
+___UTILS_GIT=$_MSG
+
+debugutils $_MSG
+. utils_core.shi
+. utils_vb.shi
+
+### START CONTENT
+export UTS_GITDIR=${UTS_GITDIR:-"~/GIT"} # env can override.
+
+getgitbranch() 
+{
+	V=`git branch 2>/dev/null | grep \* | tr ' \*' '_'`
+	V=${V:="NoGitBranch"}
+	echo $V
+}
+
+isGitDir() # if isgitdir; then ... fi
+{
+	if test -d ".git"; then
+		return 0;
+	else
+		return 1;
+	fi
+}
+
+checkIsGitDir() # exit if not.
+{
+	if ! isGitDir; then
+		errecho "$0: Error <$(pwd)> Not A Git Dir"
+		exiterr;
+	fi
+}
+
+gitNeedsCommit()
+{
+	checkIsGitDir;
+
+	if ! test -z "$(git status -s)"; then
+		return 0;
+	else
+		return 1;
+	fi
+}
+
+gitStatus()
+{
+	checkIsGitDir;
+
+	if gitNeedsCommit; then	
+		echo "GIT COMMIT REQUIRED IN: $(pwd)"
+	fi
+}
+
+### END CONTENT
+fi

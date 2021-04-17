@@ -1,0 +1,25 @@
+#!/bin/bash
+
+_MSG="UTILS_GLOBALS INCLUDED"
+if test -z "$___UTILS_GLOBALS"; then 
+___UTILS_GLOBALS=$_MSG;
+
+### START CONTENT
+debugutils $_MSG
+
+# override with exported environment variables. defaults provided.
+export UTS_LOGDIR=${UTS_LOGDIR:-"$HOME/.LOGS"}				
+export UTS_BACKUPDIR=${UTS_BACKUPDIR:-"$HOME/.BACKUP"}
+export UTS_GITDIR=${UTS_GITDIR:-"$HOME/GIT"}
+export UTS_SCRIPTDIR=${UTS_SCRIPTDIR:-"$HOME/scripts"};
+export UTS_GITSYNCFILE=${UTS_GITSYNCFILE:-".gitx"}
+
+# list of directories to exclude from recursive grep searches (e.g. grep -r) - NB "|" as per grep 'or' option.
+export UTS_GREPEXLUDEDIR=${UTS_GREPEXLUDEDIR:-"node_modules|Binary|sublime|SCRAP|SCRAPS|DVBinspector-1.10.1|\.ssh|\.git|vendor|YV|OLD|ONGOING|MESH|HOWTO"}
+
+getGrepExcludes() 	{ echo $UTS_GREPEXLUDEDIR; }
+getGlobLogDir() 	{ echo $UTS_LOGDIR; }
+getGlobBackupDir() 	{ echo $UTS_BACKUPDIR; };
+
+### END CONTENT
+fi
