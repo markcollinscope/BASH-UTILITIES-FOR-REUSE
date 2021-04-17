@@ -102,8 +102,7 @@ findFile() # -d <dir> or -h (home director);
 		DIR=~; shift;
 	fi
 
-	FILE=$1
-	chkarg FILE
+	FILE=$1; chkarg FILE
 
 	find $DIR -name $FILE -print -quit 2>/dev/null
 }
@@ -111,9 +110,9 @@ findfile() { findFile $*; }
 
 backupFile()
 {
-	FILE=$1
+	FILE=$1; chkarg FILE;
 	ensuredirexists $UTS_BACKUPDIR
-	BACKUPFILE=$UTS_BACKUPDIR/$(basename $0).$FILE.$(dateforfile)
+	BACKUPFILE=$UTS_BACKUPDIR/$(basename $0).$FILE.$(date "%Y.%m.%d-%H.%M.%S")
 
 	if test -e $FILE; then		
 		vbecho "FILE <$FILE> IS BEING BACKED UP TO <$TMP>"
