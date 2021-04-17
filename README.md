@@ -10,7 +10,9 @@ To do this put:
 ```
 . filename.shi  # note the 'dot' (.)
 ```
+
 and set your PATH variable:
+
 ```
 export PATH="/path/to/utilities/directory:$PATH" #
 
