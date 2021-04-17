@@ -49,7 +49,7 @@ utils_uio.shi        | Warn (continue yes|N[o] - type functions to alert users o
 utils_git.shi    | functions to determine - am I in a git dir? Does this git dir need a commit? etc. Used for git related scripts (unsurprisingly).
 utils_msc.shi    | other functinos. randomString and xgrep can be quite useful.
 utils_map.shi    | multi dimensional (hash)map data structure. can use with caution (for now).
-NB: utils_globals.shi| This is a set of bash variables that are useful in scripts - globally assigned values for backup directories, git directories, etc.  Defaults are provided but if set externally and exported these values can be overridden.
+NB: utils_globals.shi| This is a set of bash variables that are useful in scripts - globally assigned values for backup directories, git directories, etc.  Defaults are provided but if set externally and exported these values can be overridden. Some functions *will* expect the values to be set.
 
 ### File naming
 
