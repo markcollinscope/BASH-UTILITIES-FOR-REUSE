@@ -61,3 +61,7 @@ NB: utils_globals.shi| This is a set of bash variables that are useful in script
 
 * *test -z xxx vs. [[ -z xxx ]]* - the code currently uses the 'test' form of condition for 'if' statements, etc. e.g. 'test -z "$X"' - is $X an empty string. If enough people complain I could be tempted to convert this.
 
+## Comments and Contributions Welcome
+Please do contribute:
+* email:markcollinscope@gmail.com, or message here.
+* branch etc. to contribute something new and make a pull request.
