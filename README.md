@@ -1,7 +1,7 @@
 # BASH-UTILS - VERSION 0.1 - SUBJECT TO FURTHER REVIEW - COMMENTS WELCOMED
-A set of over 40 bash utility functions to make writing complex well structured Bash Scripts easier.
+A set of over 40 bash utility functions to make writing complex well structured Bash Scripts simple.
 
-Broadly speaking the utilities provide functionality to simplify writing bash functions (check arguments, etc), under take debugging or verbose output (when -v flag passed into a script), get or override user input (-f type flag), check or ensure files and directories exist, do useful stuff with git directories, create map data structures (multi-d), and a whole load of other useful miscellaneous stuff.
+Broadly speaking the utilities provide functionality to simplify writing bash functions (check function arguments, etc), assist with debugging or producing verbose output (when -v flag passed into a script), to get (continue - y/n?) user input (or override with -f type flag), to check or ensure files and directories exist as expected, do useful stuff with git directories, create map data structures (multi-d), and a whole load of other useful miscellaneous stuff.
 
 ## Using the utilities
 To use any of the utilities it must  be 'included' within your script. 
