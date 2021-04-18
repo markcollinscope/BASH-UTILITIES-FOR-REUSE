@@ -3,6 +3,8 @@ A set of over 40 bash utility functions to make writing complex well structured 
 
 Broadly speaking the utilities provide functionality to simplify writing bash functions (check function arguments, etc), assist with debugging or producing verbose output (when -v flag passed into a script), to get (continue - y/n?) user input (or override with -f type flag), to check or ensure files and directories exist as expected, do useful stuff with git directories, create map data structures (multi-d), and a whole load of other useful miscellaneous stuff.
 
+*contributions or comments actively welcomed*
+
 ## Using the utilities
 To use any of the utilities it must  be 'included' within your script. 
 To do this put:
@@ -51,7 +53,7 @@ utils_msc.shi    | other functinos. randomString and xgrep can be quite useful.
 utils_map.shi    | multi dimensional (hash)map data structure. can use with caution (for now).
 NB: utils_globals.shi| This is a set of bash variables that are useful in scripts - globally assigned values for backup directories, git directories, etc.  Defaults are provided but if set externally and exported these values can be overridden. Some functions *will* expect the values to be set.
 
-### File naming
+### File namingshought
 
 * *.shi* (shell include) is used as a suffix for all utility files.
 
