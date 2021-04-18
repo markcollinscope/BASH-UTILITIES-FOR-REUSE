@@ -7,12 +7,12 @@ ___UTILS_MSC=$_MSG;
 debugutils $_MSG
 . utils_core.shi
 
-
-DELIM=%%
 delimit() {
-	if ! test -z $1; then DELIM=$1; fi
+	local _DCHARS=%%
+	if ! test $1 = '-d'; then _DCHARS=$2; shift 2 fi
 
-	echo $DELIM$1$DELIM;
+	vbarg _DCHARS
+	echo $_DCHARS$1$_DCHARS;
 }
 
 stripwhite()	# remove excess whitespace (\t and space) & control chars
