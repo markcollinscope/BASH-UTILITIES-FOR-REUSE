@@ -53,7 +53,7 @@ utils_msc.shi    | other functinos. randomString and xgrep can be quite useful.
 utils_map.shi    | multi dimensional (hash)map data structure. can use with caution (for now).
 NB: utils_globals.shi| This is a set of bash variables that are useful in scripts - globally assigned values for backup directories, git directories, etc.  Defaults are provided but if set externally and exported these values can be overridden. Some functions *will* expect the values to be set.
 
-### File namingshought
+### File naming
 
 * *.shi* (shell include) is used as a suffix for all utility files.
 
