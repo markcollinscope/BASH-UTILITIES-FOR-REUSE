@@ -4,12 +4,8 @@
 # if a Map name is similar (grep wise) to a Key name.
 # Watch for updates. Contributions welcome.
 
-_MSG="UTILS_MAP INCLUDED"
-if test -z "$___UTILS_MAP"; then
-___UTILS_MAP=$_MSG;
-
-debugutils $_MSG
 . utils_core.shi
+if ! alreadyIncluded UTILS_MAP; then
 
 ### START CONTENT
 

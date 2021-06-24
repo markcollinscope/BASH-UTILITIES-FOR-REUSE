@@ -1,12 +1,7 @@
 #!/bin/bash
 
-_MSG="UTILS_UIO INCLUDED"
-if test -z "$___UTILS_UIO"; then
-___UTILS_UIO=$_MSG
-# CONTENT STARTS
-
-debugutils $_MSG
 . utils_core.shi
+if ! alreadyIncluded UTILS_UIO; then
 
 FORCE=false;	# override manual intervention requests
 FORCEFLAG="";	# empty or "-f" (pass onto subscripts - subscript $FORCEFLAG)
@@ -14,9 +9,9 @@ setForce() 		{ export FORCE=true; export FORCEFLAG="-f"; }
 
 checkIfForce()
 {
-	if test "$1" = "-f"; then setForce; shift; fi	
+	if test "$1" = "-f"; then setForce; return 0; else return 1; fi
 }
-checkIfForce;	# NB: this called after checkIfVerbose, so $ scriptname -v -f ...
+if checkIfForce "$1"; then shift; fi # NB: use -v before -f if necessary.
 
 hitKeyToContinue() # [<message>]
 {
@@ -59,11 +54,6 @@ Warning() # [-n] [<message-to-show>] (-n - do not exit on "no")
 	done
 	return $RETURN_VAL;
 }
-
-if test "$1" = "--testme"; then # $0 --testme [-f] [-n] - to see how Warning works.
-	shift;
-	if Warning $*; then echo "$0: YES, AND FORCE=$FORCE" ; else echo "$0: NO"; fi
-fi
 
 #CONTENT ENDS
 fi

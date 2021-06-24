@@ -1,26 +1,48 @@
 #!/bin/bash
 
-_MSG="UTILS_MSC INCLUDED"
-if test -z "$___UTILS_MSC"; then
-___UTILS_MSC=$_MSG;
-
-debugutils $_MSG
+. utils_globals.shi
+if ! alreadyIncluded UTILS_MSC; then
 . utils_core.shi
+. utils_vb.shi
+. utils_fd.shi
 
-delimit() {
-	local _DCHARS=%%
-	if ! test $1 = '-d'; then _DCHARS=$2; shift 2 fi
+delimit() # $1 => %%$1%%, [-d <_ARG>] - use $_ARG instead of '%%'.
+{
+	local _ARG=%%
+	if ! test $1 = '-d'; then _ARG=$2; shift 2; fi
 
-	vbarg _DCHARS
-	echo $_DCHARS$1$_DCHARS;
+	vbarg _ARG
+	echo $_ARG$1$_ARG;
 }
 
-stripwhite()	# remove excess whitespace (\t and space) & control chars
+stripwhite() # $1 => $1 but without excess whitespace (\t and space) & control chars
 {
 	RES="$1";
-	RES=$(echo $RES | xargs)		# obscure trick.
 
+	RES=$(echo $RES | xargs)		# obscure trick.
  	echo "$RES"
+}
+
+count() { echo $#; }
+
+concat() # [-c <string>] - e.g. concat a b c => 'abc', concat -c : a b c => 'a:b:c'
+{ 
+
+	local RES="";
+	local ADDCHAR="";
+	if test "$1" = "-c"; then TOADDCHAR=$2; shift 2; fi;
+
+	if test "$1" = "-s"; then 
+		shift; 
+		RES=$(concat -c ' ' "$*");
+	else
+		for i in "$@"; do 
+			RES="$RES$ADDCHAR$i";
+			ADDCHAR=$TOADDCHAR
+		done;
+	fi
+
+	echo "$RES"
 }
 
 randomString() 
@@ -48,88 +70,27 @@ roundDown()
 
 cdscr()
 {
-	
 	checkdirexists $UTS_SCRIPTDIR
 	cd $UTS_SCRIPTDIR
 }
 
-# various small fns intended equally for use on cmd line as in scripts.
-
-xgrep()
+getDirs() # echo full path name of dirs, from cwd, recursive, exclude unwanted. [-x]: exclude cwd. TODO
 {
-	ne grep "$@" | grep -v "$(getGrepExcludes)";
+	DIR="$(pwd)/"; 
+	if test "$1" = "-x"; then _FILTER="| grep -v -E ^$DIR$"; fi
+
+	find "$(pwd)/" -type d -print $_FILTER | grep -v -E "$(getGrepExcludes)";
+}
+
+nds() # no double slash - e.g. "nds echo $PATH" - echo PATH with // => /. # TODO - Deprecate...
+{
+	ne eval "$@" | sed 's?\/\/?/?g';
+}
+
+explode() # explode "ABCDE" => A B C D E
+{
+	echo $1 | grep -o .
 }
 
 # END CONTENT
 fi
-
-# if test "$1" = "--test"; then
-# 	chkChkArg() 
-# 	{ 
-# 		NOTHINGHERE=
-# 		chkarg NOTHINGHERE
-# 		NOTHINGHERE="SOMETHING"
-# 		chkarg NOTHINGHERE
-# 		echo "Should be ONE (1) error message above"
-# 	}
-# 	chkChkArg
-
-# 	if checkIfVerbose -v; then echo VERBOSE=$VERBOSE; fi
-
-# 	echo RANDOM: $(randomString 5)
-# 	roundDown 100.776
-
-# 	setcol $RED
-# 	echo RED
-# 	setcol $GREEN
-# 	echo GREEN
-# 	setcol $YELLOW
-# 	echo YELLOW
-# 	setcol $BLUE
-# 	echo BLUE
-# 	setcol $CYAN
-# 	echo CYAN
-# 	setcol $LIGHTRED
-# 	echo LIGHTRED
-# 	setcolnorm
-# 	echo
-# 	echo BACK TO NORMAL COLOR
-
-# 	(
-# 		nostdout
-# 		echo "ERROR IF YOU SEE THIS (STDOUT)"
-# 		errecho "OK TO SEE THIS (STDERR)" 
-# 	)
-
-# 	errecho "THIS IS RED"
-# 	VERBOSE=true
-# 	vbecho "THIS IS BLUE"
-# 	VERBOSE=false
-
-#     echo _createRealKey:
-#     _createRealKey first second third fourth endless
-    
-#     echo set - won\'t print
-#     setMapValue YOU YYYY 1 2 3 4 5
-#     setMapValue ME MMMM 1 2 3
-    
-#     echo get: YOU, ME
-#     getMapValue YOU 1 2 3 4 5
-#     getMapValue ME 1 2 3
-    
-#     echo _allMapKeys:
-#     echo ${!_D[@]}
-#     _allMapKeys
-    
-#     echo _allMapKeyValues:
-#     _allMapKeyValues
-    
-#     echo mapKeys:
-#     mapKeys YOU
-#     mapKeys ME
-    
-#     echo mapKeyValues:
-#     mapKeyValues YOU
-#     mapKeyValues ME
-# fi
-

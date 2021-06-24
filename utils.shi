@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Reordering will change priority of -v and -f (and poss other) automatic flag parsing.
+# UTILS TIP: (-v -f) is the order in which automatic flag parsing works, (-f -v) will fail on -v.
 . utils_core.shi
 . utils_vb.shi
 . utils_git.shi
@@ -8,5 +10,3 @@
 . utils_msc.shi
 
 . utils_map.shi
-
-

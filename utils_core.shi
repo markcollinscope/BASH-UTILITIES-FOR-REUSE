@@ -1,57 +1,58 @@
 #!/bin/bash
 #
 # Core functions used in all other *utils*.
+# TBD: Unit Test Msg?
 
-_MSG="UTILS_CORE INCLUDED"
-if test -z "$___UTILS_CORE"; then 
-___UTILS_CORE=$_MSG
-
-debugutils() { if ! test -z "$DEBUGUTILS"; then >&2 echo $*; fi }
-debugutils $_MSG
-
-# global values... git dir, scripts dirs, log dirs ...
+# global values... git dir, scripts dirs, log dirs ... one time include if present.
 _UTILS_GLOB=$(which utils_globals.shi)
 if test -f "$_UTILS_GLOB"; then
 . $_UTILS_GLOB;
 fi
 
-### START CONTENT
-callFnIfExists() { if test "`type -t $1`" = "function" ; then $*; fi }
-nostdout() { exec > /dev/null; } 	# turn off stdout. best in subshell "(" .. ")" if you must use!
-nostderr() { exec 2> /dev/null; }	# turn off stderr, may screw colors stuff below.
+if ! alreadyIncluded UTILS_CORE; then
 
-doscriptexit() 
+### START CONTENT
+callFnIfExists() { if test "$(type -t $1)" = "function" ; then $*; fi }
+nostdout() { exec > /dev/null; } 	# turn off stdout. best in subshell - ( .. ) -  if you must use!
+nostderr() { exec 2> /dev/null; }	# turn off stderr, best in subshell - ( .. ) -  if you must use!
+null() { if test -z "$*"; then return 0; else return 1; fi }
+isdir() { if test -d "$1"; then return 0; else return 1; fi }; isDir() { isdir $*; }
+
+_doscriptexit() 
 { 
 	local EXITCODE=$1;
 
 	if test "$0" = "bash" || test "$0" = "sh"; then # don't exit on terminal cmd line! deeply annoying!
 		2>&1 echo "'exit' called in function <${FUNCNAME[2]}> - status <$EXITCODE>"
+	elif test "$EXITCODE" = "-k"; then
+		kill 0
 	else
 		exit $EXITCODE;
 	fi
 }
 
 # use these to exit... if you want to use functions on the cmd line (in process).
-exitok() { doscriptexit 0; }
-exiterr() 
+exitok() { _doscriptexit 0; }
+exiterr() # -k - really exit - from multiple sub-processes as well.
 { 
-	local EXITCODE=1;
-	if ! test -z "$1"; then EXITCODE=$1; fi
-
-	doscriptexit $EXITCODE;
+	local EXITCODE=1; 
+	if ! test -z "$1"; then EXITCODE=$1; fi;
+	
+	_doscriptexit $EXITCODE;
 }
 
-chkarg()	# exit if a fn arg not provided.
+chkarg() # # e.g. usage: "local T=$1; chkarg T; # exit if T=
 {
-	local VARNAME=$1; 	#NB: pass $1 as MYARG not $MYARG - no "$" necessary (or permitted)
+	local VARNAME="$1"; 	#NB: pass $1 as MYARG not $MYARG - no "$" necessary (or permitted)
 	
 	local VALUE=${!VARNAME}
-	local FNNAME=$(fnname)
+	local FNNAME=$(fnname -l 2)
 	if test -z "$VALUE"; then 
 		errecho "[$FNNAME]: Call to Fn has missing argument <$VARNAME>"
 		exiterr;
 	fi
-} # e.g. usage: "local TEMPERATURE=$1; chkarg TEMPERATURE" - check if TEMPERATURE ($1) was passed in.
+} 
+chkvar() { chkarg $*; } # shown intent - when checking non arg value (e.g. ENV VAR)
 
 export BLACK="\e[30m"
 export RED="\e[31m"		
@@ -63,26 +64,37 @@ export MAGNETA="\e[35m"
 export CYAN="\e[36m"
 export WHITE="\e[37m"
 export NORMAL="\e[0m"
-export RESET="\e[0m"  # same as NORMAL
+export RESET=$NORMAL
 
-setcol()
+isTerminalOutput() # is the output stream (1, 2 ...) to a terminal?
+{
+	local OUTPUT=1; if ! test -z "$1"; then OUTPUT="$1"; fi
+    if test -t $OUTPUT; then return 0; else return 1; fi
+}
+
+UTS_NOCOLOR=${UTS_NOCOLOR:-false}
+setcol() # ' export UTS_NOCOLOR=true ' -  in env. to turn color off.
+# set text color.
 {
 	local COLOR=$1; chkarg COLOR;
+	if $UTS_NOCOLOR; then return 0; fi
 
-	echo -n -e $COLOR
-	>&2 echo -n -e $COLOR
+	if isTerminalOutput; then echo -n -e $COLOR; fi
+	if isTerminalOutput 2; then >&2 echo -n -e $COLOR; fi
+
+	return 0;
 }
 
 setcolnorm() # reset (echo) text color to normal. 
 {
-	echo -n -e $NORMAL
-	>&2 echo -n -e $NORMAL
+	setcol $NORMAL
 }
 resetcol() { setcolnorm; }
 
 errecho() {  setcol $RED; (>&2 echo "$*"); setcolnorm; } # echo to std error!
 
 fnname() # [-l <call-fn-level>] - # e.g. "fnname -l 2"  echo fn calling fn calling this fn.
+# what is the current function name (the function calling this one)
 {
 	local ARG_FLAG=$1;
 	local ARG_LEVEL=$2;
@@ -90,7 +102,7 @@ fnname() # [-l <call-fn-level>] - # e.g. "fnname -l 2"  echo fn calling fn calli
 
 	if test "$ARG_FLAG" = "-l"; 
 	then 
-		chkarg ARG_LEVEL;
+		if test -z "$ARG_LEVEL"; then errecho "[fnname -l NO LEVEL PROVIDED]"; exiterr; fi
 		DEFAULT_LEVEL=$ARG_LEVEL; 
 	fi
 	echo "${FUNCNAME[$DEFAULT_LEVEL]}"
@@ -98,45 +110,28 @@ fnname() # [-l <call-fn-level>] - # e.g. "fnname -l 2"  echo fn calling fn calli
 
 ne() { 2>/dev/null $*; }	# run command without those irritating error messages! (ne=NoError)
 
-checkNotEmptyString() # 
+checkNotEmptyString()
+# e.g. usage: 'local NAME=""; checkNotEmptyString "You forgot to give a name!" $NAME' 
+# - NB: "$" is necessary here.
 {
 	local ERROR_MSG="$1";
 	local VALUE_TO_CHECK="$2";
 
 	if test -z "$VALUE_TO_CHECK"; then 
-		errecho "$0 - [$(fnname)] $ERROR_MSG"; 
-		exit 1; 
+		errecho "$0 - [$(fnname -l 2)] $ERROR_MSG"; 
+		exiterr
 	fi
 }
-# e.g. usage: 'local NAME=""; checkNotEmptyString "You forgot to give a name!" $NAME' 
-# - NB: "$" is necessary here.
 
+# grep but exclude certain patterns.
+xgrep() { ne grep "$@" | grep -v -E "$(getGrepExcludes)"; }
 
-Usage() { errecho "$USAGE"; exit 1; }
+# default Usage function. 
+Usage() { USAGE="$(echo "$USAGE" | sed 's?\./??' )"; errecho "$USAGE"; exiterr; }
 
-### END CONTENT
-fi 
+if null "$UTS_NOAUTOARGS"; then 
+	if test "$1" = "--help"; then callFnIfExists Usage; fi
+	if test "$1" = "-?"; then callFnIfExists Usage; fi
+fi
 
-#if test "$1" = "--testme"
-#then
-#	(
-#		echo OKIFSHOWN
-#		nostdout
-#		echo ERROR IF SHOWN!
-#	)
-#	echo SHOULDBESHOWN
-#
-#	(
-#		errecho OKIFSHOWN
-#		nostderr
-#		errecho ERROR IF SHOWN!
-#	)
-#	errecho SHOULDBESHOWN
-#
-#	(
-#		# NB: running in subshell due to "exit 1" on error.
-#		chkarg NOSUCHARG
-#	)
-#
-#	errecho SHOULDBESHOWN
-#fi
+fi

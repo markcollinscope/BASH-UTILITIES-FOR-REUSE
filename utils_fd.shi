@@ -1,11 +1,8 @@
 #!/bin/bash
 
-_MSG="UTILS_FD INCLUDED"
-if test -z "$___UTILS_FD"; then
-___UTILS_FD=$_MSG;
-
-debugutils $_MSG
 . utils_core.shi
+
+if ! alreadyIncluded UTILS_FD; then
 
 ### START CONTENT
 
@@ -38,18 +35,21 @@ checkdirexists()
 	DIR="$1"; chkarg DIR;
 
 	MSG="Directory <$DIR> does not exist"
-	if ! test -z "$2"; then MSG="$2"; fi
+
+	if ! null "$2"; then MSG="$2"; fi
 
 	if ! test -d "$DIR"; then
 		errecho "$MSG"
 		callFnIfExists Usage
 		exiterr;
+		return 1;
 	fi
+	return 0;
 }
 
 ensuredirexists()
 {
-	DIR="$1"; chkarg DIR;
+	DIR="$1"; chkarg DIR; 
 
 	if ! test -d "$DIR"; then
 		mkdir -p $DIR
@@ -65,40 +65,40 @@ ensuredirexists()
 
 tmpFile()	# [ <num> ] - number of characters in filename suffix - default 5.
 {
-	LEN=$1;
+	local LEN="$1"
+	if null "$LEN"; then LEN=5; fi
 
-	PREFIX="utils"
-	if  test -z "$LEN"; then LEN=5; fi
-
-	TMP="/tmp/$PREFIX.$(randomString $LEN)"
+	PREFIX="UTILS_FD"
+	
+	local TMP="/tmp/$PREFIX.$(randomString $LEN)"
 	echo $TMP
 }
 
 
 fileecho() # [--rm] <message> <file> [...<file>] - (write msg to file(s), clear file first if '--rm')
 {
-	local DELETE_FILE_BEFORE_ECHO=false
-	if test "$1" = "--rm"; then DELETE_FILE_BEFORE_ECHO=true; shift; fi
-	#
+	local CLEAR_FILE_BEFORE_NEW_WRITE=false
+	if test "$1" = "--rm"; then CLEAR_FILE_BEFORE_NEW_WRITE=true; shift; fi
+
 	local MSG="$1"; shift; chkarg MSG;
+
 	local LIST_OF_FILES="$*"; chkarg LIST_OF_FILES;
 
 	for i in $LIST_OF_FILES; do
-		if $DELETE_FILE_BEFORE_ECHO; then
-			rm -rf $i;
+		if $CLEAR_FILE_BEFORE_NEW_WRITE; then
+			rm -r $i;
 		fi
 		echo "$MSG" >> "$i";
 	done
 }
 
-findFile() # -d <dir> or -h (home director);
+findFile() # -d <dir> or -h (home directory);
 {
-	FLAG=$1 
-
-	DIR=.
+	FLAG=$1
+	DIR=.; 
 	if test "$FLAG" = "-d"; then 
 		DIR="$2"; shift 2;
-   	elif test "$1" = "-h"; then
+   	elif test "$FLAG" = "-h"; then
 		DIR=~; shift;
 	fi
 
@@ -111,16 +111,154 @@ findfile() { findFile $*; }
 backupFile()
 {
 	FILE=$1; chkarg FILE;
+
 	ensuredirexists $UTS_BACKUPDIR
-	BACKUPFILE=$UTS_BACKUPDIR/$(basename $0).$FILE.$(date "%Y.%m.%d-%H.%M.%S")
+	BACKUPFILE=$UTS_BACKUPDIR/$FILE.$(date "%Y.%m.%d-%H.%M.%S")
 
 	if test -e $FILE; then		
-		vbecho "FILE <$FILE> IS BEING BACKED UP TO <$TMP>"
+		vbecho "FILE <$FILE> IS BEING BACKED UP TO <$BACKUPFILE>"
 		cp -r $FILE $BACKUPFILE;
 	fi
 }
 backupDir() { backupFile $*; }
 
+getPath() # [-h] - under HOME dir only
+{
+	local HOMEONLY=false;
+	if test "$1" = "-h"; then HOMEONLY=true;fi
+
+	TFILE1=$(tmpFile)
+	TFILE2=$(tmpFile)
+
+	IFS=':'
+	for i in $PATH; do
+		if test -d "$i"; then
+		(
+			cd $i; pwd; # full path to dir.
+		)
+		fi
+	done | sort | uniq > $TFILE1
+	
+	if $HOMEONLY; then 
+		grep "$HOME" < $TFILE1 > $TFILE2;
+	else
+		mv $TFILE1 $TFILE2
+	fi
+	cat $TFILE2
+}
+
+matchManyFilesInSingleDir() # [--full (return full path names)] DIR PATTERN
+{
+	local DIRPREFIX=""; 
+	if test "$1" = "--full"; then shift; DIRPREFIX="$1/" ; fi
+	
+	local DIR="$1";
+	local FILEPATTERN="$2";
+
+	checkdirexists $DIR || return 1;
+	cd $DIR;
+
+	vbfnecho "NOW IN DIR: $(pwd)";
+	vbvar FILEPATTERN
+
+	FLS=$(find . -maxdepth 1 -name "$FILEPATTERN")
+	vbvar FLS
+
+	for j in $FLS; do
+		# concat echoes value.
+		concat $DIRPREFIX $(basename $j)
+	done
+
+	return 0;
+}
+
+matchManyFilesInDirList()
+{
+	vbfnecho "$@"
+
+    local FILEPATTERN="$1"; chkarg FILEPATTERN; shift;
+    local DIRLIST=$*; chkarg DIRLIST;
+
+    vbvar FILEPATTERN
+    vbvar DIRLIST
+
+    for dir in $DIRLIST; do
+  		vbvar dir
+		vbvar FILEPATTERN
+        matchManyFilesInSingleDir --full $dir "$FILEPATTERN" || return 1;
+    done
+
+    return 0;
+}
+
+export UTS_ERR_TOO_MANY_FILES="matchOneFileInDirList-Error-Too-Many-Files-Matched"
+matchOneFileInDirList() # [-n (no error messages)] <pattern> <dir-list (one or more)>
+{
+	local SHOWERRORS=true; 
+	if test "$1" = "-n"; then SHOWERRORS=false; shift; fi
+	
+	local FILEPATTERN="$1"; chkarg FILEPATTERN; shift; 
+	local DIRLIST="$*"; chkarg DIRLIST;
+	
+	vbvar FILEPATTERN
+	vbvar DIRLIST
+
+	local MATCHES=$(matchManyFilesInDirList "$FILEPATTERN" $DIRLIST) || return 1; # TODO CHECK THIS || return 1 ...
+	
+	# process and sort errors.
+	vbecho "---------------------$(fnname)-----------------------"
+	vbvar MATCHES
+
+	local COUNT=$(count $MATCHES);
+	vbvar COUNT
+
+	if (( COUNT > 1 )); then
+		if $SHOWERRORS; then
+			errecho MATCHES ARE:
+			for i in $MATCHES; do errecho "$i"; done
+			errecho '---'
+			errecho Too Many Files!
+		fi
+		echo "$UTS_ERR_TOO_MANY_FILES";
+		return 1
+	fi
+
+	echo "$MATCHES"
+	return 0;
+}
+
+matchSingleFileUsingFlags() 
+# -x: exact match only, 
+# -a: allow full partial match *<FILEPARTNAME>* (default: <FILEPARTNAME>*)
+{
+	local WILDCARD="*"; 
+	if test "$1" = "-x"; then WILDCARD=""; shift; fi
+	
+	local EXTENDMATCH=""; 
+	if test "$1" = "-a"; then EXTENDMATCH="*"; shift; fi; vbvar EXTENDMATCH
+	
+	local FILEPARTNAME="$1"; chkarg FILEPARTNAME; shift;
+	local DIRLIST="$*"; chkarg DIRLIST;
+
+	vbvar WILDCARD
+	vbvar EXTENDMATCH
+	vbvar FILEPARTNAME
+	vbvar DIRLIST
+
+	local SHELLFORMATMATCHSTRING="$(concat "$EXTENDMATCH" "$FILEPARTNAME" "$WILDCARD")"
+	vbvar SHELLFORMATMATCHSTRING
+
+	local RESULT="$(matchOneFileInDirList "$SHELLFORMATMATCHSTRING" $DIRLIST)"
+
+	vbvar RESULT
+
+	if test "$RESULT" = "$UTS_ERR_TOO_MANY_FILES"; then 
+	# $UTS... returned if more than one file matched.
+		exiterr -k;
+	fi
+
+	echo $RESULT
+}
 
 ### END
 fi

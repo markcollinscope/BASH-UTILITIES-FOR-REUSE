@@ -1,11 +1,9 @@
 #!/bin/bash
 
-_MSG="UTILS_GIT INCLUDED"
-if test -z "$___UTILS_GIT"; then 
-___UTILS_GIT=$_MSG
-
-debugutils $_MSG
 . utils_core.shi
+
+if ! alreadyIncluded UTILS_GIT; then
+
 . utils_vb.shi
 
 ### START CONTENT
