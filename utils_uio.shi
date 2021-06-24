@@ -11,7 +11,10 @@ checkIfForce()
 {
 	if test "$1" = "-f"; then setForce; return 0; else return 1; fi
 }
-if checkIfForce "$1"; then shift; fi # NB: use -v before -f if necessary.
+
+if null "$UTS_NOAUTOARGS"; then
+	if checkIfForce "$1"; then shift; fi # NB: use -v before -f if necessary.
+fi
 
 hitKeyToContinue() # [<message>]
 {

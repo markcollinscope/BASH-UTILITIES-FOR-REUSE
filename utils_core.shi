@@ -112,7 +112,6 @@ ne() { 2>/dev/null $*; }	# run command without those irritating error messages! 
 
 checkNotEmptyString()
 # e.g. usage: 'local NAME=""; checkNotEmptyString "You forgot to give a name!" $NAME' 
-# - NB: "$" is necessary here.
 {
 	local ERROR_MSG="$1";
 	local VALUE_TO_CHECK="$2";
@@ -134,4 +133,5 @@ if null "$UTS_NOAUTOARGS"; then
 	if test "$1" = "-?"; then callFnIfExists Usage; fi
 fi
 
+# END
 fi
