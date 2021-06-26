@@ -17,7 +17,7 @@ vbvar() # for debug -  print variable - BASHVAR - no $required.
 }
 
 vbecho()	{ if $VERBOSE; then setcol $YELLOW; (>&2 echo $*); setcolnorm; fi }
-vbfnecho()	{ vbecho "$0 [${FUNCNAME[1]}()]: $*"; }
+vbfnecho()	{ vbecho "$(basename $0) [${FUNCNAME[1]}()]: $*"; }
 vbsleep() { if $VERBOSE; then sleep $*; fi }
 
 checkIfVerbose() # quick parse for -v flag as $1.
