@@ -68,12 +68,6 @@ roundDown()
 }
 
 
-cdscr()
-{
-	checkdirexists $UTS_SCRIPTDIR
-	cd $UTS_SCRIPTDIR
-}
-
 getDirs() # echo full path name of dirs, from cwd, recursive, exclude unwanted. [-x]: exclude cwd. TODO
 {
 	DIR="$(pwd)/"; 
