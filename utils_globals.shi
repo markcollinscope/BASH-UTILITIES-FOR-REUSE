@@ -1,5 +1,7 @@
 #!/bin/bash
 
+if ! test "$(type -t alreadyIncluded)" = "function"; then
+
 alreadyIncluded()
 {
 	local GUARD=$1;
@@ -11,6 +13,8 @@ alreadyIncluded()
 	fi
 	return 0;
 }
+
+fi
 
 if ! alreadyIncluded UTILS_GLOBALS; then
 
