@@ -1,17 +1,43 @@
 #!/bin/bash
 
 . utils_globals.shi
-
 if ! alreadyIncluded UTILS_OPTS; then
+
 . utils_core.shi
+. utils_msc.shi
+
+USAGE_FILE=$(tmpFile);
+rm -f $USAGE_FILE;
+echo "Options:" > $USAGE_FILE;
+
+addUsage()
+{
+	setvar FLG "$1";
+	if ! null "$2"; then
+		echo "$FLG: $2" >> $USAGE_FILE;
+	fi
+}
+
+getOptUsage()
+{
+	cat $USAGE_FILE;
+}
 
 binopt()	# binary option v1 or v2.
 {
+	local DOC=
+	if test "$1" = "-d"; then 
+		setvar DOC $2;
+		shift 2;
+	fi
+
 	setvar FLAG $1
 	setvar VAR $2
 	setvar DEFAULT_VALUE $3
 	setvar OTHER_VALUE $4
 	shift 4;
+
+	addUsage "$FLAG" "$DOC"
 
 	EVAL="$VAR=$DEFAULT_VALUE"
 	while ! test -z "$1"; do

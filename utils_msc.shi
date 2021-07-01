@@ -28,8 +28,10 @@ count() { echo $#; }
 concat() # [-c <string>] - e.g. concat a b c => 'abc', concat -c : a b c => 'a:b:c'
 { 
 
-	local RES="";
-	local ADDCHAR="";
+	local RES=
+	local ADDCHAR=
+	local TOADDCHAR=
+
 	if test "$1" = "-c"; then TOADDCHAR=$2; shift 2; fi;
 
 	if test "$1" = "-s"; then 

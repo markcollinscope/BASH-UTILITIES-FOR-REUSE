@@ -1,47 +1,29 @@
 #!/bin/bash
 # REMOVE THIS LINE - IT IS USED TO CLEANUP UNUNSED SCRIPTS - PATTERN MATCH UNUSEDSCRIPTXXX
 
+. utils.shi
+
 #
 USAGE=$(cat <<ENDUSAGE
-Usage: $(basename $0) <args ...> - description...
--x	option x...
--y 	option y... etc.
+Usage: $(basename $0)
+
+$(getOptUsage)
 ENDUSAGE
 )
 #
 
-. utils.shi
+cleanup() { echo "It's a trap!"; }
+trap cleanup SIGINT # ctl-c.
 
-cleanup() # Only if you really need it.
-{
-    # add cleanup code.
-}
-trap cleanup SIGINT # trap ctrl-c, call cleanup.
-
-
-doit() 
-{
-	# ... do something!
-}
+doit() { echo "DOIT: $*"; }
 
 main()
 {
-	local ARGS=
+	eval $(boolopt -b BVAR $*); echo BVAR: $BVAR
+	eval $(valopt  -m MAINVAR $*); echo MAINVAR $MAINVAR
+	# ...
 
-	while ! test -z "$1"; do
-		case $1 in
-			-o|--output) # 2 arg option, for example.
-				OUTPUTFILE=$2; shift 2 ;;
-			-a) # one arg options.
-				FLAG="A"; shift ;;
-			*)  
-				ARGS="$ARGS "$1 # keep "non option" args for later use.
-				shift;
-				;;
-		esac;
-	done
-
-	doit $ARGS # process real arguments and do something.
+	doit $*;
 	exitok;
 }
 
