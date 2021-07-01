@@ -20,7 +20,7 @@ doit() { echo "DOIT: $*"; }
 main()
 {
 	eval $(boolopt -b BVAR $*); echo BVAR: $BVAR
-	eval $(valopt  -m MAINVAR $*); echo MAINVAR $MAINVAR
+	eval $(valopt -m MAINVAR $*); echo MAINVAR $MAINVAR
 	# ...
 
 	doit $*;
@@ -28,3 +28,4 @@ main()
 }
 
 main $*;
+Usage
