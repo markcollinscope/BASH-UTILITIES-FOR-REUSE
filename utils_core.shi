@@ -1,7 +1,6 @@
 #!/bin/bash
 #
 # Core functions used in all other *utils*.
-# TBD: Unit Test Msg?
 
 # global values... git dir, scripts dirs, log dirs ... one time include if present.
 _UTILS_GLOB=$(which utils_globals.shi)
@@ -52,7 +51,8 @@ chkarg() # # e.g. usage: "local T=$1; chkarg T; # exit if T=
 		exiterr;
 	fi
 } 
-chkvar() { chkarg $*; } # shown intent - when checking non arg value (e.g. ENV VAR)
+chkvar() { chkarg $*; }
+setvar() { AVAR="$1"; chkarg AVAR; AVAL="$2"; chkarg AVAL; eval "$AVAR"="$AVAL"; }
 
 export BLACK="\e[30m"
 export RED="\e[31m"		
@@ -109,6 +109,7 @@ fnname() # [-l <call-fn-level>] - # e.g. "fnname -l 2"  echo fn calling fn calli
 }
 
 ne() { 2>/dev/null $*; }	# run command without those irritating error messages! (ne=NoError)
+no() { >/dev/null $*; }		# run command without irritating output.
 
 checkNotEmptyString()
 # e.g. usage: 'local NAME=""; checkNotEmptyString "You forgot to give a name!" $NAME' 
@@ -122,8 +123,9 @@ checkNotEmptyString()
 	fi
 }
 
-# grep but exclude certain patterns.
-xgrep() { ne grep "$@" | grep -v -E "$(getGrepExcludes)"; }
+# grep/find but exclude certain patterns.
+xgrep() { grep "$@" | grep -v -E "$(getGrepExcludes)"; }
+xfind() { find "$@" | grep -v -E "$(getGrepExcludes)"; }
 
 # default Usage function. 
 Usage() { USAGE="$(echo "$USAGE" | sed 's?\./??' )"; errecho "$USAGE"; exiterr; }

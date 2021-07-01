@@ -63,6 +63,11 @@ ensuredirexists()
 	fi
 }
 
+fdmatch() # is there a matching file or dir for shell glob pattern.
+{
+	stat -t $1 > /dev/null 2>&1
+}
+
 tmpFile()	# [ <num> ] - number of characters in filename suffix - default 5.
 {
 	local LEN="$1"

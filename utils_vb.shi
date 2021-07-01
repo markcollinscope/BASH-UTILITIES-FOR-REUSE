@@ -7,6 +7,7 @@ if ! alreadyIncluded UTILS_VB; then
 
 ### START CONTENT
 setVerbose() 	{ export VERBOSE=true; export VERBOSEFLAG="-v"; }	# preferred way to set VERBOSE=true;
+verbose()		{ if $VERBOSE; then return 0; else return 1; fi; }
 resetVerbose() 	{ export VERBOSE=false; export VERBOSEFLAG=""; }	# preferred way to set VERBOSE=true;
 resetVerbose;
 

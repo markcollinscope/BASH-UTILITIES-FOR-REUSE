@@ -4,6 +4,7 @@
 # UTILS TIP: (-v -f) is the order in which automatic flag parsing works, (-f -v) will fail on -v.
 . utils_core.shi
 . utils_vb.shi
+. utils_opts.shi
 . utils_git.shi
 . utils_uio.shi
 . utils_fd.shi

@@ -1,0 +1,78 @@
+#!/bin/bash
+
+. utils_globals.shi
+
+if ! alreadyIncluded UTILS_OPTS; then
+. utils_core.shi
+
+binopt()	# binary option v1 or v2.
+{
+	setvar FLAG $1
+	setvar VAR $2
+	setvar DEFAULT_VALUE $3
+	setvar OTHER_VALUE $4
+	shift 4;
+
+	EVAL="$VAR=$DEFAULT_VALUE"
+	while ! test -z "$1"; do
+		if test "$1" = "$FLAG"; then
+			EVAL="$VAR=$OTHER_VALUE"
+		else
+			ARGS="$ARGS $1";
+		fi
+		shift;
+	done
+
+	echo "set -- $ARGS; $EVAL"
+}
+
+boolopt()	# t/f value - default f, uses VAR as given to store result of parsing cmd line.
+{
+	setvar FLAG $1
+	setvar VAR $2
+	shift 2;
+
+	binopt $FLAG $VAR false true $*
+}
+
+valopt() 	# e.g. script -f afile ; use 'afile' if given with -f option.
+{
+	setvar FLAG $1
+	setvar VAR $2
+	shift 2;
+
+	while ! test -z "$1"; do
+		if test "$1" = "$FLAG"; then
+			EVAL="$VAR=$2;"
+			shift;
+		else
+			ARGS="$ARGS $1";
+		fi
+		shift;
+	done
+
+	echo "set -- $ARGS; $EVAL"
+	return 0;
+}
+
+fnopt()
+{
+	setvar FLAG $1
+	setvar FN $2
+	shift 2;
+
+	while ! test -z "$1"; do
+		if test "$1" = "$FLAG"; then
+			EVAL="callFnIfExists $FN"
+		else
+			ARGS="$ARGS $1";
+		fi
+		shift;
+	done
+
+	echo "set -- $ARGS; $EVAL" 
+}
+
+# END CONTENT
+fi
+
