@@ -11,7 +11,6 @@ To do this put:
 . filename.shi  
 # note the 'dot' (.)
 ```
-
 and set your PATH variable:
 
 
@@ -19,7 +18,7 @@ and set your PATH variable:
 export PATH="/path/to/utilities/directory:$PATH"
 ```
 
-The easiest way top use the utilities is to include utils.shi:
+The easiest way to use the utilities is to include utils.shi:
 
 ```
 
@@ -42,6 +41,7 @@ Filename         | Notes
 -----------------|--------------
 utils.shi        | Main include file. Including this file includes all the files listed below.
 utils_core.shi   | functions for: script exit and status, bash function argument checking, setting text output colo[u]r on command line, echoing to standard error, and a default Usage function.
+utils_opts	     | functions to make command line option (flag) processing very easy.
 utils_vb.shi     | Verbose output functionality. The functions here will, if a '-v' is passed as the first argument to a script, output (echo) additional information - e.g. for debug or for additional explanation (see vbecho). Provides for output of bash function names as well (see vbfnecho). No '-v' flag, no output. 
 utils_fd.shi     | Functions to *check* (exit on error) or *ensure* (create if not present) if directories and files that a scripts expects to be there actually is. See function names (create, ensure). Also functions to create temp files, search for files, or write output to files.
 utils_uio.shi        | Warn (continue yes/no?)  style. Or hit any key to continue. Passing -f as first arg to a script using this include will turn the warnings off ('force' option). 
