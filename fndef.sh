@@ -12,12 +12,11 @@ main()
 {
 	setvar PARTFN $1
 
-	RES=$(set | sed -n "/^[[:alnum:]]*$PARTFN.*\s()/,/^}/p")
+	RES=$(set | sed -n "/^[[:alnum:]]*$PARTFN[[:alnum:]]* ()/,/^}/p")
 	if $NAMEONLY; then 
-		RES=$(cat <<< $RES | grep '()') 
+		RES=$(cat <<< $RES | grep "^[[:alnum:]]*$PARTFN[[:alnum:]]* ()")
 	fi
 	cat <<< $RES	
 }
-# set | grep ".*$1.* ()" | awk '{ print $1; }'
 
 main $*

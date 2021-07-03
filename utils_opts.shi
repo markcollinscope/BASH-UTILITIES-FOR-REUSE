@@ -6,30 +6,57 @@ if ! alreadyIncluded UTILS_OPTS; then
 . utils_core.shi
 . utils_msc.shi
 
-USAGE_FILE=$(tmpFile);
-rm -f $USAGE_FILE;
-echo "Options:" > $USAGE_FILE;
+__OPTION_DOC=false;
+__USAGE_FILE=$(tmpFile);
+rm -f $__USAGE_FILE;
+echo "Options:" > $__USAGE_FILE;
 
-addUsage()
+_DOCFLAG="-d"
+
+addOptionsUsage()
 {
+	vbfnecho "$@"
+
 	setvar FLG "$1";
+
 	if ! null "$2"; then
-		echo "$FLG: $2" >> $USAGE_FILE;
+		# Option format here.
+		echo "$FLG: $2" >> $__USAGE_FILE;
 	fi
 }
 
 getOptUsage()
 {
-	cat $USAGE_FILE;
+	vbfnecho "$@" ": $__OPTION_DOC"
+
+	if $__OPTION_DOC; then
+		cat $__USAGE_FILE;
+	fi
 }
 
-binopt()	# binary option v1 or v2.
+processDoc() # exec'd as new process.
 {
-	local DOC=
-	if test "$1" = "-d"; then 
-		setvar DOC $2;
-		shift 2;
-	fi
+	vbfnecho "$@"
+	setvar FLAG "$1";
+	shift;
+
+	local ARGS=
+	while ! null "$1"; do
+		if test "$1" = "$_DOCFLAG"; then
+			DOC="$2";
+			addOptionsUsage "$FLAG" "$DOC"
+			shift 2;
+		else
+			ARGS="$ARGS $1";
+			shift;
+		fi
+	done
+	echo "set -- $ARGS; __OPTION_DOC=$__OPTION_DOC"
+}
+
+binopt() # exec'd as new process.
+{
+	vbfnecho After processDoc: "$@"
 
 	setvar FLAG $1
 	setvar VAR $2
@@ -37,10 +64,10 @@ binopt()	# binary option v1 or v2.
 	setvar OTHER_VALUE $4
 	shift 4;
 
-	addUsage "$FLAG" "$DOC"
+	eval $(processDoc $FLAG "$@")
 
 	EVAL="$VAR=$DEFAULT_VALUE"
-	while ! test -z "$1"; do
+	while ! null "$1"; do
 		if test "$1" = "$FLAG"; then
 			EVAL="$VAR=$OTHER_VALUE"
 		else
@@ -49,40 +76,48 @@ binopt()	# binary option v1 or v2.
 		shift;
 	done
 
-	echo "set -- $ARGS; $EVAL"
+	echo "set -- $ARGS; $EVAL; __OPTION_DOC=$__OPTION_DOC"
+	return 0;
 }
 
-boolopt()	# t/f value - default f, uses VAR as given to store result of parsing cmd line.
+boolopt() # FLAG [e.g -x]  VAR [e.g. X_A_BASHVAR]
+# exec'd as new process.
 {
+	eval $(processDoc "$@");
+
 	setvar FLAG $1
 	setvar VAR $2
 	shift 2;
 
-	binopt $FLAG $VAR false true $*
+	binopt $FLAG $VAR false true "$@"
 }
 
 valopt() 	# e.g. script -f afile ; use 'afile' if given with -f option.
 {
+	eval $(processDoc "$@");
+
 	setvar FLAG $1
 	setvar VAR $2
 	shift 2;
 
 	while ! test -z "$1"; do
 		if test "$1" = "$FLAG"; then
-			EVAL="$VAR=$2;"
-			shift;
+			EVAL="$VAR=$2"
+			shift 2;
 		else
 			ARGS="$ARGS $1";
+			shift
 		fi
-		shift;
 	done
 
-	echo "set -- $ARGS; $EVAL"
+	echo "set -- $ARGS; $EVAL; __OPTION_DOC=$__OPTION_DOC"
 	return 0;
 }
 
-fnopt()
+fnopt() # exec'd as new process.
 {
+	eval $(processDoc "$@");
+
 	setvar FLAG $1
 	setvar FN $2
 	shift 2;
@@ -96,7 +131,29 @@ fnopt()
 		shift;
 	done
 
-	echo "set -- $ARGS; $EVAL" 
+	echo "set -- $ARGS; $EVAL; __OPTION_DOC=$__OPTION_DOC" 
+	return 0;
+}
+
+argRange()
+{
+	setvar LOWER "$1";
+	setvar UPPER "$2";
+	setvarif MSG "$3";
+
+	shift 2;
+	local CNT=$(count "$@");
+	if test "$CNT" -lt "$LOWER" || test "$CNT" -gt "$UPPER"; then
+		MSG=${MSG:-"argument count error: upplied $CNT args. Expected between $LOWER and $UPPER inclusive"}
+		errecho $MSG
+		callFnIfExists Usage;
+	fi
+}
+
+argExact()
+{
+	setvar EXACTVALUE $1
+	argRange $EXACTVALUE $EXACTVALUE "argument count error. $CNT args given. Expected $EXACTVALUE".
 }
 
 # END CONTENT

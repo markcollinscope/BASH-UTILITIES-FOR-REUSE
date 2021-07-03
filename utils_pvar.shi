@@ -1,0 +1,55 @@
+#!/bin/bash
+
+. utils_globals.shi
+
+if ! alreadyIncluded UTILS_PVAR; then
+. utils_core.shi
+. utils_vb.shi
+. utils_msc.shi
+. utils_fd.shi
+
+# START CONTENT
+
+export __PVARSUFFIX=$(randomString 3)
+
+_pvarfile()
+{
+	RES=$(concat "/tmp/" "$1" "." $__PVARSUFFIX)
+	vbfnecho "_pvarfile: $RES"
+	echo $RES
+}
+
+setpvar()
+{
+	setvar PVAR_NAME "$1"
+	shift;
+	setvar PVAR_VALUE "$@"
+
+	local FILE=$(_pvarfile $PVAR_NAME);
+	echo "$PVAR_VALUE" > $FILE
+}
+
+getpvar()
+{
+	setvar PVAR_NAME "$1";
+	local FILE=$(_pvarfile $PVAR_NAME);
+	checkfileexists $FILE "did you getpvar before setpvar using <$PVAR_NAME>?"
+
+	vbfnecho "$PVAR_NAME,$FILE"
+	local PVAR_VALUE=$(cat $FILE)
+	vbfnecho "VALUE: $PVAR_VALUE"
+	echo $PVAR_VALUE
+}
+
+if test "$1" = "--test"; then
+	setpvar _HELLO "this is a pvar value";
+	VAL=$(getpvar _HELLO)
+	echo RESULT1: $VAL
+
+	setpvar _HELLO "this is a second value";
+	VAL=$(getpvar _HELLO)
+	echo RESULT12 $VAL
+fi
+
+# END CONTENT
+fi

@@ -31,7 +31,7 @@ _doscriptexit()
 }
 
 # use these to exit... if you want to use functions on the cmd line (in process).
-exitok() { _doscriptexit 0; }
+exitok() { _doscriptexit 0; }; 
 exiterr() # -k - really exit - from multiple sub-processes as well.
 { 
 	local EXITCODE=1; 
@@ -51,8 +51,12 @@ chkarg() # # e.g. usage: "local T=$1; chkarg T; # exit if T=
 		exiterr;
 	fi
 } 
-chkvar() { chkarg $*; }
-setvar() { AVAR="$1"; chkarg AVAR; AVAL="$2"; chkarg AVAL; eval "$AVAR"="$AVAL"; }
+chkvar() { chkarg "$@"; }
+chkval() { chkarg "$@"; }
+
+setvar() { AVAR="$1"; chkarg AVAR; AVAL="$2"; chkarg AVAL; eval "$AVAR"="\"$AVAL\""; }; 
+setvarif() { setvar AVAR "$1"; AVAL="$2"; if ! null "$AVAL"; then eval "$AVAR"="$AVAL"; fi; }; 
+# TODO: Rationalise arg, val, var ...
 
 export BLACK="\e[30m"
 export RED="\e[31m"		

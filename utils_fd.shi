@@ -22,9 +22,10 @@ ensuredeleted()
 checkfileexists()
 {
 	local FILE=$1; chkarg FILE;
+	local MSG="($2)"
 
 	if ! test -f $FILE; then
-		errecho "File <$1> does not exist"
+		errecho "$0: file <$1> does not exist $MSG"
 		callFnIfExists Usage
 		exiterr;
 	fi
@@ -263,6 +264,32 @@ matchSingleFileUsingFlags()
 	fi
 
 	echo $RESULT
+}
+
+###
+
+mkfindor() # make a find 'or expression' with many filename patterns ("$@").
+{
+	setvar PATT $1
+	shift;
+
+	RETVAL="-name $PATT"
+
+	for i in "$@"; do
+		RETVAL=$(concat -s $RETVAL -o -name $i)
+	done	
+
+	echo "$RETVAL"
+}
+
+xfinddirs() # find non excluded dirs below current dir.
+{
+	xfind . -type d
+}
+
+xfindfiles() # find non excluded files below current dir that match the patterns in $*.
+{
+	xfind . -type f $(mkfindor $*)
 }
 
 ### END
