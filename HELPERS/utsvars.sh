@@ -7,14 +7,13 @@ set -e
 USAGE=$(cat <<ENDUSAGE
 	Usage: $(basename $0)
 	* Print all uts_ vars - recursive descent search used.
-
 ENDUSAGE
 )
 
 
 main()
 {
-	grep -r -h UTS_ | sed 's/.*\(UTS_[[:alnum:]]*\).*/\1/' | sort | uniq
+	xgrep -r -h UTS_ | sed 's/.*\(UTS_[[:alnum:]]*\).*/\1/' | sort | uniq
 }
 
 main $*

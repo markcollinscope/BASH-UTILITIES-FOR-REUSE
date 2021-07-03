@@ -1,12 +1,13 @@
 . utils.shi
 
+# eval $(boolopt -n NAMEONLY $*) - TODO
+
 USAGE=$(cat <<HERE
 $0 [-n] show a bash function definition
 -n - show fn name only
 HERE
 )
 
-eval $(boolopt -n NAMEONLY $*)
 
 main()
 {
