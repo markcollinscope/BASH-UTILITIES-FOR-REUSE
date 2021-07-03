@@ -41,6 +41,7 @@ Filename         | Notes
 -----------------|--------------
 utils.shi        | Main include file. Including this file includes all the files listed below.
 utils_core.shi   | functions for: script exit and status, bash function argument checking, setting text output colo[u]r on command line, echoing to standard error, and a default Usage function.
+utils_pvar		 | functions that enable 'persistent (p)' variables to be stored and used cross process - mainly to enable subprocesses to pass information back to super process (when using $(function) type notation)
 utils_opts	     | functions to make command line option (flag) processing very easy.
 utils_vb.shi     | Verbose output functionality. The functions here will, if a '-v' is passed as the first argument to a script, output (echo) additional information - e.g. for debug or for additional explanation (see vbecho). Provides for output of bash function names as well (see vbfnecho). No '-v' flag, no output. 
 utils_fd.shi     | Functions to *check* (exit on error) or *ensure* (create if not present) if directories and files that a scripts expects to be there actually is. See function names (create, ensure). Also functions to create temp files, search for files, or write output to files.
