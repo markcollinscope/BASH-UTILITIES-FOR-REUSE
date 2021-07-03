@@ -259,7 +259,7 @@ matchSingleFileUsingFlags()
 	vbvar RESULT
 
 	if test "$RESULT" = "$UTS_ERR_TOO_MANY_FILES"; then 
-	# $UTS... returned if more than one file matched.
+	# .._ERR_TOO_MANY.. returned if more than one file matched.
 		exiterr -k;
 	fi
 
