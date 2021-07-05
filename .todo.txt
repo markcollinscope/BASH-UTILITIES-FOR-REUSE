@@ -1,5 +1,11 @@
 TODO - maybe.
 
+general:
+- sort of XUTILS area x perimental area - not released to Github - or part of SCRIPTS (more sense).
+
+utils_pvar
+- add test or do some more testing.
+
 utils_opts
 - getOptsSummary function (echo: "[-a] [-z] ..." etc) for script option docco.
 - enable "-o|--option" format.
