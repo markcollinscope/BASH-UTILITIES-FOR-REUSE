@@ -1,0 +1,7 @@
+TODO - maybe.
+
+utils_opts
+- getOptsSummary function (echo: "[-a] [-z] ..." etc) for script option docco.
+- enable "-o|--option" format.
+
+
