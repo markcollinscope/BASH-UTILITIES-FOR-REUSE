@@ -6,156 +6,119 @@ if ! alreadyIncluded UTILS_OPTS; then
 . utils_core.shi
 . utils_msc.shi
 
-__OPTION_DOC=false;
 __USAGE_FILE=$(tmpFile);
+
 rm -f $__USAGE_FILE;
-echo "Options:" > $__USAGE_FILE;
 
-_DOCFLAG="-d"
+__DOCFLAG="--rem"
+__OPTIONS="Options:"
 
-addOptionsUsage()
+addOptRem()
 {
-	vbfnecho "$@"
-
 	setvar FLG "$1";
+	setvar TXT "$2";
 
-	if ! null "$2"; then
-		# Option format here.
-		echo "$FLG: $2" >> $__USAGE_FILE;
+	if ! test -f $__USAGE_FILE; then 
+		echo $__OPTIONS > $__USAGE_FILE;
+	fi
+
+	echo "$FLG: $TXT" >> $__USAGE_FILE;
+}
+
+getOptUsageDocco() 
+# print option documentation a given by '--rem' argument to xxxopt functions.
+# -n: don't print "Options:" at head of option list.
+{
+	local FILTER=false;
+
+	if test "$1" = "-n"; then 
+		FILTER=true;
+	fi
+
+	if test -f $__USAGE_FILE; then
+		$FILTER || cat $__USAGE_FILE;
+		$FILTER && ( cat $__USAGE_FILE | grep -v "$__OPTIONS" );
 	fi
 }
 
-getOptUsage()
+processRem() 
 {
-	vbfnecho "$@" ": $__OPTION_DOC"
+	local USEDOC="$1"
+	local RET=
 
-	if $__OPTION_DOC; then
-		cat $__USAGE_FILE;
+	if test "$USEDOC" = "$__DOCFLAG"; then
+		setvar TEXT "$2";
+		setvar FLAG "$3";
+		addOptRem "$FLAG" "$TEXT";
+		RET="shift 2";
 	fi
+	echo $RET;
 }
 
-processDoc() # exec'd as new process.
+binopt()
 {
-	vbfnecho "$@"
-	setvar FLAG "$1";
-	shift;
+	eval $(processRem "$@");
 
-	local ARGS=
-	while ! null "$1"; do
-		if test "$1" = "$_DOCFLAG"; then
-			DOC="$2";
-			addOptionsUsage "$FLAG" "$DOC"
-			shift 2;
-		else
-			ARGS="$ARGS $1";
-			shift;
-		fi
-	done
-	echo "set -- $ARGS; __OPTION_DOC=$__OPTION_DOC"
-}
-
-binopt() # exec'd as new process.
-{
-	vbfnecho After processDoc: "$@"
-
-	setvar FLAG $1
-	setvar VAR $2
-	setvar DEFAULT_VALUE $3
-	setvar OTHER_VALUE $4
+	setvar FLAG "$1"
+	setvar VAR "$2"
+	setvar DEFAULT_VALUE "$3"
+	setvar OTHER_VALUE "$4"
 	shift 4;
 
-	eval $(processDoc $FLAG "$@")
+	local ARGS=
 
-	EVAL="$VAR=$DEFAULT_VALUE"
+	EVAL="$VAR=\"$DEFAULT_VALUE\""
 	while ! null "$1"; do
 		if test "$1" = "$FLAG"; then
-			EVAL="$VAR=$OTHER_VALUE"
+			EVAL="$VAR=\"$OTHER_VALUE\""
 		else
-			ARGS="$ARGS $1";
+			ARGS="$ARGS \"$1\"";
 		fi
 		shift;
 	done
 
-	echo "set -- $ARGS; $EVAL; __OPTION_DOC=$__OPTION_DOC"
-	return 0;
+
+	echo "set -- $ARGS; $EVAL"
 }
 
 boolopt() # FLAG [e.g -x]  VAR [e.g. X_A_BASHVAR]
-# exec'd as new process.
 {
-	eval $(processDoc "$@");
-
-	setvar FLAG $1
-	setvar VAR $2
+	eval $(processRem "$@");
+	
+	setvar FLAG "$1"
+	setvar VAR "$2"
 	shift 2;
 
-	binopt $FLAG $VAR false true "$@"
+
+	binopt "$FLAG" "$VAR" false true "$@"
 }
 
 valopt() 	# e.g. script -f afile ; use 'afile' if given with -f option.
 {
-	eval $(processDoc "$@");
 
-	setvar FLAG $1
-	setvar VAR $2
+	eval $(processRem "$@");
+
+	setvar FLAG "$1"
+	setvar VAR "$2"
 	shift 2;
+
+	local ARGS=
+	local EVAL=
 
 	while ! test -z "$1"; do
 		if test "$1" = "$FLAG"; then
-			EVAL="$VAR=$2"
+			EVAL="$VAR=\"$2\""
 			shift 2;
 		else
-			ARGS="$ARGS $1";
+			ARGS="$ARGS \"$1\"";
 			shift
 		fi
 	done
 
-	echo "set -- $ARGS; $EVAL; __OPTION_DOC=$__OPTION_DOC"
-	return 0;
-}
-
-fnopt() # exec'd as new process.
-{
-	eval $(processDoc "$@");
-
-	setvar FLAG $1
-	setvar FN $2
-	shift 2;
-
-	while ! test -z "$1"; do
-		if test "$1" = "$FLAG"; then
-			EVAL="callFnIfExists $FN"
-		else
-			ARGS="$ARGS $1";
-		fi
-		shift;
-	done
-
-	echo "set -- $ARGS; $EVAL; __OPTION_DOC=$__OPTION_DOC" 
-	return 0;
-}
-
-argRange()
-{
-	setvar LOWER "$1";
-	setvar UPPER "$2";
-	setvarif MSG "$3";
-
-	shift 2;
-	local CNT=$(count "$@");
-	if test "$CNT" -lt "$LOWER" || test "$CNT" -gt "$UPPER"; then
-		MSG=${MSG:-"argument count error: upplied $CNT args. Expected between $LOWER and $UPPER inclusive"}
-		errecho $MSG
-		callFnIfExists Usage;
-	fi
-}
-
-argExact()
-{
-	setvar EXACTVALUE $1
-	argRange $EXACTVALUE $EXACTVALUE "argument count error. $CNT args given. Expected $EXACTVALUE".
+	echo "set -- $ARGS; $EVAL "
 }
 
 # END CONTENT
 fi
+
 

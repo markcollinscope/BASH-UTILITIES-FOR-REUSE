@@ -292,5 +292,13 @@ xfindfiles() # find non excluded files below current dir that match the patterns
 	xfind . -type f $(mkfindor $*)
 }
 
+xfindcwd()
+{
+	for i in $(xfind . -maxdepth 1 | sed 's?\./??g' | grep -v '^\.'); do
+		if test -f $i; then
+			echo $i;
+		fi
+	done
+}
 ### END
 fi

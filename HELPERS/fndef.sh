@@ -11,6 +11,7 @@ HERE
 
 main()
 {
+	NAMEONLY=false
 	setvar PARTFN $1
 
 	RES=$(set | sed -n "/^[[:alnum:]]*$PARTFN[[:alnum:]]* ()/,/^}/p")
