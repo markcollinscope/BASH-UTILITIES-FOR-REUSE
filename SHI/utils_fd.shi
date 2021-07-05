@@ -287,12 +287,25 @@ xfinddirs() # find non excluded dirs below current dir.
 	xfind . -type d
 }
 
+xforeachdir() # run a command in each xfinddirs value.
+{
+	setvar CMD "$*"
+
+	for i in $(xfinddirs); do
+	(
+		vbfnecho $i;
+		cd $i;
+		eval $CMD;
+	)
+	done
+}
+
 xfindfiles() # find non excluded files below current dir that match the patterns in $*.
 {
 	xfind . -type f $(mkfindor $*)
 }
 
-xfindcwd()
+xfindcwd() # list files (applying exclusions) in current dir.
 {
 	for i in $(xfind . -maxdepth 1 | sed 's?\./??g' | grep -v '^\.'); do
 		if test -f $i; then
