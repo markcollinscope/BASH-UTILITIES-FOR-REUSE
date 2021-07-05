@@ -20,7 +20,7 @@ Usage()
 	exiterr 1
 }
 
-cleanup() { echo "It's a trap!"; }; trap cleanup SIGINT; ### ctl-c. See docco for other options.
+cleanup() { echo "It's a trap!"; }; trap cleanup SIGINT;
 doFn() { echo "DO-SUMMIT: $*"; }
 
 main()
