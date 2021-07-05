@@ -25,7 +25,7 @@ addOptRem()
 	echo "$FLG: $TXT" >> $__USAGE_FILE;
 }
 
-getOptUsageDocco() 
+getOptUsage() 
 # print option documentation a given by '--rem' argument to xxxopt functions.
 # -n: don't print "Options:" at head of option list.
 {
