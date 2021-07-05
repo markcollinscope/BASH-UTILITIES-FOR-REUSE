@@ -153,6 +153,7 @@ getPath() # [-h] - under HOME dir only
 	cat $TFILE2
 }
 
+#### TODO: Remove / Archittve BELOW.
 matchManyFilesInSingleDir() # [--full (return full path names)] DIR PATTERN
 {
 	local DIRPREFIX=""; 
@@ -171,7 +172,6 @@ matchManyFilesInSingleDir() # [--full (return full path names)] DIR PATTERN
 	vbvar FLS
 
 	for j in $FLS; do
-		# concat echoes value.
 		concat $DIRPREFIX $(basename $j)
 	done
 
@@ -300,5 +300,18 @@ xfindcwd()
 		fi
 	done
 }
+
+xforeachdir() 
+{ 
+    for i in $(xfinddirs);
+    do
+	(
+        cd $i;
+        eval "$1"
+	)
+    done
+}
+
+
 ### END
 fi
