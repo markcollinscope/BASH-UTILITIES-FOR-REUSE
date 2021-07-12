@@ -88,5 +88,16 @@ explode() # explode "ABCDE" => A B C D E
 	echo $1 | grep -o .
 }
 
+printbetween()
+{
+	setvar START "$1"
+	setvar END "$2"
+	setvar FILE "$3"
+	
+    if ! grep $START.*$END $FILE; then
+        sed -n "/$START/,/$END/p" $FILE
+    fi
+}
+
 # END CONTENT
 fi
