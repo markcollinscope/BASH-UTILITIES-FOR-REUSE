@@ -16,7 +16,7 @@ if null "$UTS_NOAUTOARGS"; then
 	if checkIfForce "$1"; then shift; fi # NB: use -v before -f if necessary.
 fi
 
-hitKeyToContinue() # [<message>]
+hitAnyKeyToContinue() # [<message>]
 {
 	local MSG=$1
 
@@ -30,7 +30,7 @@ hitKeyToContinue() # [<message>]
 Warning() # [-n] [<message-to-show>] (-n - do not exit on "no")
 {
 	local EXITONNO=true; if test "$1" = "-n"; then EXITONNO=false; shift; fi
-	local OPTIONAL_MSG=$1;
+	local OPTIONAL_MSG="$1";
 	local MSG="CONTINUE?" # default.
 
 	local RETURN_VAL=0;
@@ -52,7 +52,7 @@ Warning() # [-n] [<message-to-show>] (-n - do not exit on "no")
 				else 
 					RETURN_VAL=1; break; 
 				fi;;
-			* ) errecho "Please answer yes or no.";;
+			* ) errecho "Please answer yes or no (n).";;
 		esac
 	done
 	return $RETURN_VAL;
