@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# utils to enable addtional (perhaps debug) information to be printed (to stderr) only when VERBOSE flag is set.
+# utils to enable addtional (perhaps debug) information to be printed (to stderr) only when UTS_VERBOSE flag is set.
 
 . utils_core.shi
 if ! alreadyIncluded UTILS_VB; then 
 
 ### START CONTENT
-setVerbose() 	{ export VERBOSE=true; export VERBOSEFLAG="-v"; }	# preferred way to set VERBOSE=true;
-getVerbose()	{ if $VERBOSE; then return 0; else return 1; fi; }
+setVerbose() 	{ export UTS_VERBOSE=true; export UTS_VERBOSEFLAG="-v"; }	# preferred way to set UTS_VERBOSE=true;
+getVerbose()	{ if $UTS_VERBOSE; then return 0; else return 1; fi; }
 verbose()		{ getVerbose; } # deprecated.
-resetVerbose() 	{ export VERBOSE=false; export VERBOSEFLAG=""; }	# preferred way to set VERBOSE=false;
+resetVerbose() 	{ export UTS_VERBOSE=false; export UTS_VERBOSEFLAG=""; }	# preferred way to set UTS_VERBOSE=false;
 resetVerbose;
 
 vbvar() # for debug -  print variable - BASHVAR - no $required.
@@ -18,9 +18,9 @@ vbvar() # for debug -  print variable - BASHVAR - no $required.
 	vbecho "$(basename $0) [${FUNCNAME[1]}()]: $BASHVAR: <${!BASHVAR}>";
 }
 
-vbecho()	{ if $VERBOSE; then setcol $YELLOW; (>&2 echo $*); setcolnorm; fi }
+vbecho()	{ if $UTS_VERBOSE; then setcol $YELLOW; (>&2 echo $*); setcolnorm; fi }
 vbfnecho()	{ vbecho "$(basename $0) [${FUNCNAME[1]}()]: $*"; }
-vbsleep() { if $VERBOSE; then sleep $*; fi }
+vbsleep() { if $UTS_VERBOSE; then sleep $*; fi }
 
 checkIfVerbose() # quick parse for -v flag as $1.
 {
@@ -36,7 +36,7 @@ if null "$UTS_NOAUTOARGS"; then
 fi
 
 # parses $1 (only!) and if '-v' sets verbose, removes -v as arg.#
-# so scripts will *automatically* set VERBOSE if '-v' is first argument
+# so scripts will *automatically* set UTS_VERBOSE if '-v' is first argument
 # and these utils are included (using '.'' or 'source')
 
 ### END CONTENT
