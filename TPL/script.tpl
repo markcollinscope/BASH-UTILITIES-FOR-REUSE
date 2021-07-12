@@ -12,14 +12,6 @@ o dum dum dum
 UTXT
 );
 
-Usage()
-{
-	OPTIONS="$(getOptUsage)"
-	>&2 cat<<<$USAGE
-	>&2 cat<<<$OPTIONS
-	exiterr 1
-}
-
 cleanup() { echo "It's a trap!"; }; trap cleanup SIGINT;
 doFn() { echo "DO-SUMMIT: $*"; }
 

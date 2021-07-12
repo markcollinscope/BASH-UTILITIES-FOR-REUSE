@@ -93,7 +93,7 @@ boolopt() # FLAG [e.g -x]  VAR [e.g. X_A_BASHVAR]
 	binopt "$FLAG" "$VAR" false true "$@"
 }
 
-valopt() 	# e.g. script -f afile ; use 'afile' if given with -f option.
+valopt() 	# e.g. script --file afilename ; use 'afilename' if given with --file option.
 {
 
 	eval $(processRem "$@");
@@ -116,6 +116,27 @@ valopt() 	# e.g. script -f afile ; use 'afile' if given with -f option.
 	done
 
 	echo "set -- $ARGS; $EVAL "
+}
+
+errifopt() # it is an error if there are any more options (-*) in $@
+{
+	while ! test -z "$1"; do
+		if [[ "$1" =~ -.* ]]; then
+			errecho "Unknown option: \"$1\""
+			callFnIfExists Usage;
+			exiterr -k;
+		fi
+		shift;
+	done
+}
+
+
+Usage() # override if using this include.
+{
+	OPTIONS="$(getOptUsage)"
+	>&2 cat<<<$USAGE
+	>&2 cat<<<$OPTIONS
+	exiterr 1
 }
 
 # END CONTENT
