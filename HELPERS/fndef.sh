@@ -1,17 +1,19 @@
 . utils.shi
 
-# eval $(boolopt -n NAMEONLY $*) - TODO
+USAGE=$(cat <<USG
 
-USAGE=$(cat <<HERE
 $0 [-n] show a bash function definition
 -n - show fn name only
-HERE
-)
 
+USG
+)
 
 main()
 {
 	NAMEONLY=false
+	if test "$1" = "-n"; then NAMEONLY=true; shift; fi
+	checkNotEmptyString "Missing function name" $1
+
 	setvar PARTFN $1
 
 	RES=$(set | sed -n "/^[[:alnum:]]*$PARTFN[[:alnum:]]* ()/,/^}/p")
@@ -21,4 +23,4 @@ main()
 	cat <<< $RES	
 }
 
-main $*
+main "$@"

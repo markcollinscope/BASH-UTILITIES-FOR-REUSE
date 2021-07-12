@@ -154,119 +154,119 @@ getPath() # [-h] - under HOME dir only
 }
 
 #### TODO: Remove / Archittve BELOW.
-matchManyFilesInSingleDir() # [--full (return full path names)] DIR PATTERN
-{
-	local DIRPREFIX=""; 
-	if test "$1" = "--full"; then shift; DIRPREFIX="$1/" ; fi
-	
-	local DIR="$1";
-	local FILEPATTERN="$2";
-
-	checkdirexists $DIR || return 1;
-	cd $DIR;
-
-	vbfnecho "NOW IN DIR: $(pwd)";
-	vbvar FILEPATTERN
-
-	FLS=$(find . -maxdepth 1 -name "$FILEPATTERN")
-	vbvar FLS
-
-	for j in $FLS; do
-		concat $DIRPREFIX $(basename $j)
-	done
-
-	return 0;
-}
-
-matchManyFilesInDirList()
-{
-	vbfnecho "$@"
-
-    local FILEPATTERN="$1"; chkarg FILEPATTERN; shift;
-    local DIRLIST=$*; chkarg DIRLIST;
-
-    vbvar FILEPATTERN
-    vbvar DIRLIST
-
-    for dir in $DIRLIST; do
-  		vbvar dir
-		vbvar FILEPATTERN
-        matchManyFilesInSingleDir --full $dir "$FILEPATTERN" || return 1;
-    done
-
-    return 0;
-}
-
-export UTS_ERR_TOO_MANY_FILES="matchOneFileInDirList-Error-Too-Many-Files-Matched"
-matchOneFileInDirList() # [-n (no error messages)] <pattern> <dir-list (one or more)>
-{
-	local SHOWERRORS=true; 
-	if test "$1" = "-n"; then SHOWERRORS=false; shift; fi
-	
-	local FILEPATTERN="$1"; chkarg FILEPATTERN; shift; 
-	local DIRLIST="$*"; chkarg DIRLIST;
-	
-	vbvar FILEPATTERN
-	vbvar DIRLIST
-
-	local MATCHES=$(matchManyFilesInDirList "$FILEPATTERN" $DIRLIST) || return 1; # TODO CHECK THIS || return 1 ...
-	
-	# process and sort errors.
-	vbecho "---------------------$(fnname)-----------------------"
-	vbvar MATCHES
-
-	local COUNT=$(count $MATCHES);
-	vbvar COUNT
-
-	if (( COUNT > 1 )); then
-		if $SHOWERRORS; then
-			errecho MATCHES ARE:
-			for i in $MATCHES; do errecho "$i"; done
-			errecho '---'
-			errecho Too Many Files!
-		fi
-		echo "$UTS_ERR_TOO_MANY_FILES";
-		return 1
-	fi
-
-	echo "$MATCHES"
-	return 0;
-}
-
-matchSingleFileUsingFlags() 
-# -x: exact match only, 
-# -a: allow full partial match *<FILEPARTNAME>* (default: <FILEPARTNAME>*)
-{
-	local WILDCARD="*"; 
-	if test "$1" = "-x"; then WILDCARD=""; shift; fi
-	
-	local EXTENDMATCH=""; 
-	if test "$1" = "-a"; then EXTENDMATCH="*"; shift; fi; vbvar EXTENDMATCH
-	
-	local FILEPARTNAME="$1"; chkarg FILEPARTNAME; shift;
-	local DIRLIST="$*"; chkarg DIRLIST;
-
-	vbvar WILDCARD
-	vbvar EXTENDMATCH
-	vbvar FILEPARTNAME
-	vbvar DIRLIST
-
-	local SHELLFORMATMATCHSTRING="$(concat "$EXTENDMATCH" "$FILEPARTNAME" "$WILDCARD")"
-	vbvar SHELLFORMATMATCHSTRING
-
-	local RESULT="$(matchOneFileInDirList "$SHELLFORMATMATCHSTRING" $DIRLIST)"
-
-	vbvar RESULT
-
-	if test "$RESULT" = "$UTS_ERR_TOO_MANY_FILES"; then 
-	# .._ERR_TOO_MANY.. returned if more than one file matched.
-		exiterr -k;
-	fi
-
-	echo $RESULT
-}
-
-###
+#matchManyFilesInSingleDir() # [--full (return full path names)] DIR PATTERN
+#{
+#	local DIRPREFIX=""; 
+#	if test "$1" = "--full"; then shift; DIRPREFIX="$1/" ; fi
+#	
+#	local DIR="$1";
+#	local FILEPATTERN="$2";
+#
+#	checkdirexists $DIR || return 1;
+#	cd $DIR;
+#
+#	vbfnecho "NOW IN DIR: $(pwd)";
+#	vbvar FILEPATTERN
+#
+#	FLS=$(find . -maxdepth 1 -name "$FILEPATTERN")
+#	vbvar FLS
+#
+#	for j in $FLS; do
+#		concat $DIRPREFIX $(basename $j)
+#	done
+#
+#	return 0;
+#}
+#
+#matchManyFilesInDirList()
+#{
+#	vbfnecho "$@"
+#
+#    local FILEPATTERN="$1"; chkarg FILEPATTERN; shift;
+#    local DIRLIST=$*; chkarg DIRLIST;
+#
+#    vbvar FILEPATTERN
+#    vbvar DIRLIST
+#
+#    for dir in $DIRLIST; do
+#  		vbvar dir
+#		vbvar FILEPATTERN
+#        matchManyFilesInSingleDir --full $dir "$FILEPATTERN" || return 1;
+#    done
+#
+#    return 0;
+#}
+#
+#export UTS_ERR_TOO_MANY_FILES="matchOneFileInDirList-Error-Too-Many-Files-Matched"
+#matchOneFileInDirList() # [-n (no error messages)] <pattern> <dir-list (one or more)>
+#{
+#	local SHOWERRORS=true; 
+#	if test "$1" = "-n"; then SHOWERRORS=false; shift; fi
+#	
+#	local FILEPATTERN="$1"; chkarg FILEPATTERN; shift; 
+#	local DIRLIST="$*"; chkarg DIRLIST;
+#	
+#	vbvar FILEPATTERN
+#	vbvar DIRLIST
+#
+#	local MATCHES=$(matchManyFilesInDirList "$FILEPATTERN" $DIRLIST) || return 1; # TODO CHECK THIS || return 1 ...
+#	
+#	# process and sort errors.
+#	vbecho "---------------------$(fnname)-----------------------"
+#	vbvar MATCHES
+#
+#	local COUNT=$(count $MATCHES);
+#	vbvar COUNT
+#
+#	if (( COUNT > 1 )); then
+#		if $SHOWERRORS; then
+#			errecho MATCHES ARE:
+#			for i in $MATCHES; do errecho "$i"; done
+#			errecho '---'
+#			errecho Too Many Files!
+#		fi
+#		echo "$UTS_ERR_TOO_MANY_FILES";
+#		return 1
+#	fi
+#
+#	echo "$MATCHES"
+#	return 0;
+#}
+#
+#matchSingleFileUsingFlags() 
+## -x: exact match only, 
+## -a: allow full partial match *<FILEPARTNAME>* (default: <FILEPARTNAME>*)
+#{
+#	local WILDCARD="*"; 
+#	if test "$1" = "-x"; then WILDCARD=""; shift; fi
+#	
+#	local EXTENDMATCH=""; 
+#	if test "$1" = "-a"; then EXTENDMATCH="*"; shift; fi; vbvar EXTENDMATCH
+#	
+#	local FILEPARTNAME="$1"; chkarg FILEPARTNAME; shift;
+#	local DIRLIST="$*"; chkarg DIRLIST;
+#
+#	vbvar WILDCARD
+#	vbvar EXTENDMATCH
+#	vbvar FILEPARTNAME
+#	vbvar DIRLIST
+#
+#	local SHELLFORMATMATCHSTRING="$(concat "$EXTENDMATCH" "$FILEPARTNAME" "$WILDCARD")"
+#	vbvar SHELLFORMATMATCHSTRING
+#
+#	local RESULT="$(matchOneFileInDirList "$SHELLFORMATMATCHSTRING" $DIRLIST)"
+#
+#	vbvar RESULT
+#
+#	if test "$RESULT" = "$UTS_ERR_TOO_MANY_FILES"; then 
+#	# .._ERR_TOO_MANY.. returned if more than one file matched.
+#		exiterr -k;
+#	fi
+#
+#	echo $RESULT
+#}
+#
+####
 
 mkfindor() # make a find 'or expression' with many filename patterns ("$@").
 {

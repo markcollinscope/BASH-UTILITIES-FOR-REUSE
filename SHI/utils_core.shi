@@ -49,7 +49,7 @@ chkarg() # # e.g. usage: "local T=$1; chkarg T; # exit if T=
 	
 	local VALUE=${!VARNAME}
 	local FNNAME=$(fnname -l LEVEL)
-	if test -z "$VALUE"; then 
+	if null "$VALUE"; then 
 		errecho "[$FNNAME]: Call to Fn has missing argument <$VARNAME>"
 		exiterr;
 	fi
@@ -67,7 +67,7 @@ export LIGHTRED="\e[91m"
 export GREEN="\e[32m"		
 export YELLOW="\e[33m"
 export BLUE="\e[34m"
-export MAGNETA="\e[35m"
+export MAGENTA="\e[35m"
 export CYAN="\e[36m"
 export WHITE="\e[37m"
 export NORMAL="\e[0m"
