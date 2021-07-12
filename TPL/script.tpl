@@ -19,7 +19,7 @@ main()
 {
 	# eg use of opts.
 	eval $(boolopt -c BOOLVAR "$@"); echo BOOLVAR: $BOOLVAR;
-	eval $(valopt --rem "mainvar options - ok asshole?" -m MAINVAR "$@"); echo MAINVAR: $MAINVAR
+	eval $(valopt --rem "mainvar options - this is the docco - ok?" -m MAINVAR "$@"); echo MAINVAR: $MAINVAR
 	# ...
 
 	exitok;
