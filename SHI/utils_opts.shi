@@ -130,7 +130,6 @@ errifopt() # it is an error if there are any more options (-*) in $@
 	done
 }
 
-
 Usage() # override if using this include.
 {
 	OPTIONS="$(getOptUsage)"

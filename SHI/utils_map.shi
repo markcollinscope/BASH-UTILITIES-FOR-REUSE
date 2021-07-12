@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # NB: This works but has limitations, in particular it is possible to get errors
-# if a Map name is similar (grep wise) to a Key name.
+# if a Map name is similar (pattern match wise) to a Key name.
 # Watch for updates. Contributions welcome.
 
 . utils_core.shi
@@ -12,7 +12,6 @@ if ! alreadyIncluded UTILS_MAP; then
 ### Simulate Multi Dimentional HASH/MAP/ASSOCIATIVE ARRAY.
 ### Todo: fully test and perhaps mv 'value' as last arg...
 
-#
 # e.g. 
 # - name is name of multi-d map.
 # - value is a value to be put into the map.
@@ -21,13 +20,6 @@ if ! alreadyIncluded UTILS_MAP; then
 #
 # setMapValue name value 1 2 3 ... N etc.
 # getMapValue name 1 2 3 ... N
-#
-# name - map name.
-# value - value to be set within map.
-# 1 2 3 ... N - any number of keys that the value will be set against.
-# e.g. setMapValue myMap 25 1 2
-# => 'equivalent to' sets myMap[1][2] = 25, 
-# note the number of keys is important.
 
 # 'local' variable storing multi-d maps.
 declare -A _D
@@ -42,7 +34,7 @@ _mangle()	# local usage - convert $1 to its internally used format.
 
 _createRealKey()
 {
-	checkNotEmptyString "error in subscript (at least one value needed)- " $1
+	checkNotEmptyString "error in key(s) (at least one value needed)" $1
 
 	local FULL=
 	for i in $*; do
@@ -54,8 +46,7 @@ _createRealKey()
 
 _allMapKeys()
 {
-	# All mangled.
-	echo ${!_D[@]}
+	echo ${!_D[@]}	# All mangled.
 }
 
 
@@ -86,8 +77,7 @@ getMapValue()
 	echo "${_D[$(_createRealKey $MAPNAME $*)]}"
 }
 
-
-mapKeys()
+mapKeys() # list all map keys for $1 (in mangled internal format)
 {
 	local MAPNAME=$1; chkarg MAPNAME;
 
@@ -99,7 +89,7 @@ mapKeys()
 	done
 }
 
-mapKeyValues()
+mapKeyValues() # list all map values for $1 (keys shown in mangled internal format)
 {
 	MAPNAME=$1; chkarg MAPNAME;
 
