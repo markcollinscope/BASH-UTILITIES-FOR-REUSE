@@ -7,7 +7,6 @@ if ! alreadyIncluded UTILS_GIT; then
 . utils_vb.shi
 
 ### START CONTENT
-export UTS_GITDIR=${UTS_GITDIR:-"~/GIT"} # env can override.
 
 getgitbranch() 
 {

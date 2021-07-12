@@ -25,7 +25,6 @@ export UTS_SCRIPTBIN=${UTS_SCRIPTBIN:-"$HOME/scripts"};						# ROOT location of 
 # todo - review and sort between MYENV_ and UTS_
 export UTS_LOGDIR=${UTS_LOGDIR:-"$HOME/.LOGS"}			# place to store log files.
 export UTS_BACKUPDIR=${UTS_BACKUPDIR:-"$HOME/.BACKUP"}	# place to copy for backup.
-export UTS_GITDIR=${UTS_GITDIR:-"$HOME/GIT"}			# dir where you put git ROOT dirs.
 export UTS_GITSYNCFILE=${UTS_GITSYNCFILE:-".gitx"}		# name of file used in git scripts, see the scripts.
 export UTS_BASHINCLUDE=${UTS_BASHINCLUDE:-".shi"}		# extension used for bash include files.
 export UTS_SCRIPTTPL=${UTS_SCRIPTTPL:-"script.tpl"}		# template for 'new' scripts, if used.
