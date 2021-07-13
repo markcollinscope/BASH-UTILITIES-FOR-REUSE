@@ -90,13 +90,18 @@ explode() # explode "ABCDE" => A B C D E
 
 printbetween()
 {
+	eval $(boolopt -n NUMERIC "$@");
 	setvar START "$1"
 	setvar END "$2"
 	setvar FILE "$3"
-	
-    if ! grep $START.*$END $FILE; then
-        sed -n "/$START/,/$END/p" $FILE
-    fi
+
+	if ! $NUMERIC; then
+    	if ! grep $START.*$END $FILE; then
+        	sed -n "/$START/,/$END/p" $FILE
+    	fi
+	else
+		sed -n "${START},${END}p" $FILE
+	fi
 }
 
 # END CONTENT
