@@ -11,7 +11,7 @@ if ! alreadyIncluded UTILS_PVAR; then
 # START CONTENT
 
 export __PVARSUFFIX=$(randomString 3)
-export __PVARNOTINITIALISED="UNINITIALISED PVAR ERROR (_PVARSUFFIX)"
+export __PVARNOTINITIALISED="UNINITIALISED PVAR ERROR"
 
 _pvarfile()
 {
@@ -20,7 +20,7 @@ _pvarfile()
 	echo $RES
 }
 
-checkpvarisinit()
+_checkpvarisinit()
 {
 	setvar __PVARNAME $1
 	local FILE=$(_pvarfile $__PVARNAME);
@@ -32,7 +32,7 @@ checkpvarisinit()
 	fi
 }
 
-checkpvarisdeclared()
+_checkpvarisdeclared()
 {
 	setvar __PVARNAME $1
 	local FILE=$(_pvarfile $__PVARNAME);
@@ -52,10 +52,15 @@ declarepvar()
 	echo "$__PVARNOTINITIALISED" > $FILE
 }
 
+pvarcontext()
+{
+	setvar __PVARSUFFIX "$1"
+}
+
 setpvar()
 {
 	setvar PVAR_NAME "$1"
-	checkpvarisdeclared $PVAR_NAME;
+	_checkpvarisdeclared $PVAR_NAME;
 	shift;
 
 	setvar PVAR_VALUE "$@"
@@ -67,8 +72,8 @@ setpvar()
 getpvar()
 {
 	setvar __PVAR_NAME $1;
-	checkpvarisdeclared $__PVAR_NAME;
-	checkpvarisinit $__PVARNAME;
+	_checkpvarisdeclared $__PVAR_NAME;
+	_checkpvarisinit $__PVARNAME;
 
 	local FILE=$(_pvarfile $__PVAR_NAME);
 

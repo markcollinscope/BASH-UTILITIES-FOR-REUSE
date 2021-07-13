@@ -12,8 +12,8 @@ if ! alreadyIncluded UTILS_CORE; then
 
 ### START CONTENT
 callFnIfExists() { if test "$(type -t $1)" = "function" ; then $*; fi }
-nostdout() { exec > /dev/null; } 	# turn off stdout. best in subshell - ( .. ) -  if you must use!
-nostderr() { exec 2> /dev/null; }	# turn off stderr, best in subshell - ( .. ) -  if you must use!
+nostdout() { exec > /dev/null; } 	# turn off stdout. best in subshell - ( .. )
+nostderr() { exec 2> /dev/null; }	# turn off stderr, best in subshell - ( .. )
 null() { if test -z "$*"; then return 0; else return 1; fi }
 isdir() { if test -d "$1"; then return 0; else return 1; fi }; isDir() { isdir $*; }
 
@@ -97,6 +97,19 @@ setcolnorm() # reset (echo) text color to normal.
 	setcol $NORMAL
 }
 resetcol() { setcolnorm; }
+
+setcurpos() # Position the cursor at row, column (offset from top rhs) as per $1, $2 - or at 0,0 if args not given.
+{
+	local ROW=$1;
+	local COL=$2;
+	
+	if ! null $ROW && ! null $COL; then
+		local OUTPUT="\e[""${ROW}"";""${COL}""H"
+		echo -ne "$OUTPUT"
+	else
+		echo -ne "\e[H"
+	fi
+}
 
 errecho() {  setcol $RED; (>&2 echo "$*"); setcolnorm; } # echo to std error!
 

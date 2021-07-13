@@ -25,6 +25,7 @@ Usage()
 	exiterr 1
 }
 
+EXACTMATCH=false;
 SHORTFORMAT=false;
 LONGFORMAT=false;
 PRINTFILENAMEONLY=false;
@@ -43,6 +44,10 @@ searchForMatch()
 	local FUNCT="^[[:alnum:]]*$PARTFNNAME.*$FNEND";
 	local MATCHES=$(xfindfilesgrep "$FUNCT" $FILEPATTERN)
 	local COUNT=$(count $MATCHES)
+
+	if $EXACTMATCH; then
+		FUNCT="^$PARTFNNAME$FNEND"
+	fi
 	
 	if $USEBASHNATIVE && (( COUNT > 0 )); then
 		fndef $PARTFNNAME;
@@ -59,7 +64,7 @@ searchForMatch()
 			printbetween $FUNCT '}' $match;
 
 		elif $SHORTFORMAT; then
-			printbetween $FUNCT '{' $match;
+			printbetween $FUNCT '^$' $match;
 
 		elif $PRINTFILENAMEONLY; then
 			echo $match; 
@@ -74,13 +79,15 @@ searchForMatch()
 
 main()
 {
+	eval $(boolopt --rem "search for an exact match only" -x EXACTMATCH "$@")
 	eval $(boolopt --rem "print matching file name only" -n PRINTFILENAMEONLY "$@")
 	eval $(valopt  --rem "specify files (by glob pattern) to match (ls style - e.g. *.sh)" -m FILEPATTERN "$@")
-	eval $(boolopt --rem "use shorter detailed output format" -s SHORTFORMAT "$@")
+	eval $(boolopt --rem "use shorter output format (prints fn upto first blank line)" -s SHORTFORMAT "$@")
 	eval $(boolopt --rem "use longer detailed output format" -l LONGFORMAT "$@")
 	eval $(boolopt --rem "use bash native (set) output format" -d USEBASHNATIVE "$@")
 	errifopt "$@";
 
+	if (( $# != 1 )); then Usage; fi
 	setvar PARTFN "$1"
 
 	cd $UTS_SCRIPTDIR

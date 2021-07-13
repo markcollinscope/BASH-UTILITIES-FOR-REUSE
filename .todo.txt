@@ -1,5 +1,8 @@
 TODO - maybe.
 
+ffn: etc.
+- make error message a bit more useful if no arg given. Or 'chkcmdargs 1 4' or similar.
+
 general:
 - sort of XUTILS area x perimental area - not released to Github - or part of SCRIPTS (more sense).
 
