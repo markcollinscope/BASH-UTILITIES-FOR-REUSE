@@ -104,5 +104,11 @@ printbetween()
 	fi
 }
 
+len() # how many chars in $1 - length.
+{
+	setvar STRING "$1"
+	count $(explode "$STRING")
+}
+
 # END CONTENT
 fi

@@ -40,25 +40,25 @@ exiterr() # -k - really exit - from multiple sub-processes as well.
 	_doscriptexit $EXITCODE;
 }
 
-chkarg() # # e.g. usage: "local T=$1; chkarg T; # exit if T=
+chkarg() # usage: "local T=$1; chkarg T; # error if T is null.
 {
 	local VARNAME="$1"; 	#NB: pass $1 as MYARG not $MYARG - no "$" necessary (or permitted)
 	local LEVEL=2
 	if ! null $2; then LEVEL=$2; fi
 	
-	
 	local VALUE=${!VARNAME}
-	local FNNAME=$(fnname -l LEVEL)
+	local FNNAME=$(fnname -l $LEVEL)
 	if null "$VALUE"; then 
 		errecho "[$FNNAME]: Call to Fn has missing argument <$VARNAME>"
+		callFnIfExists Usage
 		exiterr;
 	fi
 } 
 chkvar() { chkarg "$@"; }
-chkval() { chkarg "$@"; }
+chkval() { chkval "$@"; }
 
-setvar() { AVAR="$1"; chkarg AVAR 3; AVAL="$2"; chkarg AVAL 3; eval "$AVAR"="\"$AVAL\""; }; 
-setvarif() { setvar AVAR "$1" 3; AVAL="$2"; if ! null "$AVAL"; then eval "$AVAR"="$AVAL"; fi; }; 
+setvar() { VAR="$1"; chkarg VAR 3; VAL="$2"; chkarg VAL 3; eval "$VAR"="\"$VAL\""; }; 
+setvarif() { setvar VAR "$1" 4; VAL="$2"; if ! null "$VAL"; then eval "$VAR"="\"$VAL\""; fi; }; 
 # TODO: Rationalise arg, val, var ...
 
 export BLACK="\e[30m"
