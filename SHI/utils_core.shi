@@ -139,6 +139,7 @@ checkNotEmptyString()
 
 	if test -z "$VALUE_TO_CHECK"; then 
 		errecho "$0 - [$(fnname -l 2)] $ERROR_MSG"; 
+		callFnIfExists Usage
 		exiterr
 	fi
 }
