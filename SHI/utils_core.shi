@@ -12,8 +12,8 @@ if ! alreadyIncluded UTILS_CORE; then
 
 ### START CONTENT
 callFnIfExists() { if test "$(type -t $1)" = "function" ; then $*; fi }
-nostdout() { exec > /dev/null; } 	# turn off stdout. best in subshell - ( .. )
-nostderr() { exec 2> /dev/null; }	# turn off stderr, best in subshell - ( .. )
+nostdout() { exec > /dev/null; } 	# turn off stdout. best in subshell - ( .. ) -  if you must use!
+nostderr() { exec 2> /dev/null; }	# turn off stderr, best in subshell - ( .. ) -  if you must use!
 null() { if test -z "$*"; then return 0; else return 1; fi }
 isdir() { if test -d "$1"; then return 0; else return 1; fi }; isDir() { isdir $*; }
 
@@ -40,25 +40,25 @@ exiterr() # -k - really exit - from multiple sub-processes as well.
 	_doscriptexit $EXITCODE;
 }
 
-chkarg() # usage: "local T=$1; chkarg T; # error if T is null.
+chkarg() # # e.g. usage: "local T=$1; chkarg T; # exit if T=
 {
 	local VARNAME="$1"; 	#NB: pass $1 as MYARG not $MYARG - no "$" necessary (or permitted)
 	local LEVEL=2
 	if ! null $2; then LEVEL=$2; fi
 	
+	
 	local VALUE=${!VARNAME}
 	local FNNAME=$(fnname -l $LEVEL)
 	if null "$VALUE"; then 
 		errecho "[$FNNAME]: Call to Fn has missing argument <$VARNAME>"
-		callFnIfExists Usage
 		exiterr;
 	fi
 } 
 chkvar() { chkarg "$@"; }
-chkval() { chkval "$@"; }
+chkval() { chkarg "$@"; }
 
-setvar() { VAR="$1"; chkarg VAR 3; VAL="$2"; chkarg VAL 3; eval "$VAR"="\"$VAL\""; }; 
-setvarif() { setvar VAR "$1" 4; VAL="$2"; if ! null "$VAL"; then eval "$VAR"="\"$VAL\""; fi; }; 
+setvar() { AVAR="$1"; chkarg AVAR 3; AVAL="$2"; chkarg AVAL 3; eval "$AVAR"="\"$AVAL\""; }; 
+setvarif() { setvar AVAR "$1" 3; AVAL="$2"; if ! null "$AVAL"; then eval "$AVAR"="$AVAL"; fi; }; 
 # TODO: Rationalise arg, val, var ...
 
 export BLACK="\e[30m"
@@ -101,14 +101,14 @@ resetcol() { setcolnorm; }
 setcurpos() # Position the cursor at row, column (offset from top rhs) as per $1, $2 - or at 0,0 if args not given.
 {
 	local ROW=$1;
-	local COL=$2;
-	
-	if ! null $ROW && ! null $COL; then
-		local OUTPUT="\e[""${ROW}"";""${COL}""H"
-		echo -ne "$OUTPUT"
-	else
-		echo -ne "\e[H"
-	fi
+ 	local COL=$2;
+ 	
+ 	if ! null $ROW && ! null $COL; then
+ 		local OUTPUT="\e[""${ROW}"";""${COL}""H"
+ 		echo -ne "$OUTPUT"
+ 	else
+ 		echo -ne "\e[H"
+ 	fi
 }
 
 errecho() {  setcol $RED; (>&2 echo "$*"); setcolnorm; } # echo to std error!
