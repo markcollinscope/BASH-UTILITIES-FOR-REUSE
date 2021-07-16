@@ -61,6 +61,22 @@ setvar() { AVAR="$1"; chkarg AVAR 3; AVAL="$2"; chkarg AVAL 3; eval "$AVAR"="\"$
 setvarif() { setvar AVAR "$1" 3; AVAL="$2"; if ! null "$AVAL"; then eval "$AVAR"="$AVAL"; fi; }; 
 # TODO: Rationalise arg, val, var ...
 
+chkargcount() # check argument ($@) count - between lower, upper inclusive - error if outside limits.
+{
+	setvar LOWERLIMIT $1
+	setvar UPPERLIMIT $2
+
+	shift 2;
+
+	setvar COUNT $(count "$@");
+	if (( $COUNT < $LOWERLIMIT )) || (( $COUNT > $UPPERLIMIT)); then
+		errecho "Incorrect number of arguments (expected $LOWERLIMIT-$UPPERLIMIT, got $COUNT)";
+		callFnIfExists Usage;
+		exiterr -k;
+	fi
+}
+
+
 export BLACK="\e[30m"
 export RED="\e[31m"		
 export LIGHTRED="\e[91m"	
