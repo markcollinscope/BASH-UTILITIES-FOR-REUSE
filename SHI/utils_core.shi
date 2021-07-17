@@ -40,7 +40,7 @@ exiterr() # -k - really exit - from multiple sub-processes as well.
 	_doscriptexit $EXITCODE;
 }
 
-chkarg() # # e.g. usage: "local T=$1; chkarg T; # exit if T=
+chkarg() # - local T=$1; chkarg T; - e.g. typical usage - exiterr if T=""
 {
 	local VARNAME="$1"; 	#NB: pass $1 as MYARG not $MYARG - no "$" necessary (or permitted)
 	local LEVEL=2
@@ -59,23 +59,37 @@ chkval() { chkarg "$@"; }
 
 setvar() { AVAR="$1"; chkarg AVAR 3; AVAL="$2"; chkarg AVAL 3; eval "$AVAR"="\"$AVAL\""; }; 
 setvarif() { setvar AVAR "$1" 3; AVAL="$2"; if ! null "$AVAL"; then eval "$AVAR"="$AVAL"; fi; }; 
-# TODO: Rationalise arg, val, var ...
 
-chkargcount() # check argument ($@) count - between lower, upper inclusive - error if outside limits.
+## TODO: Rationalise arg, val, var ... across all chk fns, set fns... etc.
+
+## TODO - mv this - does it belong in core. is used by scripts, not fns (yet) ???
+UTS_MAXARGS=99 # arbitrary but large - upper limit
+chkargcount() 
+#
+# [-l] - lower limit only
+# check argument ($@) count is- between lower, upper inclusive - otherwise exit with message.
+#
 {
-	setvar LOWERLIMIT $1
-	setvar UPPERLIMIT $2
+	if test "$1" = "-l"; then LOWERONLY=true; shift; fi
+	setvar LOWERLIMIT $1; shift;
+	if ! $LOWERONLY; then UPPERLIMIT=$2; shift; else UPPERLIMIT=$UTS_MAXARGS; fi
 
-	shift 2;
-
-	setvar COUNT $(count "$@");
+	chkarg UPPERLIMIT
+	local COUNT=$(count "$@");
 	if (( $COUNT < $LOWERLIMIT )) || (( $COUNT > $UPPERLIMIT)); then
-		errecho "Incorrect number of arguments (expected $LOWERLIMIT-$UPPERLIMIT, got $COUNT)";
+
+		local MSG="Incorrect number of arguments - "
+		if $LOWERONLY; then 
+			MSG=$(concat "$MSG" "expected more than: $LOWERLIMIT - got $COUNT")
+		else
+			MSG=$(concat "$MSG" "expected (between): $LOWERLIMIT and $UPPERLIMIT - got $COUNT");
+		fi
+		errecho "$MSG"
+
 		callFnIfExists Usage;
 		exiterr -k;
 	fi
 }
-
 
 export BLACK="\e[30m"
 export RED="\e[31m"		

@@ -69,6 +69,12 @@ setpvar()
 	echo "$PVAR_VALUE" > $FILE
 }
 
+ispvarset()
+{
+	setvar __PVARNAME $1
+	test "$__PVARVALUE" = "$__PVARNOTINITIALISED";
+}
+
 getpvar()
 {
 	setvar __PVAR_NAME $1;

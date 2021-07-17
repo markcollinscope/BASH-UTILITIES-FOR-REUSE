@@ -6,14 +6,6 @@ if ! alreadyIncluded UTILS_MSC; then
 . utils_vb.shi
 . utils_fd.shi
 
-delimit() # $1 => %%$1%%, [-d <_ARG>] - use $_ARG instead of '%%'.
-{
-	local _ARG=%%
-	if ! test $1 = '-d'; then _ARG=$2; shift 2; fi
-
-	vbarg _ARG
-	echo $_ARG$1$_ARG;
-}
 
 stripwhite() # $1 => $1 but without excess whitespace (\t and space) & control chars
 {
@@ -45,6 +37,19 @@ concat() # [-c <string>] - e.g. concat a b c => 'abc', concat -c : a b c => 'a:b
 	fi
 
 	echo "$RES"
+}
+
+delimit() # $1 => %%$1%%, [-d <_LIMITCHAR>] - use $_LIMITCHAR instead of '%%'.
+{
+	local _LIMITCHAR=%%
+
+	if test "$1" = '-d'; 
+	then 	
+		_LIMITCHAR=$2; 
+		shift 2; 
+	fi
+
+	echo $_LIMITCHAR$1$_LIMITCHAR;
 }
 
 randomString() 

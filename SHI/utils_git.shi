@@ -15,18 +15,14 @@ getgitbranch()
 	echo $V
 }
 
-isGitDir() # if isgitdir; then ... fi
+isGitDir() # if $(isGitDir); then ... fi
 {
-	if test -d ".git"; then
-		return 0;
-	else
-		return 1;
-	fi
+	no ne git rev-parse --is-inside-work-tree
 }
 
 checkIsGitDir() # exit if not.
 {
-	if ! isGitDir; then
+	if ! $(isGitDir); then
 		errecho "$0: Error <$(pwd)> Not A Git Dir"
 		exiterr;
 	fi
@@ -50,6 +46,12 @@ gitStatus()
 	if gitNeedsCommit; then	
 		echo "GIT COMMIT REQUIRED IN: $(pwd)"
 	fi
+}
+
+gitAbandonChanges()
+{
+	Warning "Abandon uncommitted changes?"
+	git reset --hard
 }
 
 ### END CONTENT

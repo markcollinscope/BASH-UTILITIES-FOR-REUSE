@@ -117,9 +117,10 @@ findfile() { findFile $*; }
 backupFile()
 {
 	FILE=$1; chkarg FILE;
+echo BACKUP: $FILE
 
 	ensuredirexists $UTS_BACKUPDIR
-	BACKUPFILE=$UTS_BACKUPDIR/$FILE.$(date "%Y.%m.%d-%H.%M.%S")
+	BACKUPFILE=$UTS_BACKUPDIR/$FILE.$(date --iso-8601)
 
 	if test -e $FILE; then		
 		vbecho "FILE <$FILE> IS BEING BACKED UP TO <$BACKUPFILE>"
