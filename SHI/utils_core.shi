@@ -70,13 +70,31 @@ chkargcount()
 # check argument ($@) count is- between lower, upper inclusive - otherwise exit with message.
 #
 {
-	if test "$1" = "-l"; then LOWERONLY=true; shift; fi
-	setvar LOWERLIMIT $1; shift;
-	if ! $LOWERONLY; then UPPERLIMIT=$2; shift; else UPPERLIMIT=$UTS_MAXARGS; fi
+	LOWERONLY=false; 
+	if test "$1" = "-l"; then 
+		vbfnecho "Lower Limit Only"; 
+		LOWERONLY=true; 
+		shift; 
+	fi
+	setvar LOWERLIMIT $1;
+	shift;
 
+	if ! $LOWERONLY; then 
+		setvar UPPERLIMIT $1; 
+		vbfnecho "Upper Limit: $UPPERLIMIT"
+		shift; 
+	else 
+		UPPERLIMIT=$UTS_MAXARGS; 
+	fi
 	chkarg UPPERLIMIT
+
+	vbvar LOWERLIMIT
+	vbvar UPPERLIMIT
+
 	local COUNT=$(count "$@");
+
 	if (( $COUNT < $LOWERLIMIT )) || (( $COUNT > $UPPERLIMIT)); then
+		vbecho "LIMIT CHECK FAILED";
 
 		local MSG="Incorrect number of arguments - "
 		if $LOWERONLY; then 
