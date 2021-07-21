@@ -117,7 +117,6 @@ findfile() { findFile $*; }
 backupFile()
 {
 	FILE=$1; chkarg FILE;
-echo BACKUP: $FILE
 
 	ensuredirexists $UTS_BACKUPDIR
 	BACKUPFILE=$UTS_BACKUPDIR/$FILE.$(date --iso-8601)

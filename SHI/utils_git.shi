@@ -8,10 +8,10 @@ if ! alreadyIncluded UTILS_GIT; then
 
 ### START CONTENT
 
-getgitbranch() 
+gitCurrentBranch() 
 {
-	V=`git branch 2>/dev/null | grep \* | tr ' \*' '_'`
-	V=${V:="NoGitBranch"}
+	V=$(git branch 2>/dev/null | grep '*' | sed 's/*//')
+	V=${V:="No-Git-Branch-Available"}
 	echo $V
 }
 

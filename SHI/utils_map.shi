@@ -29,7 +29,7 @@ _SEP=','
 
 _mangle()	# local usage - convert $1 to its internally used format.
 {
-	echo "$_MANGLE""_$1""$_MANGLE_"
+	echo "$_MANGLE_""$1""$_MANGLE_"
 }
 
 _createRealKey()
