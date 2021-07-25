@@ -125,7 +125,6 @@ len() # how many chars in $1 - length.
 	count $(explode "$STRING")
 }
 
-
 echoPadded()
 {
 	setvar PADLEN $1;
@@ -150,6 +149,11 @@ echoPadded()
 	for ((i=0; i<PADDING; i++)) do 
 		echo -n " ";  
 	done
+}
+
+errechoPadded()
+{
+	>&2 echoPadded $*
 }
 
 # END CONTENT

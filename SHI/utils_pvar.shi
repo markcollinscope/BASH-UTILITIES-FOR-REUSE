@@ -11,25 +11,12 @@ if ! alreadyIncluded UTILS_PVAR; then
 # START CONTENT
 
 export __PVARSUFFIX=$(randomString 3)
-export __PVARNOTINITIALISED="UNINITIALISED PVAR ERROR"
 
 _pvarfile()
 {
 	RES=$(concat "/tmp/" "$1" "." $__PVARSUFFIX)
 	vbfnecho "$RES"
 	echo $RES
-}
-
-_checkpvarisinit()
-{
-	setvar __PVARNAME $1
-	local FILE=$(_pvarfile $__PVARNAME);
-	local __PVARVALUE=$(cat $FILE);
-
-	if  test "$__PVARVALUE" = "$__PVARNOTINITIALISED"; then
-		errecho "$0: attempted use of pvar <$__PVARNAME> when not initialised"
-		exiterr -k
-	fi
 }
 
 _checkpvarisdeclared()
@@ -43,43 +30,39 @@ _checkpvarisdeclared()
 	fi
 }
 
-declarepvar()
-{
-	setvar __PVAR_NAME $1
-	shift;
-
-	local FILE=$(_pvarfile $__PVAR_NAME);
-	echo "$__PVARNOTINITIALISED" > $FILE
-}
-
 pvarcontext()
 {
 	setvar __PVARSUFFIX "$1"
 }
 
-setpvar()
+declarepvar()
 {
-	setvar PVAR_NAME "$1"
-	_checkpvarisdeclared $PVAR_NAME;
-	shift;
+	chkargcount 2 2 "$@"
 
-	setvar PVAR_VALUE "$@"
+	setvar __PVAR_NAME "$1"
+	setvar __PVAR_VALUE "$2"
 
-	local FILE=$(_pvarfile $PVAR_NAME);
-	echo "$PVAR_VALUE" > $FILE
+	local FILE=$(_pvarfile $__PVAR_NAME);
+	if ! test -f $FILE; then
+		echo "$__PVAR_VALUE" > $FILE
+	fi
 }
 
-ispvarset()
+setpvar()
 {
-	setvar __PVARNAME $1
-	test "$__PVARVALUE" = "$__PVARNOTINITIALISED";
+	setvar __PVAR_NAME "$1"; shift;
+	setvar PVAR_VALUE "$@"
+
+	_checkpvarisdeclared $__PVAR_NAME;
+
+	local FILE=$(_pvarfile $__PVAR_NAME);
+	echo "$PVAR_VALUE" > $FILE
 }
 
 getpvar()
 {
 	setvar __PVAR_NAME $1;
 	_checkpvarisdeclared $__PVAR_NAME;
-	_checkpvarisinit $__PVARNAME;
 
 	local FILE=$(_pvarfile $__PVAR_NAME);
 
@@ -91,7 +74,7 @@ getpvar()
 }
 
 if test "$1" = "--test"; then
-	declarepvar _HELLO	
+	declarepvar _HELLO	"WORLD"
 	setpvar _HELLO "this is a pvar value";
 	VAL=$(getpvar _HELLO)
 	echo RESULT1: $VAL

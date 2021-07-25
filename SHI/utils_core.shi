@@ -146,7 +146,7 @@ setcolnorm() # reset (echo) text color to normal.
 }
 resetcol() { setcolnorm; }
 
-setcurpos() # Position the cursor at row, column (offset from top rhs) as per $1, $2 - or at 0,0 if args not given.
+scrCurPos() # Position the cursor at(row,column(relative top rhs) as per $1, $2 - or at 0,0 if args not given.
 {
 	local ROW=$1;
  	local COL=$2;
@@ -157,6 +157,11 @@ setcurpos() # Position the cursor at row, column (offset from top rhs) as per $1
  	else
  		echo -ne "\e[H"
  	fi
+}
+
+scrClear() # clear the screen.
+{
+	echo -ne "\e[2J"
 }
 
 errecho() {  setcol $RED; (>&2 echo "$*"); setcolnorm; } # echo to std error!
