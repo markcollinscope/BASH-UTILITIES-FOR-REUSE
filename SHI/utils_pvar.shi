@@ -97,6 +97,11 @@ if test "$1" = "--test"; then
 	declarepvar _GOODBYE
 	VAL=$(getpvar _GOODBYE)
 	# that's an error.
+
+	clearpvar HELLO
+	declarepvar HELLO "THIS IS THIRD VALUE>"
+	VAL=$(getpvar _HELLO)
+	echo RESULT3: $VAL
 fi
 
 # END CONTENT
