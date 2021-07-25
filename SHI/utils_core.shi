@@ -65,10 +65,8 @@ setvarif() { setvar AVAR "$1" 3; AVAL="$2"; if ! null "$AVAL"; then eval "$AVAR"
 ## TODO - mv this - does it belong in core. is used by scripts, not fns (yet) ???
 UTS_MAXARGS=99 # arbitrary but large - upper limit
 chkargcount() 
-#
 # [-l] - lower limit only
 # check argument ($@) count is- between lower, upper inclusive - otherwise exit with message.
-#
 {
 	LOWERONLY=false; 
 	if test "$1" = "-l"; then 
@@ -105,6 +103,7 @@ chkargcount()
 		errecho "$MSG"
 
 		callFnIfExists Usage;
+		errecho "No Usage Fn"
 		exiterr -k;
 	fi
 }
