@@ -73,6 +73,17 @@ getpvar()
 	echo $PVAR_VALUE
 }
 
+clearpvar()
+{
+	setvar __PVAR_NAME $1;
+	_checkpvarisdeclared $__PVAR_NAME;
+
+	local FILE=$(_pvarfile $__PVAR_NAME);
+	if test -f $FILE; then
+		rm $FILE;
+	fi
+}
+
 if test "$1" = "--test"; then
 	declarepvar _HELLO	"WORLD"
 	setpvar _HELLO "this is a pvar value";
