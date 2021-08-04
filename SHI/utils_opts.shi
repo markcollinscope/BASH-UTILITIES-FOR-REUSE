@@ -138,6 +138,49 @@ Usage() # override if using this include.
 	exiterr 1
 }
 
+_UTS_MAXARGS=999 # arbitrary but large - upper limit
+chkargcount() 
+# [-l] - lower limit only
+# check argument ($@) count is- between lower, upper inclusive - otherwise exit with message.
+{
+	LOWERONLY=false; 
+	if test "$1" = "-l"; then 
+		vbfnecho "Lower Limit Only"; 
+		LOWERONLY=true; 
+		shift; 
+	fi
+	setvar LOWERLIMIT $1;
+	shift;
+
+	if ! $LOWERONLY; then 
+		setvar UPPERLIMIT $1; 
+		vbfnecho "Upper Limit: $UPPERLIMIT"
+		shift; 
+	else 
+		UPPERLIMIT=$_UTS_MAXARGS; 
+	fi
+	chkarg UPPERLIMIT
+	vbvar LOWERLIMIT
+	vbvar UPPERLIMIT
+
+	local COUNT=$(count "$@");
+
+	if (( $COUNT < $LOWERLIMIT )) || (( $COUNT > $UPPERLIMIT)); then
+		vbecho "LIMIT CHECK FAILED";
+
+		local MSG="Incorrect number of arguments - "
+		if $LOWERONLY; then 
+			MSG=$(concat "$MSG" "expected more than: $LOWERLIMIT - got $COUNT")
+		else
+			MSG=$(concat "$MSG" "expected (between): $LOWERLIMIT and $UPPERLIMIT - got $COUNT");
+		fi
+		errecho "$MSG"
+
+		callFnIfExists Usage;
+		exiterr -k;
+	fi
+}
+
 # END CONTENT
 fi
 
