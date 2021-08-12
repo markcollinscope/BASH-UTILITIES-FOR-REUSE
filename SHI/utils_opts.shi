@@ -138,7 +138,7 @@ Usage() # override if using this include.
 	exiterr 1
 }
 
-_UTS_MAXARGS=999 # arbitrary but large - upper limit
+_UTS_MAXARGS=9999 # arbitrary but large - upper limit
 chkargcount() 
 # [-l] - lower limit only
 # check argument ($@) count is- between lower, upper inclusive - otherwise exit with message.
@@ -167,10 +167,11 @@ chkargcount()
 
 	if (( $COUNT < $LOWERLIMIT )) || (( $COUNT > $UPPERLIMIT)); then
 		vbecho "LIMIT CHECK FAILED";
-
 		local MSG="Incorrect number of arguments - "
 		if $LOWERONLY; then 
-			MSG=$(concat "$MSG" "expected more than: $LOWERLIMIT - got $COUNT")
+			MSG=$(concat "$MSG" "only $COUNT arguments given - more than: $LOWERLIMIT required")
+		elif (( $LOWERLIMIT == $UPPERLIMIT )); then
+			MSG=$(concat "$MSG" "$COUNT arguments given - expected $LOWERLIMIT");
 		else
 			MSG=$(concat "$MSG" "expected (between): $LOWERLIMIT and $UPPERLIMIT - got $COUNT");
 		fi
