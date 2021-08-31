@@ -22,7 +22,7 @@ addOptRem()
 		echo $__OPTIONS > $__USAGE_FILE;
 	fi
 
-	echo "$FLG: $TXT" >> $__USAGE_FILE;
+	echo "$FLG $TXT" >> $__USAGE_FILE;
 }
 
 getOptUsage() 
