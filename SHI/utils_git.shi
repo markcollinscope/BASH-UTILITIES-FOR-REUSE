@@ -15,6 +15,18 @@ gitCurrentBranch()
 	echo $V
 }
 
+getGitRoot() # return the dir name of current git root dir (has .git file).
+{
+	checkIsGitDir;
+
+	if test -f ".git"; then
+		pwd;
+	else
+		cd ..;
+		getGitRoot;
+	fi
+}
+
 isGitDir() # if $(isGitDir); then ... fi
 {
 	no ne git rev-parse --is-inside-work-tree
