@@ -15,16 +15,23 @@ gitCurrentBranch()
 	echo $V
 }
 
-getGitRoot() # return the dir name of current git root dir (has .git file).
+gitRoot() # return the dir name of current git root dir (has .git file).
 {
 	checkIsGitDir;
 
 	if test -f ".git"; then
 		pwd;
 	else
+	(
 		cd ..;
-		getGitRoot;
+		gitRoot;
+	)
 	fi
+}
+
+isGitRootDir()
+{
+	if test -a ".git"; then return 0; else return 1; fi
 }
 
 isGitDir() # if $(isGitDir); then ... fi

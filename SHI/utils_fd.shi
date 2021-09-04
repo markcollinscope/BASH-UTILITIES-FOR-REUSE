@@ -169,7 +169,7 @@ mkfindor() # make a find 'or expression' with many filename patterns ("$@").
 
 xfinddirs() # find non excluded dirs below current.
 {
-	xfind . -type d
+	xfind . -type d | grep -v '^\.$'
 }
 
 xforeachdir() # run a command in each xfinddirs directory.
