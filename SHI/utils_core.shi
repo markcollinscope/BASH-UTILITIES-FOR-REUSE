@@ -121,6 +121,7 @@ scrClear() # clear the screen.
 }
 
 errecho() {  setcol $RED; (>&2 echo "$*"); setcolnorm; } # echo to std error!
+errfnecho() { errecho "[${FUNCNAME[1]}()]: $*"; }
 
 fnname() # [-l <call-fn-level>] - # e.g. "fnname -l 2"  echo fn calling fn calling this fn.
 # what is the current function name (the function calling this one)
