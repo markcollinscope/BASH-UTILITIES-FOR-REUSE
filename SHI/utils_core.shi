@@ -16,6 +16,9 @@ nostdout() { exec > /dev/null; } 	# turn off stdout. best in subshell - ( .. ) -
 nostderr() { exec 2> /dev/null; }	# turn off stderr, best in subshell - ( .. ) -  if you must use!
 null() { if test -z "$*"; then return 0; else return 1; fi }
 isdir() { if test -d "$1"; then return 0; else return 1; fi }; isDir() { isdir $*; }
+isfile() { if test -f "$1"; then return 0; else return 1; fi }; isFile() { isFile $*; }
+script() { echo $(basename $0); }
+scriptName() { script; }
 
 # default Usage function. 
 Usage() { USAGE="$(echo "$USAGE" | sed 's?\./??' )"; errecho "$USAGE"; exiterr; }
