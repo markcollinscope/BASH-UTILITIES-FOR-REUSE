@@ -43,8 +43,20 @@ checkIsGitDir() # exit if not.
 {
 	if ! $(isGitDir); then
 		errecho "$0: Error <$(pwd)> Not A Git Dir"
-		exiterr;
+		exiterr -k;
 	fi
+}
+
+xfindgitdirs()
+{
+	for i in $(xfinddirs); do
+	(
+		cd $i;
+		if isGitRootDir; then 
+			echo $i
+		fi
+	)
+	done
 }
 
 gitNeedsCommit()
