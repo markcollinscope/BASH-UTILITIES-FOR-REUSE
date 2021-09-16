@@ -19,7 +19,7 @@ fi
 if ! alreadyIncluded UTILS_GLOBALS; then
 
 # override with exported environment variables. defaults provided.
-export UTS_SCRIPTDIR=${UTS_SCRIPTDIR:-"$HOME/GIT/GITHUB/scripts"};	# ROOT location of scripts under git control.
+export UTS_SCRIPTDIR=${UTS_SCRIPTDIR:-"$HOME/GIT/scripts"};	# ROOT location of scripts under git control.
 
 # todo - review and sort between MYENV_ and UTS_
 export UTS_LOGDIR=${UTS_LOGDIR:-"$HOME/.LOGS"}			# place to store log files.
