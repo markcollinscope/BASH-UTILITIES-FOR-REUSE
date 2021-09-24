@@ -11,9 +11,9 @@ fi
 if ! alreadyIncluded UTILS_CORE; then
 
 ### START CONTENT
-callFnIfExists() { if test "$(type -t $1)" = "function" ; then $*; fi }
-nostdout() { exec > /dev/null; } 	# turn off stdout. best in subshell - ( .. ) -  if you must use!
-nostderr() { exec 2> /dev/null; }	# turn off stderr, best in subshell - ( .. ) -  if you must use!
+callFnIfExists() { if test "$(type -t $1)" = "function" ; then "$@"; fi }
+nostdout() { exec > /dev/null; } 	# turn off stdout. best in subshell - ( .. )
+nostderr() { exec 2> /dev/null; }	# turn off stderr, best in subshell - ( .. )
 null() { if test -z "$*"; then return 0; else return 1; fi }
 isdir() { if test -d "$1"; then return 0; else return 1; fi }; isDir() { isdir $*; }
 isfile() { if test -f "$1"; then return 0; else return 1; fi }; isFile() { isFile $*; }
@@ -46,15 +46,15 @@ exiterr() # -k - really exit - from multiple sub-processes as well.
 	_doscriptexit $EXITCODE;
 }
 
-chkarg() # - local T=$1; chkarg T; - e.g. typical usage - exiterr if T=""
+chkarg() # chkarg X - is $X set to a value? if not, error.
 {
-	local VARNAME="$1"; 	#NB: pass $1 as MYARG not $MYARG - no "$" necessary (or permitted)
-	local LEVEL=2
-	if ! null $2; then LEVEL=$2; fi
-	
+	#nb: pass $1 as MYARG not $MYARG - no "$" necessary (or permitted)
+	local VARNAME=$1; 	
+	local LEVEL=2; if ! null $2; then LEVEL=$2; fi
 	
 	local VALUE=${!VARNAME}
 	local FNNAME=$(fnname -l $LEVEL)
+
 	if null "$VALUE"; then 
 		errecho "[$FNNAME]: Call to Fn has missing argument <$VARNAME>"
 		exiterr;
@@ -63,10 +63,23 @@ chkarg() # - local T=$1; chkarg T; - e.g. typical usage - exiterr if T=""
 chkvar() { chkarg "$@"; }
 chkval() { chkarg "$@"; }
 
-setvar() { AVAR="$1"; chkarg AVAR 3; AVAL="$2"; chkarg AVAL 3; eval "$AVAR"="\"$AVAL\""; }; 
-setvarif() { setvar AVAR "$1" 3; AVAL="$2"; if ! null "$AVAL"; then eval "$AVAR"="$AVAL"; fi; }; 
+setvar() 
+{ 
+	local VARNAME="$1"; chkarg VARNAME;
+	local VALUE="$2"; 
 
-## TODO: Rationalise arg, val, var ... across all chk fns, set fns... etc.
+	local THISFN=$(fnname);
+	local CALLINGFN=$(fnname -l 2)
+
+	if null "$VALUE"; then
+		errecho "$(script): <$THISFN> (caller: <$CALLINGFN>, var: <$VARNAME>) - no value given for <\$2>"
+		exiterr -k;
+	fi
+
+	eval "$VARNAME"="\"$VALUE\""; 
+} 
+
+setvarif() { setvar AVAR "$1" 3; AVAL="$2"; if ! null "$AVAL"; then eval "$AVAR"="$AVAL"; fi; };  # TODO: check.
 
 export BLACK="\e[30m"
 export RED="\e[31m"		
