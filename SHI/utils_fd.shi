@@ -167,9 +167,13 @@ mkfindor() # make a find 'or expression' with many filename patterns ("$@").
 	echo "$RETVAL"
 }
 
-xfinddirs() # find non excluded dirs below current.
+xfinddirs() # ([-i]: include current dir) - find non excluded dirs below current.
 {
-	xfind . -type d | grep -v '^\.$'
+	local GREP="| grep -v '^\.$'"
+	if test $1 = "-i"; then
+		GREP=
+	fi
+	xfind . -type d $GREP
 }
 
 xforeachdir() # run a command in each xfinddirs directory.
