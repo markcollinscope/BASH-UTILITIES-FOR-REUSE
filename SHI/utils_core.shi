@@ -15,8 +15,8 @@ callFnIfExists() { if test "$(type -t $1)" = "function" ; then "$@"; fi }
 nostdout() { exec > /dev/null; } 	# turn off stdout. best in subshell - ( .. )
 nostderr() { exec 2> /dev/null; }	# turn off stderr, best in subshell - ( .. )
 null() { if test -z "$*"; then return 0; else return 1; fi }
-isdir() { if test -d "$1"; then return 0; else return 1; fi }; isDir() { isdir $*; }
-isfile() { if test -f "$1"; then return 0; else return 1; fi }; isFile() { isFile $*; }
+isdir() { if test -d "$1"; then return 0; else return 1; fi }; isDir() { isdir "$@"; }
+isfile() { if test -f "$1"; then return 0; else return 1; fi }; isFile() { isFile "$@"; }
 script() { echo $(basename $0); }
 scriptName() { script; }
 
@@ -95,7 +95,7 @@ export RESET=$NORMAL
 
 isTerminalOutput() # is the output stream (1, 2 ...) to a terminal?
 {
-	local OUTPUT=1; if ! test -z "$1"; then OUTPUT="$1"; fi
+	local OUTPUT=1; if ! null "$1"; then OUTPUT="$1"; fi
     if test -t $OUTPUT; then return 0; else return 1; fi
 }
 
@@ -136,26 +136,35 @@ scrClear() # clear the screen.
 	echo -ne "\e[2J"
 }
 
-errecho() {  setcol $RED; (>&2 echo "$*"); setcolnorm; } # echo to std error!
-errfnecho() { errecho "[${FUNCNAME[1]}()]: $*"; }
+errecho() # -s - precede error with script name.
+{  
+	if test "$1" = "-s"; then
+		>&2 echo "$(script): "
+		shift;
+	fi
+	setcol $RED; 
+	>&2 echo "$*" 
+	setcolnorm; 
+}
+
+errfnecho() { errecho -s "[${FUNCNAME[1]}()]: $*"; }
 
 fnname() # [-l <call-fn-level>] - # e.g. "fnname -l 2"  echo fn calling fn calling this fn.
 # what is the current function name (the function calling this one)
 {
 	local ARG_FLAG=$1;
 	local ARG_LEVEL=$2;
-	local DEFAULT_LEVEL=1;
+	local FN_LEVEL=1;
 
-	if test "$ARG_FLAG" = "-l"; 
-	then 
-		if test -z "$ARG_LEVEL"; then errecho "[fnname -l NO LEVEL PROVIDED]"; exiterr; fi
-		DEFAULT_LEVEL=$ARG_LEVEL; 
+	if test "$ARG_FLAG" = "-l"; then 
+		if test -z "$ARG_LEVEL"; then errfnecho "[fnname -l NO LEVEL PROVIDED]"; exiterr -k; fi
+		FN_LEVEL=$ARG_LEVEL; 
 	fi
-	echo "${FUNCNAME[$DEFAULT_LEVEL]}"
+	echo "${FUNCNAME[$FN_LEVEL]}"
 }
 
-ne() { 2>/dev/null $*; }	# run command without those irritating error messages! (ne=NoError)
-no() { >/dev/null $*; }		# run command without irritating output.
+ne() { 2>/dev/null $*; }	# run command without those irritating error messages! (ne: No Error)
+no() { >/dev/null $*; }		# run command without std output! (no: No Output)
 
 checkNotEmptyString()
 # e.g. usage: 'local NAME=""; checkNotEmptyString "You forgot to give a name!" $NAME' 

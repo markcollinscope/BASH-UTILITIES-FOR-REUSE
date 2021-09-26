@@ -10,12 +10,14 @@ if ! alreadyIncluded UTILS_PVAR; then
 
 # START CONTENT
 
-export __PVARSUFFIX=$(randomString 3)
+export __PVARSUFFIX=".pvar"
 
 _pvarfile()
 {
-	RES=$(concat "/tmp/" "$1" "." $__PVARSUFFIX)
-	vbfnecho "$RES"
+	setvar _PVARF "$1";
+
+	RES=$(concat "/tmp/" "$_PVARF" "." "$__PVARSUFFIX")
+	vbfnecho "PVARFILE: $RES"
 	echo $RES
 }
 
@@ -33,7 +35,7 @@ _checkpvarisdeclared()
 pvarcontext()
 {
 	if null "$1"; then errfnecho "no context supplied"; fi
-	setvar __PVARSUFFIX "$1"
+	__PVARSUFFIX=".$1"
 }
 
 declarepvar()
@@ -67,9 +69,9 @@ getpvar()
 
 	local FILE=$(_pvarfile $__PVAR_NAME);
 
-	vbfnecho "$__PVAR_NAME,$FILE"
+	vbfnecho "PVAR-NAME,FILE: $__PVAR_NAME, $FILE"
 	local PVAR_VALUE=$(cat $FILE)
-	vbfnecho "VALUE: $PVAR_VALUE"
+	vbfnecho "PVAR-VALUE: $PVAR_VALUE"
 	
 	echo $PVAR_VALUE
 }
@@ -93,7 +95,7 @@ if test "$1" = "--testpvar"; then
 
 	setpvar _HELLO "this is a second value";
 	VAL=$(getpvar _HELLO)
-	echo RESULT12 $VAL
+	echo RESULT2 $VAL
 
 	declarepvar _GOODBYE
 	VAL=$(getpvar _GOODBYE)
