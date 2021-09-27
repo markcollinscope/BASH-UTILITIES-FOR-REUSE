@@ -21,7 +21,7 @@ script() { echo $(basename $0); }
 scriptName() { script; }
 
 # default Usage function. 
-Usage() { USAGE="$(echo "$USAGE" | sed 's?\./??' )"; errecho "$USAGE"; exiterr; }
+Usage() { USAGE="$(echo "$USAGE" | sed 's?\./??' )"; errecho "$USAGE"; exiterr -k; }
 
 _doscriptexit() 
 { 
@@ -182,7 +182,6 @@ checkNotEmptyString()
 # grep/find but exclude certain patterns.
 xgrep() { grep "$@" | grep -v -E "$(getGrepExcludes)"; }
 xfind() { find "$@" | grep -v -E "$(getGrepExcludes)"; }
-
 
 if null "$UTS_NOAUTOARGS"; then 
 	if test "$1" = "--help"; then callFnIfExists Usage; fi
