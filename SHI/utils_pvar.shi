@@ -10,13 +10,15 @@ if ! alreadyIncluded UTILS_PVAR; then
 
 # START CONTENT
 
-export __PVARSUFFIX=".pvar"
+__PVARSUFFIX=".pvar"
+__PVARDIR=${UTS_PVARDIR:-"/tmp/"}
+ensuredirexists $__PVARDIR
 
 _pvarfile()
 {
 	setvar _PVARF "$1";
 
-	RES=$(concat "/tmp/" "$_PVARF" "." "$__PVARSUFFIX")
+	RES=$(concat $__PVARDIR "$_PVARF" "." "$__PVARSUFFIX")
 	vbfnecho "PVARFILE: $RES"
 	echo $RES
 }
@@ -27,7 +29,7 @@ _checkpvarisdeclared()
 	local FILE=$(_pvarfile $__PVARNAME);
 
 	if ! test -f $FILE; then
-		errecho "$0: attempted use of pvar <$__PVARNAME> when not declared";
+		errecho -s "attempted use of pvar <$__PVARNAME> when not declared";
 		exiterr -k;
 	fi
 }

@@ -85,5 +85,25 @@ gitAbandonChanges()
 	git reset --hard
 }
 
+gitDoPush()
+{
+	git push origin $(gitCurrentBranch);
+}
+
+gitDoCommit()
+{
+	local MSG=${1:-"function $(fnname) - no commit message given - branch is <$(gitCurrentBranch)>"};
+	git add -A
+	git commit -m "$MSG"
+}
+
+gitCommitAndPush()
+{
+	gitDoCommit	"$1"
+	gitDoPush
+}
+
+gitcandp() { gitCommitAndPush "$@"; }
+
 ### END CONTENT
 fi

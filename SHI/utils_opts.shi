@@ -121,11 +121,13 @@ valopt() 	# e.g. script --file afilename ; use 'afilename' if given with --file 
 errifopt() # it is an error if there are any more options (-*) in $@
 {
 	while ! test -z "$1"; do
-		if [[ "$1" =~ -.* ]]; then
+		case "$1" in
+		-*)
 			errecho "Unknown option: \"$1\""
 			callFnIfExists Usage;
 			exiterr -k;
-		fi
+			;;
+		esac
 		shift;
 	done
 }

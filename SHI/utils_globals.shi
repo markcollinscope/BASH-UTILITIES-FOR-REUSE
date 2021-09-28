@@ -4,11 +4,11 @@ if ! test "$(type -t alreadyIncluded)" = "function"; then
 
 alreadyIncluded()
 {
-	local GUARD=$1;
+	local INCLUDE_GUARD=$1;
 
-	if test -z ${!GUARD}; then
-		eval ${GUARD}="$GUARD-INCLUDED"
-		if ! test -z "$DEBUGUTILS"; then >&2 echo "${!GUARD}"; fi
+	if test -z "${!INCLUDE_GUARD}"; then
+		eval ${INCLUDE_GUARD}="$INCLUDE_GUARD-INCLUDED"
+		if ! test -z "$DEBUGUTILS"; then >&2 echo "${!INCLUDE_GUARD}"; fi
 		return 1;
 	fi
 	return 0;
@@ -27,7 +27,7 @@ export UTS_BACKUPDIR=${UTS_BACKUPDIR:-"$HOME/.BACKUP"}	# place to copy for backu
 export UTS_BASHINCLUDE=${UTS_BASHINCLUDE:-".shi"}		# extension used for bash include files.
 export UTS_SCRIPTTPL=${UTS_SCRIPTTPL:-"script.tpl"}		# template for 'new' scripts, if used.
 export UTS_SUNIT_TEST=${UTS_SUNIT_TEST:-"_stest"}		# string identifying a function as a unit test.
-export UTS_NOAUTOARGS=									# set to true to stop autoparsing of flags (-v, -f, etc) - TODO T/F
+export UTS_NOAUTOARGS=""								# set to true to stop autoparsing of flags (-v, -f, etc) - TODO T/F
 
 export UTS_GREPEXLUDEDIR=\
 ${UTS_GREPEXLUDEDIR:-"LIBS|node_modules|Binary|sublime|SCRAP|SCRAPS|DVBinspector-1.10.1|\.ssh|\.git|vendor|XDIR"}
