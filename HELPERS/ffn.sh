@@ -91,6 +91,7 @@ main()
 	setvar PARTFN "$1"
 
 	cd $UTS_SCRIPTDIR
+	vbecho "Starting search in <$(pwd)>"
 	FILEPATTERN=${FILEPATTERN:-"$UTS_BASHINCLUDE"}
 
 	searchForMatch "$PARTFN" "$FILEPATTERN"
