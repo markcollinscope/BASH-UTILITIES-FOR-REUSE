@@ -103,7 +103,7 @@ gitCommitAndPush()
 	gitDoPush
 }
 
-gitcandp() { gitCommitAndPush "$@"; }
+gitcandpfn() { gitCommitAndPush "$@"; }
 
 ### END CONTENT
 fi
