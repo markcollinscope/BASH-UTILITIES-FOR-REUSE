@@ -196,13 +196,19 @@ xfindfiles() # find files below current dir that match the glob pattern (ls styl
 	xfind . -type f $(mkfindor "$@")
 }
 
-xfindfilesgrep() # list files containing a pattern - no grep output.
+xfindfilesgrep() # -s: show grep results; list files containing a pattern - no grep output.
 {
+	local SHOW=false; if test "$1" = "-s"; then SHOW=true; shift; fi
+
 	setvar PATTERN "$1"; shift;
 
 	for i in $(xfindfiles "$@"); do
-		if no xgrep $PATTERN "$i"; then
+		if no xgrep "$PATTERN" "$i"; then
+			setcol $GREEN
 			echo $i;
+			setcol $CYAN
+			if $SHOW; then xgrep "$PATTERN" "$i"; fi
+			resetcol
 		fi
 	done
 }
