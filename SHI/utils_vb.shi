@@ -5,10 +5,14 @@
 . utils_core.shi
 if ! alreadyIncluded UTILS_VB; then 
 
+
 ### START CONTENT
-setVerbose() 	{ export UTS_VERBOSE=true; export UTS_VERBOSEFLAG="-v"; }	# preferred way to set UTS_VERBOSE=true;
+
+VBFLAG=${UTS_VBFLAG:-'--vb'}	# can override from environment.
+
+setVerbose() 	{ export UTS_VERBOSE=true; export UTS_VERBOSEFLAG="$VBFLAG"; }	# preferred way to set UTS_VERBOSE=true;
 getVerbose()	{ if $UTS_VERBOSE; then return 0; else return 1; fi; }
-verbose()		{ getVerbose; } # deprecated.
+verbose()		{ getVerbose; }
 resetVerbose() 	{ export UTS_VERBOSE=false; export UTS_VERBOSEFLAG=""; }	# preferred way to set UTS_VERBOSE=false;
 resetVerbose;
 
@@ -22,9 +26,9 @@ vbecho()	{ if $UTS_VERBOSE; then setcol $YELLOW; (>&2 echo $*); setcolnorm; fi }
 vbfnecho()	{ vbecho "$(basename $0) [${FUNCNAME[1]}()]: $*"; }
 vbsleep() { if $UTS_VERBOSE; then sleep $*; fi }
 
-checkIfVerbose() # quick parse for -v flag as $1.
+checkIfVerbose() # quick parse for $VBFLAG flag as $1.
 {
-	if test "$1" = "-v"; then
+	if test "$1" = "$VBFLAG"; then
 		setVerbose;
 		return 0;
 	fi
@@ -35,8 +39,8 @@ if null "$UTS_NOAUTOARGS"; then
 	if checkIfVerbose $1; then shift; fi
 fi
 
-# parses $1 (only!) and if '-v' sets verbose, removes -v as arg.#
-# so scripts will *automatically* set UTS_VERBOSE if '-v' is first argument
+# parses $1 (only!) and if $VBFLAG, sets verbose, removes -v as arg.
+# so scripts will *automatically* set UTS_VERBOSE if $VBFLAG is first argument
 # and these utils are included (using '.'' or 'source')
 
 ### END CONTENT
