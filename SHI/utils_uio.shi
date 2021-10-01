@@ -7,32 +7,30 @@ FFLAG=${UTS_FFLAG:-"--ff"}	# can override from environment.
 
 UTS_FORCE=false;	# override manual intervention requests
 UTS_FORCEFLAG="$FFLAG";	# empty or FFLAG (pass onto subscripts - subscript $UTS_FORCEFLAG)
+
 setForce() 		{ export UTS_FORCE=true; export UTS_FORCEFLAG="$FFLAG"; }
 resetForce()	{ export UTS_FORCE=false; export UTS_FORCEFLAG=""; }
 getForce()		{ if $UTS_FORCE; then return 0; else return 1; fi; }
 force()			{ getForce; }
 
-checkIfForce()
+checkIfForce() # check $1 - if it's the force flag (FFLAG) set force mode (setForce()).
 {
 	if test "$1" = "$UTS_FORCEFLAG"; then setForce; return 0; else return 1; fi
 }
 
-if null "$UTS_NOAUTOARGS"; then
-	if checkIfForce "$1"; then shift; fi # NB: use -v before -f if necessary.
-fi
-
-hitAnyKeyToContinue() # [<message>]
+hitAnyKeyToContinue() # [<message>] - print <message> and wait for key press (enter).
 {
 	local MSG=$1
 
 	if $(force); then return; fi
 	
-	MSG="$MSG - hit any key to continue - ctl-c to exit"
+	MSG="$MSG - hit enter to continue - ctl-c to exit"
 	errecho $MSG
 	read x
 }
 
-Warning() # [-n] [<message-to-show>] (-n - do not exit on "no")
+Warning() # [<message-to-show>] - show message - wait for yes/n response, exit on 'n'.
+# [-n] - do not exit on "no" reponse - default is to exit.
 {
 	local EXITONNO=true; if test "$1" = "-n"; then EXITONNO=false; shift; fi
 	local OPTIONAL_MSG="$1";
@@ -62,6 +60,10 @@ Warning() # [-n] [<message-to-show>] (-n - do not exit on "no")
 	done
 	return $RETURN_VAL;
 }
+
+if ! $UTS_NOAUTOARGS; then
+	if checkIfForce "$1"; then shift; fi # NB: use --vb before --ff if necessary.
+fi
 
 #CONTENT ENDS
 fi

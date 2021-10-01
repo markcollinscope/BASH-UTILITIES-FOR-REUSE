@@ -35,13 +35,17 @@ checkIfVerbose() # quick parse for $VBFLAG flag as $1.
 	return 1;
 }
 
-if null "$UTS_NOAUTOARGS"; then
+# autoparse verbose flag.
+
+if ! $UTS_NOAUTOARGS; then
 	if checkIfVerbose $1; then shift; fi
 fi
+# nb - re above: parses $1 (only) and if same value as $VBFLAG, sets verbose,
+# also removes VBFLAG from the including script's command line args - so is 
+# transparent to that script.
 
-# parses $1 (only!) and if $VBFLAG, sets verbose, removes -v as arg.
-# so scripts will *automatically* set UTS_VERBOSE if $VBFLAG is first argument
-# and these utils are included (using '.'' or 'source')
+# overall effect: scripts will *automatically* set UTS_VERBOSE if $VBFLAG is first argument
+# to the bash script that includes this file.
 
 ### END CONTENT
 fi

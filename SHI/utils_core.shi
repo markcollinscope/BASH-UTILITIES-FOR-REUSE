@@ -20,7 +20,7 @@ isfile() { if test -f "$1"; then return 0; else return 1; fi }; isFile() { isfil
 script() { echo $(basename $0); }; scriptName() { script; }
 
 # default Usage function. 
-Usage() { USAGE="$(echo "$USAGE" | sed 's?\./??' )"; errecho "$USAGE"; exiterr 1; }
+Usage() { USAGE="$(echo "$USAGE" | sed 's?\./??' )"; errecho "$USAGE"; }
 
 _doscriptexit() 
 { 
@@ -181,11 +181,6 @@ checkNotEmptyString()
 # grep/find but exclude certain patterns.
 xgrep() { grep "$@" | grep -v -E "$(getGrepExcludes)"; }
 xfind() { find "$@" | grep -v -E "$(getGrepExcludes)"; }
-
-if null "$UTS_NOAUTOARGS"; then 
-	if test "$1" = "--help"; then errecho "help details: "; callFnIfExists Usage; callFnIfExists Help; fi
-	if test "$1" = "-?"; then errecho "help details: "; callFnIfExists Usage; callFnIfExists Help; fi
-fi
 
 # END
 fi

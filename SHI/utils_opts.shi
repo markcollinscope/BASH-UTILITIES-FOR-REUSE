@@ -132,18 +132,16 @@ errifopt() # it is an error if there are any more options (-*) in $@
 	done
 }
 
-Usage() # override if using this include.
+Usage() # print $USAGE and also print option despcripts defined using boolopt, valopt, etc.
 {
 	OPTIONS="$(getOptUsage)"
 	>&2 cat<<<$USAGE
 	>&2 cat<<<$OPTIONS
-	exiterr 1
 }
 
 _UTS_MAXARGS=9999 # arbitrary but large - upper limit
-chkargcount() 
+chkargcount() # check argument ($3+) count is between $1-lower, $2-upper inclusive - otherwise error exit.
 # [-l] - lower limit only
-# check argument ($@) count is- between lower, upper inclusive - otherwise exit with message.
 {
 	LOWERONLY=false; 
 	if test "$1" = "-l"; then 
