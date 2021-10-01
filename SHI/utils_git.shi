@@ -8,6 +8,12 @@ if ! alreadyIncluded UTILS_GIT; then
 
 ### START CONTENT
 
+gitroot() # output the name of the root git repo given cwd.
+{
+	checkIsGitDir;
+	git rev-parse --show-toplevel
+}
+
 gitCurrentBranch() 
 {
 	V=$(git branch 2>/dev/null | grep '*' | sed 's/*//')
