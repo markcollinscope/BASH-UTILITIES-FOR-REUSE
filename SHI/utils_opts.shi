@@ -118,20 +118,21 @@ valopt() 	# e.g. script --file afilename ; use 'afilename' if given with --file 
 	echo "set -- $ARGS; $EVAL "
 }
 
-errifopt() # it is an error if there are any more options (-*) in $@; parse --help or -? automatically.
+errifopt() # exit with error if there are options (-*) in $@; autoparse --help or -? to show usage/help.
 {
 	vbfnecho;
 	if ! $UTS_NOAUTOARGS; then # first arg only.
 		vbfnecho "check first arg: $1"
-		if test "$1" = "--help"; then shift; callFnIfExists Usage; callFnIfExists Help; exitok; fi
-		if test "$1" = "-?"; then shift; callFnIfExists Usage; callFnIfExists Help; exitok; fi
+		if test "$1" = "--help"; then vbfnecho "is --help"; shift; callFnIfExists Usage; callFnIfExists Help; exitok; fi
+		if test "$1" = "-?"; then vbfnecho "is -?"; shift; callFnIfExists Usage; callFnIfExists Help; exitok; fi
 	fi
 
 	while ! test -z "$1"; do
 		case "$1" in
 		-*)
 			errecho "Unknown option: \"$1\""
-			callFnIfExists Usage;
+			vbfnecho "Usage: $(type -t Usage)";
+			Usage;
 			exiterr -k;
 			;;
 		esac
