@@ -6,6 +6,15 @@ if ! alreadyIncluded UTILS_MSC; then
 . utils_vb.shi
 . utils_fd.shi
 
+softwareRequired() # check if $1 is installed, if not print error. exit.
+{
+	setvar SW "$1";
+	
+	if null "$(which $SW)"; then
+		errecho "Software not installed <$SW> - please install to use this script/option"
+		exiterr -k;
+	fi
+}
 
 stripwhite() # $1 => $1 but without excess whitespace (\t and space) & control chars
 {
@@ -103,7 +112,7 @@ explode() # explode "ABCDE" => A B C D E
 	echo $1 | grep -o .
 }
 
-printbetween()
+printbetween() # START,END,FILE # print lines between regexps START and END (inclusive) in FILE.
 {
 	eval $(boolopt -n NUMERIC "$@");
 	setvar START "$1"
