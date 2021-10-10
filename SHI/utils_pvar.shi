@@ -14,11 +14,27 @@ __PVARSUFFIX=".pvar"
 __PVARDIR=${UTS_PVARDIR:-"/tmp/"}
 ensuredirexists $__PVARDIR
 
-_pvarfile()
+_pvardir()
+{
+	echo "$__PVARDIR"
+}
+
+_pvarsuffix()
+{
+	echo $__PVARSUFFIX
+}
+
+_setpvarsuffix()
+{
+	setvar _SUFFIX "$1"
+	__PVARSUFFIX=$_SUFFIX;
+}
+
+_pvarfilename()
 {
 	setvar _PVARF "$1";
 
-	RES=$(concat $__PVARDIR "$_PVARF" "." "$__PVARSUFFIX")
+	RES=$(concat "$(_pvardir)" "$_PVARF" "." "$(_pvarsuffix)")
 	vbfnecho "PVARFILE: $RES"
 	echo $RES
 }
@@ -26,7 +42,7 @@ _pvarfile()
 _checkpvarisdeclared()
 {
 	setvar __PVARNAME $1
-	local FILE=$(_pvarfile $__PVARNAME);
+	local FILE=$(_pvarfilename $__PVARNAME);
 
 	if ! test -f $FILE; then
 		errecho -s "attempted use of pvar <$__PVARNAME> when not declared";
@@ -36,18 +52,16 @@ _checkpvarisdeclared()
 
 pvarcontext()
 {
-	if null "$1"; then errfnecho "no context supplied"; fi
-	__PVARSUFFIX=".$1"
+	if null "$1"; then errfnecho -s "no context supplied"; exirerr -k; fi
+	_setpvarsuffix ".$1"
 }
 
 declarepvar()
 {
-	chkargcount 2 2 "$@"
-
 	setvar __PVAR_NAME "$1"
 	setvar __PVAR_VALUE "$2"
 
-	local FILE=$(_pvarfile $__PVAR_NAME);
+	local FILE=$(_pvarfilename $__PVAR_NAME);
 	if ! test -f $FILE; then
 		echo "$__PVAR_VALUE" > $FILE
 	fi
@@ -60,7 +74,7 @@ setpvar()
 
 	_checkpvarisdeclared $__PVAR_NAME;
 
-	local FILE=$(_pvarfile $__PVAR_NAME);
+	local FILE=$(_pvarfilename $__PVAR_NAME);
 	echo "$PVAR_VALUE" > $FILE
 }
 
@@ -69,7 +83,7 @@ getpvar()
 	setvar __PVAR_NAME $1;
 	_checkpvarisdeclared $__PVAR_NAME;
 
-	local FILE=$(_pvarfile $__PVAR_NAME);
+	local FILE=$(_pvarfilename $__PVAR_NAME);
 
 	vbfnecho "PVAR-NAME,FILE: $__PVAR_NAME, $FILE"
 	local PVAR_VALUE=$(cat $FILE)
@@ -80,13 +94,45 @@ getpvar()
 
 clearpvar()
 {
+	# not pvar delcaration check. can be used to 'make sure' pvar doesn't already have a value.
 	setvar __PVAR_NAME $1;
-	_checkpvarisdeclared $__PVAR_NAME;
 
-	local FILE=$(_pvarfile $__PVAR_NAME);
+	local FILE=$(_pvarfilename $__PVAR_NAME);
 	if test -f $FILE; then
 		rm $FILE;
 	fi
+}
+
+pvarasdefault()
+{
+	setvar _PVARTOUSE "$1"
+	local VALUETOUSE="$2";
+
+	if null "$VALUETOUSE"; then
+		VALUETOUSE=$(getpvar $_PVARTOUSE);
+	fi
+	echo $VALUETOUSE
+}
+
+rmpvarcontext()
+{
+	TMP=$(tmpfile)
+	ensuredirexists $TMP
+
+	(
+	cd $(_pvardir);
+	CONTEXT=$(_pvarsuffix)
+	Warning "About to destroy context: <$CONTEXT> (all pvars moved to <$TMP>)"
+	mv *.$(pvarsuffix) $TMP
+	)
+}
+
+rmpvardir()
+{
+	TMP=$(tmpfile)
+	ensuredirexists $TMP
+	Warning "About to move PVAR dir: <$(_pvardir)> to: <$TMP> (i.e. it will no longer be used to store PVARs)"
+	mv $(_pvardir) $TMP
 }
 
 if test "$1" = "--testpvar"; then
@@ -99,9 +145,8 @@ if test "$1" = "--testpvar"; then
 	VAL=$(getpvar _HELLO)
 	echo RESULT2 $VAL
 
-	declarepvar _GOODBYE
+	declarepvar _GOODBYE 'pvar'
 	VAL=$(getpvar _GOODBYE)
-	# that's an error.
 
 	clearpvar HELLO
 	declarepvar HELLO "THIS IS THIRD VALUE>"

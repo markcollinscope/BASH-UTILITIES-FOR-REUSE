@@ -22,7 +22,7 @@ if ! alreadyIncluded UTILS_GLOBALS; then
 
 export UTS_SCRIPTDIR=${UTS_SCRIPTDIR:-"$HOME/GIT/scripts"};	# ROOT location of scripts under git control.
 
-export UTS_PVARDIR=${UTS_PVARDIR:-"$HOME/.PVAR"};		# used for storage of pvars (see utils_pvar.shi).
+export UTS_PVARDIR=${UTS_PVARDIR:-"$HOME/.PVAR/"};		# used for storage of pvars (see utils_pvar.shi). nb: trailing '/'
 export UTS_LOGDIR=${UTS_LOGDIR:-"$HOME/.LOGS"}			# place to store log files.
 export UTS_BACKUPDIR=${UTS_BACKUPDIR:-"$HOME/.BACKUP"}	# place to copy for backup.
 export UTS_NOAUTOARGS=${UTS_NOAUTOARGS:-false}			# set to true to stop autoparsing of flags (--vb, --ff, etc)
@@ -32,7 +32,7 @@ export UTS_BASHINCLUDE=${UTS_BASHINCLUDE:-".shi"}		# extension used for bash inc
 export UTS_SCRIPTTPL=${UTS_SCRIPTTPL:-"script.tpl"}		# template for 'new' scripts, if used.
 export UTS_SUNIT_TEST=${UTS_SUNIT_TEST:-"_stest"}		# string identifying a function as a unit test.
 
-# often external (node_modules) directories to ignore/remove from script (recursive) searches, etc.
+# external (node_modules) directories to ignore/remove from script (recursive) searches, etc. (to remove irrelevent output)
 export UTS_GREPEXCLUDEDIRS=\
 ${UTS_GREPEXCLUDEDIRS:-"DIST|node_modules|Binary|sublime|SCRAP|SCRAPS|DVBinspector-1.10.1|\.ssh|\.git|vendor|XDIR"}
 

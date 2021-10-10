@@ -6,6 +6,30 @@ if ! alreadyIncluded UTILS_OPTS; then
 . utils_core.shi
 . utils_msc.shi
 
+# functions to enable printing of 'autocomplete' command to be eval'd to setup cmd line autocomplete (bash autocomplete).
+
+__USEAUTOCOMPLETE=false;
+__AUTOCOMPLETEOPTION="--autocomplete"
+
+# nb: at present this is focused on git-autocompletion - e.g. optautocomplete "_git_custo_command() { _git_checkout; } ..."
+optautocomplete() # if opt chosen, echo $1 back to be used to create an autocomplete option.
+{
+	setvar AC "$*"
+	if $__USEAUTOCOMPLETE; then
+		echo $AC;
+		exitok;
+	fi
+}
+
+if ! $UTS_NOAUTOARGS; then
+	if test "$1" = "$__AUTOCOMPLETEOPTION"; then  
+		__USEAUTOCOMPLETE=true;
+		shift;
+	fi
+fi
+
+# to print usage information
+
 __USAGE_FILE=$(tmpFile);
 
 rm -f $__USAGE_FILE;
