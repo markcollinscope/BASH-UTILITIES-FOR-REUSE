@@ -93,16 +93,15 @@ getpvar()
 }
 
 clearpvar()
+# not a pvar delcaration check. used to 'make sure' pvar doesn't already have a value.
 {
-	# not pvar delcaration check. can be used to 'make sure' pvar doesn't already have a value.
 	setvar __PVAR_NAME $1;
 
 	local FILE=$(_pvarfilename $__PVAR_NAME);
-	if test -f $FILE; then
-		rm $FILE;
-	fi
+	rm -f $FILE;
 }
 
+# TBD: see try.shi -- this needs to be merged with pvardefault ...
 pvarasdefault()
 {
 	setvar _PVARTOUSE "$1"
@@ -116,7 +115,7 @@ pvarasdefault()
 
 rmpvarcontext()
 {
-	TMP=$(tmpfile)
+	TMP=$(tmpFile)
 	ensuredirexists $TMP
 
 	(
@@ -129,9 +128,9 @@ rmpvarcontext()
 
 rmpvardir()
 {
-	TMP=$(tmpfile)
+	TMP=$(tmpFile)
 	ensuredirexists $TMP
-	Warning "About to move PVAR dir: <$(_pvardir)> to: <$TMP> (i.e. it will no longer be used to store PVARs)"
+	Warning "About to move PVAR dir: <$(_pvardir)> to: <$TMP> (i.e. all existing PVARs will be lost)"
 	mv $(_pvardir) $TMP
 }
 
