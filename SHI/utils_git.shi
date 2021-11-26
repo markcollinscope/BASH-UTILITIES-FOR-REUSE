@@ -14,6 +14,11 @@ gitroot() # output the name of the root git repo given cwd.
 	git rev-parse --show-toplevel
 }
 
+gitrootns() # no slashes  - replaced with _
+{
+	gitroot | sed 's?/?_?g'
+}
+
 gitCurrentBranch() 
 {
 	V=$(git branch 2>/dev/null | grep '*' | sed 's/*//')
