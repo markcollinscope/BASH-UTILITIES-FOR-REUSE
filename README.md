@@ -63,5 +63,7 @@ NB: utils_globals.shi| This is a set of bash variables that are useful in script
 
 ## Comments and Contributions Welcome
 Please do contribute:
-* email:markcollinscope@gmail.com, or message here.
+* email:markcollinscope+bashutils@gmail.com, or message here.
 * branch etc. to contribute something new and make a pull request.
+* be patient - do let me know if you're doing something in advance, please.
+
