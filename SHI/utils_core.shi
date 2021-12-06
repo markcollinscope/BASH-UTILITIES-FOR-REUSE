@@ -11,18 +11,21 @@ fi
 if ! alreadyIncluded UTILS_CORE; then
 
 ### START CONTENT
-callFnIfExists() { if test "$(type -t $1)" = "function" ; then "$@"; fi }
 nostdout() { exec > /dev/null; } 	# turn off stdout. best in subshell - ( .. )
 nostderr() { exec 2> /dev/null; }	# turn off stderr, best in subshell - ( .. )
-null() { if test -z "$*"; then return 0; else return 1; fi }
-isdir() { if test -d "$1"; then return 0; else return 1; fi }; isDir() { isdir "$@"; }
-isfile() { if test -f "$1"; then return 0; else return 1; fi }; isFile() { isfile "$@"; }
-script() { echo $(basename $0); }; scriptName() { script; }
 
-# default Usage function. 
-Usage() { USAGE="$(echo "$USAGE" | sed 's?\./??' )"; errecho "$USAGE"; }
+null() { if test -z "$*"; then return 0; else return 1; fi }; # for readibility.
+isdir() { if test -d "$1"; then return 0; else return 1; fi }; isDir() { isdir "$@"; }  # for readibility.
+isfile() { if test -f "$1"; then return 0; else return 1; fi }; isFile() { isfile "$@"; } # for readibility.
 
-_doscriptexit() 
+script() { echo $(basename $0); }; 	# print base of current bash script *file* name.
+scriptName() { script; }; 			# print base of current bash script *file* name.
+
+callFnIfExists() { if test "$(type -t $1)" = "function" ; then "$@"; fi } # <fn> - call <fn> if it exists.
+
+Usage() { USAGE="$(echo "$USAGE" | sed 's?\./??' )"; errecho "$USAGE"; } # default Usage function. Autocalled by bash utils.
+
+_doscriptexit() # internal only.
 { 
 	local EXITCODE=$1;
 
@@ -35,9 +38,14 @@ _doscriptexit()
 	fi
 }
 
-# use these to exit... if you want to use functions on the cmd line (in process).
-exitok() { _doscriptexit 0; }; 
-exiterr() # -k - really exit - from multiple sub-processes as well.
+exitok() # no args.
+# exit with ok status (0). If in terminal (command line) mode - don't exit terminal -instaad print a message.
+{ 
+	_doscriptexit 0; 
+}; 
+
+exiterr() # arg: <exit code>; opts: -k - exit from multiple nested sub-processes as well. 
+# exit with non-ok status ($1). If in terminal (command line) mode - don't exit terminal -instaad print a message.
 { 
 	local EXITCODE=1; 
 	if ! test -z "$1"; then EXITCODE=$1; fi;
@@ -45,24 +53,26 @@ exiterr() # -k - really exit - from multiple sub-processes as well.
 	_doscriptexit $EXITCODE;
 }
 
-chkarg() # chkarg X - is $X set to a value? if not, error.
+chkarg() # arg: <bash variable name> [<level>]
+# usage: chkarg X [level] ; - is X set to a value? if not, error. nb: X is passed without $
+# level - call level of function name to print for error. e.g. 2 - the function that called chkarg (this function).
 {
-	#nb: pass $1 as MYARG not $MYARG - no "$" necessary (or permitted)
 	local VARNAME=$1; 	
-	local LEVEL=2; if ! null $2; then LEVEL=$2; fi
+	local LEVEL=${2:-2};
 	
 	local VALUE=${!VARNAME}
 	local FNNAME=$(fnname -l $LEVEL)
 
 	if null "$VALUE"; then 
-		errecho "[$FNNAME]: Call to Fn has missing argument <$VARNAME>"
+		errecho "[$FNNAME]: Call to fn has missing argument <$VARNAME>"
 		exiterr;
 	fi
 } 
-chkvar() { chkarg "$@"; }
-chkval() { chkarg "$@"; }
+chkvar() { chkarg "$@"; } # see chkarg
+chkval() { chkarg "$@"; } # see chkarg
 
-setvar() 
+setvar() # <bash var name> <value>
+# set <bash var> to <value> - if no <value> - error and exit.
 { 
 	local VARNAME="$1"; chkarg VARNAME;
 	local VALUE="$2"; 
@@ -78,8 +88,7 @@ setvar()
 	eval "$VARNAME"="\"$VALUE\""; 
 } 
 
-setvarif() { setvar AVAR "$1" 3; AVAL="$2"; if ! null "$AVAL"; then eval "$AVAR"="$AVAL"; fi; };  # TODO: check.
-
+// VT100 codes.
 export BLACK="\e[30m"
 export RED="\e[31m"		
 export LIGHTRED="\e[91m"	
@@ -92,15 +101,18 @@ export WHITE="\e[37m"
 export NORMAL="\e[0m"
 export RESET=$NORMAL
 
-isTerminalOutput() # is the output stream (1, 2 ...) to a terminal?
+isTerminalOutput() 
+# is the output stream (1, 2 ...) to a terminal?
 {
 	local OUTPUT=1; if ! null "$1"; then OUTPUT="$1"; fi
     if test -t $OUTPUT; then return 0; else return 1; fi
 }
 
+# set to <true> to turn color off.
 UTS_NOCOLOR=${UTS_NOCOLOR:-false}
-setcol() # ' export UTS_NOCOLOR=true ' -  in env. to turn color off.
-# set text color.
+
+setcol() # <color code>
+# set text color - see predefined VT100 codes above.
 {
 	local COLOR=$1; chkarg COLOR;
 	if $UTS_NOCOLOR; then return 0; fi
@@ -111,13 +123,15 @@ setcol() # ' export UTS_NOCOLOR=true ' -  in env. to turn color off.
 	return 0;
 }
 
-setcolnorm() # reset (echo) text color to normal. 
+setcolnorm() 
+# reset (echo) text color to 'normal'. 
 {
 	setcol $NORMAL
 }
-resetcol() { setcolnorm; }
+resetcol() { setcolnorm; } # see setcolnorm();
 
-scrCurPos() # Position the cursor at(row,column(relative top rhs) as per $1, $2 - or at 0,0 if args not given.
+scrCurPos() [ <x> <y> ]
+# Position the cursor at(row,column(relative top rhs) as per $1, $2 - or at 0,0 if either args not given.
 {
 	local ROW=$1;
  	local COL=$2;
@@ -130,12 +144,14 @@ scrCurPos() # Position the cursor at(row,column(relative top rhs) as per $1, $2 
  	fi
 }
 
-scrClear() # clear the screen.
+scrClear() # no args.
+# clear the screen.
 {
 	echo -ne "\e[2J"
 }
 
-errecho() # -s - precede error with script name.
+errecho() # [-s] - precede error with script name.
+# print message to stderr.
 {  
 	setcol $RED; 
 	if test "$1" = "-s"; then
@@ -146,7 +162,11 @@ errecho() # -s - precede error with script name.
 	resetcol; 
 }
 
-errfnecho() { errecho -s "[${FUNCNAME[1]}()]: $*"; }
+errfnecho() # always precedes error with script and bash function name.
+# print message to stderr.
+{ 
+	errecho -s "[${FUNCNAME[1]}()]: $*"; 
+}
 
 fnname() # [-l <call-fn-level>] - # e.g. "fnname -l 2"  echo fn calling fn calling this fn.
 # what is the current function name (the function calling this one)
@@ -162,11 +182,11 @@ fnname() # [-l <call-fn-level>] - # e.g. "fnname -l 2"  echo fn calling fn calli
 	echo "${FUNCNAME[$FN_LEVEL]}"
 }
 
-ne() { 2>/dev/null $*; }	# run command without those irritating error messages! (ne: No Error)
-no() { >/dev/null $*; }		# run command without std output! (no: No Output)
+ne() { 2>/dev/null $*; }	# run command without those irritating error messages! (ne: No Error) e.g. $ no errecho hello - no output
+no() { >/dev/null $*; }		# run command without std output! (no: No Output) - e.g. $ no echo hello - no output
 
-checkNotEmptyString()
-# e.g. usage: 'local NAME=""; checkNotEmptyString "You forgot to give a name!" $NAME' 
+checkNotEmptyString() # <msg> [ <bash var name> ] - deprecated - use chkarg().
+# e.g. usage: $ 'local NAME=""; checkNotEmptyString "You forgot to give a name!" $NAME' 
 {
 	local ERROR_MSG="$1";
 	local VALUE_TO_CHECK="$2";
@@ -178,9 +198,17 @@ checkNotEmptyString()
 	fi
 }
 
-# grep/find but exclude certain patterns.
-xgrep() { grep "$@" | grep -v -E "$(getGrepExcludes)"; }
-xfind() { find "$@" | grep -v -E "$(getGrepExcludes)"; }
+xgrep() # <list of grep args>
+# grep, but exclude certain patterns from results (e.g. 'node_modules')- see UTS_GREPEXCLUDEFILES - defaults set.
+{ 
+	grep "$@" | grep -v -E "$(getGrepExcludes)"; 
+}
+
+xfind() # <list of find args>
+# find, but exclude certain patterns from results (e.g. 'node_modules')- see UTS_GREPEXCLUDEFILES - defaults set.
+{ 
+	find "$@" | grep -v -E "$(getGrepExcludes)"; 
+}
 
 # END
 fi
