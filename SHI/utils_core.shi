@@ -1,8 +1,7 @@
 #!/bin/bash
-#
 # Core functions used in all other *utils*.
 
-# global values... git dir, scripts dirs, log dirs ... one time include if present.
+# the following file contain global values used across utils e.g. git dir, scripts dirs, log dirs ... one time include if present.
 _UTILS_GLOB=$(which utils_globals.shi)
 if test -f "$_UTILS_GLOB"; then
 . $_UTILS_GLOB;
@@ -11,6 +10,17 @@ fi
 if ! alreadyIncluded UTILS_CORE; then
 
 ### START CONTENT
+
+CORE_SUMMARY=$(cat <<ENDSUMMARY
+
+Core utility functions for bash. These functions are used across other utility functionas extensively. The level of functionality is not high level, more for convenience or readibility. e.g. 
+* 'script' - print the currently executing scripts base file name.
+* 'Usage' - print usage message (based on bash var $USAGE) for currently running script.
+etc.
+
+ENDSUMMARY
+);
+
 nostdout() { exec > /dev/null; } 	# turn off stdout. best in subshell - ( .. )
 nostderr() { exec 2> /dev/null; }	# turn off stderr, best in subshell - ( .. )
 
