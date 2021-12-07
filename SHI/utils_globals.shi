@@ -1,6 +1,7 @@
 #!/bin/bash
 
 if ! test "$(type -t alreadyIncluded)" = "function"; then
+# no indent.
 
 alreadyIncluded()
 {
@@ -17,8 +18,13 @@ alreadyIncluded()
 fi
 
 if ! alreadyIncluded UTILS_GLOBALS; then
+# no indent.
 
-# IMPORTANT: override with exported environment variables to change. defaults are provided.
+GLOB_SUMMARY=$(cat <<EOSUMMARY
+Global variables used across utilities functions. Preset values will take precedence over defaults, which are provided herein.
+So to override defaults, simply define (e.g. UTS_PVAR) a new value *before* including this (or any) utility function definition file (.shi).
+EOSUMMARY
+);
 
 export UTS_SCRIPTDIR=${UTS_SCRIPTDIR:-"$HOME/GIT/scripts"};	# ROOT location of scripts under git control.
 
@@ -29,17 +35,17 @@ export UTS_NOAUTOARGS=${UTS_NOAUTOARGS:-false}			# set to true to stop autoparsi
 
 # templates / names / file extensions etc.
 export UTS_BASHINCLUDE=${UTS_BASHINCLUDE:-".shi"}		# extension used for bash include files.
-export UTS_SCRIPTTPL=${UTS_SCRIPTTPL:-"script.tpl"}		# template for 'new' scripts, if used.
+export UTS_SCRIPTTPL=${UTS_SCRIPTTPL:-"script.tpl"}		# template for 'new' scripts, if used (optional).
 export UTS_SUNIT_TEST=${UTS_SUNIT_TEST:-"_stest"}		# string identifying a function as a unit test.
 
 # external (node_modules) directories to ignore/remove from script (recursive) searches, etc. (to remove irrelevent output)
 export UTS_GREPEXCLUDEDIRS=\
 ${UTS_GREPEXCLUDEDIRS:-"DIST|node_modules|Binary|sublime|SCRAP|SCRAPS|DVBinspector-1.10.1|\.ssh|\.git|vendor|XDIR"}
 
-getGrepExcludes() 	{ echo $UTS_GREPEXCLUDEDIRS; }; export -f getGrepExcludes; 	
+getGrepExcludes() 	{ echo $UTS_GREPEXCLUDEDIRS; }; export -f getGrepExcludes; 	# get global search excludes.
 getGlobLogDir() 	{ echo $UTS_LOGDIR; }; export -f getGlobLogDir; 			# get dir in which to put log files.
 getGlobBackupDir() 	{ echo $UTS_BACKUPDIR; }; export -f getGlobBackupDir;  		# get dir to copy to for backups, etc.
 
-debugutils() { if ! test -z "$DEBUGUTILS"; then >&2 echo $*; fi } # UTILSONLY - for debugging internally these UTILS.
+debugutils() { if ! test -z "$DEBUGUTILS"; then >&2 echo $*; fi } # UTILSONLY - for debugging (as the developer) these utils.
 
 fi
