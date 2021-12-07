@@ -130,7 +130,7 @@ setcolnorm()
 }
 resetcol() { setcolnorm; } # see setcolnorm();
 
-scrCurPos() [ <x> <y> ]
+scrCurPos() # [ <x> <y> ]
 # Position the cursor at(row,column(relative top rhs) as per $1, $2 - or at 0,0 if either args not given.
 {
 	local ROW=$1;
