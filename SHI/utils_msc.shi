@@ -6,7 +6,18 @@ if ! alreadyIncluded UTILS_MSC; then
 . utils_vb.shi
 . utils_fd.shi
 
-softwareRequired() # check if $1 is installed, if not print error. exit.
+MSC_SUMMARY=$(cat << EO_MSC
+Provides misc servces for thing like:
+* padded output
+* stripping whitespaces
+* counting arguments
+* checking a scripts software dependencies &
+* tarring up directories.
+EO_MSC
+);
+
+softwareRequired() # <software-name> - e.g. cpp, tar, git ...
+# check if <software-name> is installed, if not print error. exit.
 {
 	setvar SW "$1";
 	
@@ -16,7 +27,8 @@ softwareRequired() # check if $1 is installed, if not print error. exit.
 	fi
 }
 
-stripwhite() # $1 => $1 but without excess whitespace (\t and space) & control chars
+stripwhite() # <string>
+# <string> => <string> but without excess whitespace (\t and space) & control chars
 {
 	RES="$1";
 
@@ -24,9 +36,10 @@ stripwhite() # $1 => $1 but without excess whitespace (\t and space) & control c
  	echo "$RES"
 }
 
-count() { echo $#; }
+count() { echo $#; } # count #args given, echo number as return.
 
-concat() # [-c <string>] - e.g. concat a b c => 'abc', concat -c : a b c => 'a:b:c'
+concat() # [-s | -c <string>] <args...> - join args together.
+# e.g. concat a b c => 'abc', concat -c : a b c => 'a:b:c' , concat -s a b => "a b" (space between)
 { 
 
 	local RES=
@@ -48,7 +61,8 @@ concat() # [-c <string>] - e.g. concat a b c => 'abc', concat -c : a b c => 'a:b
 	echo "$RES"
 }
 
-delimit() # $1 => %%$1%%, [-d <_LIMITCHAR>] - use $_LIMITCHAR instead of '%%'.
+delimit() # [-d <_LIMITCHAR>] <string> - was useful once... deprecate... TBD.
+# e.g. delimit <string> => %%<string>%%, delimit -d x <string> => x<string>x.
 {
 	local _LIMITCHAR=%%
 
@@ -61,12 +75,13 @@ delimit() # $1 => %%$1%%, [-d <_LIMITCHAR>] - use $_LIMITCHAR instead of '%%'.
 	echo $_LIMITCHAR$1$_LIMITCHAR;
 }
 
-randomString() 
+randomString() # <numchars - default 10>
+# return a random string (by echo).
 {
 	NUM=$1
 	if test -z "$NUM"; then NUM=10; fi
 
-	chars="abcdefghijklmnopqrstuvwxyz"
+	chars="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
 	for ((i=0; i<$NUM; i++))
 	do
@@ -74,7 +89,8 @@ randomString()
 	done
 }
 
-isNum()
+isNum() # <arg>
+# return (via exit code) if <arg> is a valid number. e.g. if isNum xxx; then ...
 {
 	setvar NUM $1
 
@@ -85,7 +101,8 @@ isNum()
 	fi
 }
 
-roundDown()
+roundDown() # <value>
+# round down <value> to whole int.
 {
 	NUM=$1
 	checkNotEmptyString "$(fnname) requires a number argument" $NUM
@@ -94,10 +111,13 @@ roundDown()
 }
 
 
-getDirs() # echo full path name of dirs, from cwd, recursive, exclude unwanted. [-x]: exclude cwd. TODO
+getDirs() 
+# echo full path name of dirs, from cwd, recursive, exclude unwanted. [-x]: exclude cwd. TODO
 {
+	eval $(boolopt -x _EXCLUDE "$@");
 	DIR="$(pwd)/"; 
-	if test "$1" = "-x"; then _FILTER="| grep -v -E ^$DIR$"; fi
+
+	if $_EXCLUDE; then _FILTER="| grep -v -E ^$DIR$"; fi
 
 	find "$(pwd)/" -type d -print $_FILTER | grep -v -E "$(getGrepExcludes)";
 }
@@ -114,12 +134,12 @@ explode() # explode "ABCDE" => A B C D E
 
 printbetween() # START,END,FILE # print lines between regexps START and END (inclusive) in FILE.
 {
-	eval $(boolopt -n NUMERIC "$@");
+	eval $(boolopt -n _NUMBERIC "$@");
 	setvar START "$1"
 	setvar END "$2"
 	setvar FILE "$3"
 
-	if ! $NUMERIC; then
+	if ! $_NUMBERIC; then
     	if ! grep $START.*$END $FILE; then
         	sed -n "/$START/,/$END/p" $FILE
     	fi
@@ -128,13 +148,33 @@ printbetween() # START,END,FILE # print lines between regexps START and END (inc
 	fi
 }
 
-len() # how many chars in $1 - length.
+len() # <string>
+# how many chars in <string> - what is its length.
 {
 	setvar STRING "$1"
 	count $(explode "$STRING")
 }
 
-echoPadded()
+tardir() # <dir> 
+# tar up a directory <dir> into a tar file.
+{
+	setvar DIR "$1";
+	checkdirexists "$DIR"
+	local OUT="$DIR".tar.gz 
+	tar -zcvf "$OUT" "$DIR"
+	echo "$OUT"
+}
+
+untardir() # <tar file name> 
+# 'untar' file (<tar-file-name>) created using tardir() fn.
+{
+	setvar FILE "$1"
+	checkfileexits "$FILE"
+	tar -zxvf "$FILE"
+}
+
+echoPadded() # <padlen> <...text>
+# echo <text> in standard manner. If less than <padlen> chars used, pad out with spaces.
 {
 	setvar PADLEN $1;
 	shift;
@@ -161,6 +201,7 @@ echoPadded()
 }
 
 errechoPadded()
+# errecho <text> (to stderr, &2) in standard manner. If less than <padlen> chars used, pad out with spaces.
 {
 	>&2 echoPadded $*
 }
