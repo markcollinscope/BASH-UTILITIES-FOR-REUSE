@@ -40,7 +40,7 @@ export UTS_SUNIT_TEST=${UTS_SUNIT_TEST:-"_stest"}		# string identifying a functi
 
 # external (node_modules) directories to ignore/remove from script (recursive) searches, etc. (to remove irrelevent output)
 export UTS_GREPEXCLUDEDIRS=\
-${UTS_GREPEXCLUDEDIRS:-"DIST|node_modules|Binary|sublime|SCRAP|SCRAPS|DVBinspector-1.10.1|\.ssh|\.git|vendor|XDIR"}
+${UTS_GREPEXCLUDEDIRS:-"node_modules|Binary|sublime|SCRAP|SCRAPS|DVBinspector-1.10.1|\.ssh|\.git|vendor|XDIR"}
 
 getGrepExcludes() 	{ echo $UTS_GREPEXCLUDEDIRS; }; export -f getGrepExcludes; 	# get global search excludes.
 getGlobLogDir() 	{ echo $UTS_LOGDIR; }; export -f getGlobLogDir; 			# get dir in which to put log files.

@@ -102,7 +102,7 @@ clearpvar()
 }
 
 # TBD: see try.shi -- this needs to be merged with pvardefault ...
-pvarasdefault()
+pvarasdefault() # pvar, value - if 'value' set, return it; if not, return value stored in 'pvar'
 {
 	setvar _PVARTOUSE "$1"
 	local VALUETOUSE="$2";
