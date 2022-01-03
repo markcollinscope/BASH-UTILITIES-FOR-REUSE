@@ -2,10 +2,10 @@
 
 . utils_globals.shi
 
-PVAR_SUMMARY= $(cat <<EOPVAR
+PVAR_SUMMARY=$(cat <<EOPVARSUMMARY
 Provides services to enable bash scripts to store 'persistent' variables. Persisent meaning the variable retain their value 
 across different calls to the same, or another, script.
-EOPVAR
+EOPVARSUMMARY
 );
 
 if ! alreadyIncluded UTILS_PVAR; then
