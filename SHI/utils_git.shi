@@ -2,55 +2,69 @@
 
 . utils_core.shi
 
+GIT_SUMMARY=$(cat <<EOGITSUMMARY
+Utitlites to assist in the automation of git related activities. In particular allows detection of the 'current' git repo.
+e.g. get currrent git root dir, is this a git repo? what's the current branch called ... etc.
+EOGITSUMMARY
+);
+
 if ! alreadyIncluded UTILS_GIT; then
 
 . utils_vb.shi
 
 ### START CONTENT
 
-gitroot() # output the name of the root git repo given cwd.
+gitroot() 
+# output the name of the root git repo given the cwd.
 {
 	checkIsGitDir;
 	git rev-parse --show-toplevel
 }
 
-gitrootns() # no slashes  - replaced with _
+gitrootns() 
+# as per gitroot - with slashes [/usr/include]  - replaced with _ as per: [_use_include]
+# enables git root dir to be used as an identifieri or filename.
 {
 	gitroot | sed 's?/?_?g'
 }
 
 gitCurrentBranch() 
+# return the current git branch
 {
 	V=$(git branch 2>/dev/null | grep '*' | sed 's/*//')
 	V=${V:="No-Git-Branch-Available"}
 	echo $V
 }
 
-getGitRoot() # return the dir name of current git root dir (has .git file).
-{
-	checkIsGitDir;
-
-	local isRoot=false;
-
-	(
-		while ! isGitRootDir; do
-			cd ..
-		done
-		pwd
-	)
-}
+# deprecating.
+#getGitRoot() # return the dir name of current git root dir (has .git file).
+#{
+#	checkIsGitDir;
+#
+#	local isRoot=false;
+#
+#	(
+#		while ! isGitRootDir; do
+#			cd ..
+#		done
+#		pwd
+#	)
+#}
 
 isGitRootDir()
+# is the cwd a git root directory - return 0 [T] or 1 [F]
 {
 	if test -a ".git"; then return 0; else return 1; fi
 }
 
-isGitDir() # if $(isGitDir); then ... fi
+isGitDir() 
+# returns T/F [0/1] depending whether the cwd is in a git repo.
 {
 	no ne git rev-parse --is-inside-work-tree
 }
 
-checkIsGitDir() # exit if not.
+checkIsGitDir() 
+# error and exit if cwd is not within a git repo.
 {
 	if ! $(isGitDir); then
 		errecho "$0: Error <$(pwd)> Not A Git Dir"
@@ -59,6 +73,7 @@ checkIsGitDir() # exit if not.
 }
 
 xfindgitdirs()
+# recursive dir search down from cwd, print (return) all the git root dir names.
 {
 	for i in $(xfinddirs); do
 	(
@@ -71,6 +86,7 @@ xfindgitdirs()
 }
 
 gitNeedsCommit()
+# does the current git repo have data to potentially commit?
 {
 	checkIsGitDir;
 
@@ -82,6 +98,7 @@ gitNeedsCommit()
 }
 
 gitStatus()
+# prints a message if the git repo which contains the cwd requires a git commit.
 {
 	checkIsGitDir;
 
@@ -91,30 +108,38 @@ gitStatus()
 }
 
 gitAbandonChanges()
+# abandon all changes since the last commit. prints warning message.
 {
 	Warning "Abandon uncommitted changes?"
 	git reset --hard
 }
 
 gitDoPush()
+# push current repo to origin.
 {
 	git push origin $(gitCurrentBranch);
 }
 
-gitDoCommit()
+gitDoCommit() # [<message>]
+# undertake a git commit using <message> - or a default message if none supplied.
 {
 	local MSG=${1:-"function $(fnname) - no commit message given - branch is <$(gitCurrentBranch)>"};
 	git add -A
 	git commit -m "$MSG"
 }
 
-gitCommitAndPush()
+gitCommitAndPush() # <messasge>
+# commit changes using <message>, then push to origin.
 {
 	gitDoCommit	"$1"
 	gitDoPush
 }
 
-gitcandpfn() { gitCommitAndPush "$@"; }
+gitcandpfn() # <message>
+# commit changes using <message>, then push to origin.
+{ 
+	gitCommitAndPush "$@"; 
+}
 
 ### END CONTENT
 fi

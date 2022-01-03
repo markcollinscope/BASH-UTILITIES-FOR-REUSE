@@ -77,7 +77,8 @@ getMapValue()
 	echo "${_D[$(_createRealKey $MAPNAME $*)]}"
 }
 
-mapKeys() # list all map keys for $1 (in mangled internal format)
+mapKeys() 
+# list all map keys for $1 (in mangled internal format)
 {
 	local MAPNAME=$1; chkarg MAPNAME;
 
@@ -89,7 +90,8 @@ mapKeys() # list all map keys for $1 (in mangled internal format)
 	done
 }
 
-mapKeyValues() # list all map values for $1 (keys shown in mangled internal format)
+mapKeyValues() 
+# list all map values for $1 (keys shown in mangled internal format)
 {
 	MAPNAME=$1; chkarg MAPNAME;
 

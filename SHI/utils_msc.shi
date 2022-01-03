@@ -134,12 +134,12 @@ explode() # explode "ABCDE" => A B C D E
 
 printbetween() # START,END,FILE # print lines between regexps START and END (inclusive) in FILE.
 {
-	eval $(boolopt -n _NUMBERIC "$@");
+	eval $(boolopt -n _NUMERIC "$@");
 	setvar START "$1"
 	setvar END "$2"
 	setvar FILE "$3"
 
-	if ! $_NUMBERIC; then
+	if ! $_NUMERIC; then
     	if ! grep $START.*$END $FILE; then
         	sed -n "/$START/,/$END/p" $FILE
     	fi
