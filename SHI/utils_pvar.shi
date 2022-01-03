@@ -2,6 +2,12 @@
 
 . utils_globals.shi
 
+PVAR_SUMMARY= $(cat <<EOPVAR
+Provides services to enable bash scripts to store 'persistent' variables. Persisent meaning the variable retain their value 
+across different calls to the same, or another, script.
+EOPVAR
+);
+
 if ! alreadyIncluded UTILS_PVAR; then
 . utils_core.shi
 . utils_vb.shi
@@ -24,7 +30,7 @@ _pvarsuffix()
 	echo $__PVARSUFFIX
 }
 
-_setpvarsuffix()
+_pvar_setsuffix()
 {
 	setvar _SUFFIX "$1"
 	__PVARSUFFIX=$_SUFFIX;
@@ -50,13 +56,15 @@ _checkpvarisdeclared()
 	fi
 }
 
-pvarcontext()
+pvar_context() # <context-name> - the context (or namespace) to be used for storing subsequent pvars.
+# Call this function IF you do not want to use the default context (namespace) - which is the calling bash script name.
 {
 	if null "$1"; then errfnecho -s "no context supplied"; exirerr -k; fi
-	_setpvarsuffix ".$1"
+	_pvar_setsuffix ".$1"
 }
 
-declarepvar()
+pvar_declare() # <pvar-name> <pvar-init-value>
+# pvars must be declared. <pvar-name> will be intitialised to <pvar-init-value> which must be supplied (non null).
 {
 	setvar __PVAR_NAME "$1"
 	setvar __PVAR_VALUE "$2"
@@ -67,7 +75,8 @@ declarepvar()
 	fi
 }
 
-setpvar()
+pvar_set() # <pvar-name> <value>
+# set the pvar <pvar-name> to the given <value>
 {
 	setvar __PVAR_NAME "$1"; shift;
 	setvar PVAR_VALUE "$@"
@@ -78,7 +87,8 @@ setpvar()
 	echo "$PVAR_VALUE" > $FILE
 }
 
-getpvar()
+pvar_get() # <pvar-name>
+# returns (via echo) the value of <pvar-name> - if any.
 {
 	setvar __PVAR_NAME $1;
 	_checkpvarisdeclared $__PVAR_NAME;
@@ -92,8 +102,8 @@ getpvar()
 	echo $PVAR_VALUE
 }
 
-clearpvar()
-# not a pvar delcaration check. used to 'make sure' pvar doesn't already have a value.
+pvar_clear() # <pvar-name>
+# 'make sure' <pvar-name> doesn't already have a value.
 {
 	setvar __PVAR_NAME $1;
 
@@ -101,19 +111,22 @@ clearpvar()
 	rm -f $FILE;
 }
 
-# TBD: see try.shi -- this needs to be merged with pvardefault ...
-pvarasdefault() # pvar, value - if 'value' set, return it; if not, return value stored in 'pvar'
+pvar_default() # <pvar-name> [<value>] 
+# if 'value' set, return it (and store it in <pvar-name>; if not, return the value of <pvar-name>
 {
 	setvar _PVARTOUSE "$1"
 	local VALUETOUSE="$2";
 
 	if null "$VALUETOUSE"; then
-		VALUETOUSE=$(getpvar $_PVARTOUSE);
+		VALUETOUSE=$(pvar_get $_PVARTOUSE);
+	else
+		pvar_set $_PVARTOUSE $VALUETOUSE;
 	fi
 	echo $VALUETOUSE
 }
 
-rmpvarcontext()
+pvar_rmcontext()
+# deletes all variables in the current context (namespace).
 {
 	TMP=$(tmpFile)
 	ensuredirexists $TMP
@@ -126,7 +139,8 @@ rmpvarcontext()
 	)
 }
 
-rmpvardir()
+pvar_rmdir()
+# moves the pvar storage area to a TMP location.
 {
 	TMP=$(tmpFile)
 	ensuredirexists $TMP
@@ -135,21 +149,21 @@ rmpvardir()
 }
 
 if test "$1" = "--testpvar"; then
-	declarepvar _HELLO	"WORLD"
-	setpvar _HELLO "this is a pvar value";
-	VAL=$(getpvar _HELLO)
+	pvar_declare _HELLO	"WORLD"
+	pvar_set _HELLO "this is a pvar value";
+	VAL=$(pvar_get _HELLO)
 	echo RESULT1: $VAL
 
-	setpvar _HELLO "this is a second value";
-	VAL=$(getpvar _HELLO)
+	pvar_set _HELLO "this is a second value";
+	VAL=$(pvar_get _HELLO)
 	echo RESULT2 $VAL
 
-	declarepvar _GOODBYE 'pvar'
-	VAL=$(getpvar _GOODBYE)
+	pvar_declare _GOODBYE 'pvar'
+	VAL=$(pvar_get _GOODBYE)
 
-	clearpvar HELLO
-	declarepvar HELLO "THIS IS THIRD VALUE>"
-	VAL=$(getpvar _HELLO)
+	pvar_clear HELLO
+	pvar_declare HELLO "THIS IS THIRD VALUE>"
+	VAL=$(pvar_get _HELLO)
 	echo RESULT3: $VAL
 fi
 
