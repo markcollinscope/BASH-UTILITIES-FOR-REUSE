@@ -9,7 +9,8 @@ if ! alreadyIncluded UTILS_FD; then
 # checkxxx - check something, exit with error if there's a problem.
 # ensurexxx - check if something is done, if not, do it.
 
-ensuredeleted() 
+ensuredeleted() # <file/dir name>
+# if it exists, delete the <file/dir> given. otherwise do nothing.
 {
 	local FILE_OR_DIR=$1; chkarg FILE_OR_DIR;
 	
@@ -19,7 +20,8 @@ ensuredeleted()
 	fi
 }
 
-checkfileexists()
+checkfileexists() # <file>
+# check if <file> exists - exit with error if not.
 {
 	local FILE=$1; chkarg FILE;
 	local MSG="($2)"
@@ -31,7 +33,8 @@ checkfileexists()
 	fi
 }
 
-checkdirexists()
+checkdirexists() # <dir>
+# check if <dir> exists - exit with error if not.
 {
 	DIR="$1"; chkarg DIR;
 
@@ -48,7 +51,8 @@ checkdirexists()
 	return 0;
 }
 
-ensuredirexists()
+ensuredirexists() # <dir>
+# if <dir> does not already exist, create it.
 {
 	DIR="$1"; chkarg DIR; 
 
@@ -64,24 +68,27 @@ ensuredirexists()
 	fi
 }
 
-fdmatch() # is there a matching file or dir for shell glob pattern.
+fdmatch() # <shell glob pattern>
+# is there a matching file or dir for shell glob pattern.
 {
 	stat -t $1 > /dev/null 2>&1
 }
 
-tmpFile()	# [ <num> ] - number of characters in filename suffix - default 5.
+tmpFile() # [ <num> ] 
+# generate a tmp file name with <num> unique charactors in it. Defaul 5.
 {
 	local LEN="$1"
 	if null "$LEN"; then LEN=5; fi
 
-	PREFIX="UTILS_FD"
+	PREFIX=$(script)
 	
 	local TMP="/tmp/$PREFIX.$(randomString $LEN)"
 	echo $TMP
 }
 
 
-fileecho() # [--rm] <message> <file> [...<file>] - (write msg to file(s), clear file first if '--rm')
+fileecho() # [--rm] <message> <file> [...<file>] 
+# (write <message> to multiple files. clear files first if '--rm')
 {
 	local CLEAR_FILE_BEFORE_NEW_WRITE=false
 	if test "$1" = "--rm"; then CLEAR_FILE_BEFORE_NEW_WRITE=true; shift; fi
@@ -98,7 +105,8 @@ fileecho() # [--rm] <message> <file> [...<file>] - (write msg to file(s), clear 
 	done
 }
 
-findFile() # -d <dir> or -h (home directory);
+findFile() # [ -d <dir> ] [ -h ] <file>
+# downwards recursive search for file (inc. part name). start in cwd unless -d: use <dir> -h: use $HOME
 {
 	FLAG=$1
 	DIR=.; 
@@ -112,9 +120,15 @@ findFile() # -d <dir> or -h (home directory);
 
 	find $DIR -name $FILE -print -quit 2>/dev/null
 }
-findfile() { findFile $*; }
 
-backupFile()
+findfile() # [ -d <dir> ] [ -h ] <file>
+# downwards recursive search for file (inc. part name). start in cwd unless -d: use <dir> -h: use $HOME
+{ 
+	findFile $*; 
+}
+
+backupFile() # <file>
+# make a backup <to UTS_BACKUPDIR> of <file> nb: can be a dir.
 {
 	FILE=$1; chkarg FILE;
 
@@ -126,12 +140,18 @@ backupFile()
 		cp -r $FILE $BACKUPFILE;
 	fi
 }
-backupDir() { backupFile $*; }
 
-getPath() # [-h] - under HOME dir only
+backupDir() # <dir>
+# make a backup <to UTS_BACKUPDIR> of <dir> nb: can be a file.
+{ 
+	backupFile $*; 
+}
+
+getPath() # [-h] 
+# return space seperated list of all dirs (full path name) on $PATH; -h: only those under $HOME
 {
 	local HOMEONLY=false;
-	if test "$1" = "-h"; then HOMEONLY=true;fi
+	if test "$1" = "-h"; then HOMEONLY=true; shift; fi
 
 	TFILE1=$(tmpFile)
 	TFILE2=$(tmpFile)
@@ -153,7 +173,8 @@ getPath() # [-h] - under HOME dir only
 	cat $TFILE2
 }
 
-mkfindor() # make a find 'or expression' with many filename patterns ("$@").
+mkfindor() # <args...>
+# make a find 'or expression' with many filename patterns ("$@").
 {
 	setvar PATT $1
 	shift;
@@ -167,6 +188,7 @@ mkfindor() # make a find 'or expression' with many filename patterns ("$@").
 	echo "$RETVAL"
 }
 
+# DOCCO HERE.
 xfinddirs() # ([-i]: include current dir) - find non excluded dirs below current.
 {
 	if test "$1" = "-i"; then
