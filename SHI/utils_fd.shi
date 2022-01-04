@@ -2,6 +2,12 @@
 
 . utils_core.shi
 
+FD_SUMMARY=$(cat << EO_FD_SUMMARY
+Utilities for file and directory management. Find directories and files, check they exist, find directories not in the 'excluded' 
+list (UTS_XCLUDE: $UTS_XCLUDE).
+EO_FD_SUMMARY
+);
+
 if ! alreadyIncluded UTILS_FD; then
 
 ### START CONTENT
