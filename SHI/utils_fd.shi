@@ -75,13 +75,13 @@ ensuredirexists() # <dir>
 }
 
 fdmatch() # <shell glob pattern>
-# is there a matching file or dir for shell glob pattern.
+# is there a matching file or dir for shell glob pattern given? return true/false (0/non-0)
 {
 	stat -t $1 > /dev/null 2>&1
 }
 
 tmpFile() # [ <num> ] 
-# generate a tmp file name with <num> unique charactors in it. Defaul 5.
+# generate a tmp file name with <num> unique charactors in it. Default 5.
 {
 	local LEN="$1"
 	if null "$LEN"; then LEN=5; fi
@@ -133,7 +133,7 @@ findfile() # [ -d <dir> ] [ -h ] <file>
 	findFile $*; 
 }
 
-backupFile() # <file>
+backupFile() # <file/dir>
 # make a backup <to UTS_BACKUPDIR> of <file> nb: can be a dir.
 {
 	FILE=$1; chkarg FILE;
@@ -179,8 +179,9 @@ getPath() # [-h]
 	cat $TFILE2
 }
 
-mkfindor() # <args...>
+mkfindor() # <...args>
 # make a find 'or expression' with many filename patterns ("$@").
+# e.g. 'mkfindor *,sh *.shi' echos => '-name *.sh -o -name *.shi'
 {
 	setvar PATT $1
 	shift;

@@ -22,8 +22,8 @@ gitroot()
 }
 
 gitrootns() 
-# as per gitroot - with slashes [/usr/include]  - replaced with _ as per: [_use_include]
-# enables git root dir to be used as an identifieri or filename.
+# as per gitroot - without slashes e.g. [/usr/include]  - replaced with _ giving: [_use_include]
+# enables git root dir to be used as an identifier or filename.
 {
 	gitroot | sed 's?/?_?g'
 }

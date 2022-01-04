@@ -26,8 +26,8 @@ So to override defaults, simply define (e.g. UTS_PVAR) a new value *before* incl
 EOSUMMARY
 );
 
+###
 export UTS_SCRIPTDIR=${UTS_SCRIPTDIR:-"$HOME/GIT/scripts"};	# ROOT location of scripts under git control.
-
 export UTS_PVARDIR=${UTS_PVARDIR:-"$HOME/.PVAR/"};		# used for storage of pvars (see utils_pvar.shi). nb: trailing '/'
 export UTS_LOGDIR=${UTS_LOGDIR:-"$HOME/.LOGS"}			# place to store log files.
 export UTS_BACKUPDIR=${UTS_BACKUPDIR:-"$HOME/.BACKUP"}	# place to copy for backup.
@@ -45,6 +45,7 @@ ${UTS_GREPEXCLUDEDIRS:-"node_modules|Binary|sublime|SCRAP|SCRAPS|DVBinspector-1.
 getGrepExcludes() 	{ echo $UTS_GREPEXCLUDEDIRS; }; export -f getGrepExcludes; 	# get global search excludes.
 getGlobLogDir() 	{ echo $UTS_LOGDIR; }; export -f getGlobLogDir; 			# get dir in which to put log files.
 getGlobBackupDir() 	{ echo $UTS_BACKUPDIR; }; export -f getGlobBackupDir;  		# get dir to copy to for backups, etc.
+###
 
 debugutils() { if ! test -z "$DEBUGUTILS"; then >&2 echo $*; fi } # UTILSONLY - for debugging (as the developer) these utils.
 
