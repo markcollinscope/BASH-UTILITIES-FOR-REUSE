@@ -25,6 +25,12 @@ Usage()
 	exiterr 1
 }
 
+EXACTMATCH=false;
+SHORTFORMAT=false;
+LONGFORMAT=false;
+PRINTFILENAMEONLY=false;
+FNEND='()'
+
 eval $(boolopt --rem "search for an exact match only" -x EXACTMATCH "$@")
 eval $(boolopt --rem "print matching file name only" -n PRINTFILENAMEONLY "$@")
 eval $(valopt  --rem "specify files (by glob pattern) to match (ls style - e.g. *.sh)" -m FILEPATTERN "$@")
@@ -32,12 +38,6 @@ eval $(boolopt --rem "use shorter output format (prints fn upto first blank line
 eval $(boolopt --rem "use longer detailed output format" -l LONGFORMAT "$@")
 eval $(boolopt --rem "use bash native (set) output format" -d USEBASHNATIVE "$@")
 errifopt "$@";
-
-EXACTMATCH=false;
-SHORTFORMAT=false;
-LONGFORMAT=false;
-PRINTFILENAMEONLY=false;
-FNEND='()'
 
 searchForMatch()
 {
@@ -68,16 +68,21 @@ searchForMatch()
 	vbvar FUNCT
 
 	for match in $MATCHES; do
+		vbvar match
+
 		if $LONGFORMAT; then
-			printbetween $FUNCT '}' $match;
+			vbfnecho 'Long Option Chosen'
+			printbetween $FUNCT '^}$' $match;
 
 		elif $SHORTFORMAT; then
+			vbfnecho 'Short Option Chosen'
 			printbetween $FUNCT '{' $match | grep -v '^{';
 
 		elif $PRINTFILENAMEONLY; then
+			vbfnecho 'Name Only Option Chosen'
 			echo $match; 
-
 		else
+			vbfnecho 'No Option Chosen'
 			xgrep $FUNCT $match;
 		fi
 	done
