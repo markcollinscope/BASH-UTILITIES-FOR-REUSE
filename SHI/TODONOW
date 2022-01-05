@@ -4,8 +4,8 @@ utils_git.shi /
 utils_globals.shi /
 utils_map.shi /
 utils_msc.shi /
-utils_opts.shi
+utils_opts.shi /
 utils_pvar.shi /
-utils.shi
+utils.shi /
 utils_uio.shi
-utils_vb.shi
+utils_vb.shi /

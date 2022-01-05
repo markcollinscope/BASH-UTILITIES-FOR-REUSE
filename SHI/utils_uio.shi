@@ -8,17 +8,44 @@ FFLAG=${UTS_FFLAG:-"--ff"}	# can override from environment.
 UTS_FORCE=false;	# override manual intervention requests
 UTS_FORCEFLAG="$FFLAG";	# empty or FFLAG (pass onto subscripts - subscript $UTS_FORCEFLAG)
 
-setForce() 		{ export UTS_FORCE=true; export UTS_FORCEFLAG="$FFLAG"; }
-resetForce()	{ export UTS_FORCE=false; export UTS_FORCEFLAG=""; }
-getForce()		{ if $UTS_FORCE; then return 0; else return 1; fi; }
-force()			{ getForce; }
+###
+# The functions below (force related) set the 'force' flaghat override requests for user confirmation.
+# See Warning(), HitAnyKeyToContiue() etc.
+# Similar to 'rm -f xxx' for example.
+# By default '--ff' in a containing script with trigger the force flag to be set. The value '--ff' can be overridden.
+# See utils_globals.
+###
 
-checkIfForce() # check $1 - if it's the force flag (FFLAG) set force mode (setForce()).
+setForce() 		
+# set the force flag to true.
+{ 
+	export UTS_FORCE=true; export UTS_FORCEFLAG="$FFLAG"; 
+}
+resetForce()	
+# set the force flag to false.
+{ 
+	export UTS_FORCE=false; export UTS_FORCEFLAG=""; 
+}
+getForce()		
+# return TRUE if the force flag is set.
+{ 
+	if $UTS_FORCE; then return 0; else return 1; fi; 
+}
+
+force()			
+# return TRUE if the force flag is set.
+{ 
+	getForce; 
+}
+
+checkIfForce() # <arg> - deprecated - for back compatibility and internal utils use.
+# check if <arg> is $FFLAG- if it is the force flag will be set.
 {
 	if test "$1" = "$UTS_FORCEFLAG"; then setForce; return 0; else return 1; fi
 }
 
-hitAnyKeyToContinue() # [<message>] - print <message> and wait for key press (enter).
+hitAnyKeyToContinue() # [<message>] 
+# print <message> and wait for 'enter' key press.
 {
 	local MSG=$1
 
@@ -29,8 +56,10 @@ hitAnyKeyToContinue() # [<message>] - print <message> and wait for key press (en
 	read x
 }
 
-Warning() # [<message-to-show>] - show message - wait for yes/n response, exit on 'n'.
-# [-n] - do not exit on "no" reponse - default is to exit.
+Warning() # [<message>] 
+# show <message> - then wait for yes/n response, exit on 'n'.
+# [-n] - do not exit on "no" reponse - return false (1) instead.
+# <message> is optional. Default is 'Continue?'
 {
 	local EXITONNO=true; if test "$1" = "-n"; then EXITONNO=false; shift; fi
 	local OPTIONAL_MSG="$1";
@@ -61,6 +90,7 @@ Warning() # [<message-to-show>] - show message - wait for yes/n response, exit o
 	return $RETURN_VAL;
 }
 
+# Parse $1 of containing script - set force flag is value is $FFLAG (default --ff, but configurable).
 if ! $UTS_NOAUTOARGS; then
 	if checkIfForce "$1"; then shift; fi # NB: use --vb before --ff if necessary.
 fi

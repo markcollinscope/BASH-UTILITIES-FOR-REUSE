@@ -3,17 +3,27 @@
 . utils_globals.shi
 if ! alreadyIncluded UTILS_OPTS; then
 
+OPTS_SUMMARY=$(cat << EO_OPTS
+Utility functions to enable the automatic parsing of command line option flags (-x, --doit, etc) and their subsequent removal 
+from the command arguments to make processing easier (i.e. script -x A B C -y D E F would be reduced to script A B C D E F once options are processed.
+
+Options can appear in any position. Use of an optional --rem 'description ...' when specifying command line flag auto processing results in the 'description ...' being added to the Usage description in the containing script (without any further effort).
+EO_OPTS
+);
+
 . utils_core.shi
 . utils_msc.shi
 
-# functions to enable printing of 'autocomplete' command to be eval'd to setup cmd line autocomplete (bash autocomplete).
+## functions to enable printing of 'autocomplete' command to be eval'd to setup cmd line autocomplete (bash autocomplete).
+## nb: at present this is focused on git-autocompletion - e.g. optautocomplete "_git_customcommand() { _git_checkout; }" would set-up a
+## 'git customcommand' script to automatically present the same bash autocomplete options as 'git checkout'.
 
 __USEAUTOCOMPLETE=false;
-__AUTOCOMPLETEOPTION="--autocomplete"
+__AUTOCOMPLETEOPTION="--autocomplete" 
 
-# nb: at present this is focused on git-autocompletion - e.g. optautocomplete "_git_custo_command() { _git_checkout; } ..."
-
-optautocomplete() # if opt chosen, echo $1 back to be used to create an autocomplete option.
+optautocomplete() # <auto complete command>
+# e.g. a scripts could contain:
+# optautocomplete "_git_rmb() { _git_checkout; }; export _git_rmb" - see bash and git autocomplete for more details.
 {
 	setvar AC "$*"
 	if $__USEAUTOCOMPLETE; then
@@ -22,17 +32,18 @@ optautocomplete() # if opt chosen, echo $1 back to be used to create an autocomp
 	fi
 }
 
+# if autoargument processing (uts_globals) is turned on.
 if ! $UTS_NOAUTOARGS; then
+	# if the first argument to the script including this file is '--autocomplete@
 	if test "$1" = "$__AUTOCOMPLETEOPTION"; then  
+		# switch on auto complete for bash/git.
 		__USEAUTOCOMPLETE=true;
 		shift;
 	fi
 fi
 
-# to print usage information
-
+# for use in building up options description, as part of Usage call.
 __USAGE_FILE=$(tmpFile);
-
 rm -f $__USAGE_FILE;
 
 __DOCFLAG="--rem"
@@ -80,7 +91,14 @@ getOptUsage() # [-n]
 	fi
 }
 
-binopt()
+binopt() # [ --rem <documentation...> ] <flag> <bash var> <default-value> <value-if-flag-given> "$@"
+# called in the form:
+# eval $(boolopt --rem <documentation...' -a AVARIABLE 99 101 "$@")
+# where: 	<flag> (-a) is the flag to be processed on the including script.
+#			<bash-var> (AVARIABLE) - the bash var to set set to either <default-value> or <other-value>
+#			<defaul-value> - <bash-var> is set to this value if <flag> is not present.
+#			<value-if-flag-given> - <bash-var> is set to this value if <flag> is present
+# --rem is optional. If given <documentation...> will be added to Usage of containing script.
 {
 	eval $(_processRem "$@");
 
@@ -106,7 +124,14 @@ binopt()
 	echo "set -- $ARGS; $EVAL"
 }
 
-boolopt() # FLAG [e.g -x]  VAR [e.g. X_A_BASHVAR]
+boolopt() # [ --rem <documentation...> ] <flag> <bash var> "$@"
+# called in the form:
+# eval $(boolopt --rem <documentation...' -a AVARIABLE "$@"
+# where: 	<flag> (-a) is the flag to be processed on the including script.
+#			<bash-var> (AVARIABLE) - the bash var to set set to either 'true' or 'false'
+# --rem is optional. If given <documentation...> will be added to Usage of containing script.
+# 
+# AVARIABLE is set to true if <flag> is present on the script call command line.
 {
 	eval $(_processRem "$@");
 	
@@ -114,11 +139,16 @@ boolopt() # FLAG [e.g -x]  VAR [e.g. X_A_BASHVAR]
 	setvar VAR "$2"
 	shift 2;
 
-
 	binopt "$FLAG" "$VAR" false true "$@"
 }
 
-valopt() 	# e.g. script --file afilename ; use 'afilename' if given with --file option.
+valopt() # [ --rem <documentation...> ] <flag> <bash var> <value> "$@"
+# called in the form:
+# eval $(valopt --rem <documentation...' -a AVARIABLE hello "$@")
+# where: 	<flag> (-a) is the flag to be processed on the including script.
+#			<bash-var> (AVARIABLE) - the bash var to set set to either <default-value> or <other-value>
+#			<value> - the value AVARIABLE is set to if <flag> is present. AVARIABLE will undefined if not.
+# --rem is optional. If given <documentation...> will be added to Usage of containing script.
 {
 
 	eval $(_processRem "$@");
@@ -143,7 +173,8 @@ valopt() 	# e.g. script --file afilename ; use 'afilename' if given with --file 
 	echo "set -- $ARGS; $EVAL "
 }
 
-errifopt() # exit with error if there are options (-*) in $@; autoparse --help or -? to show usage/help.
+errifopt() # "$@"
+# exit with error if there are options (-*) present (or left after boolopt, valopt processing)  in "$@" 
 {
 	vbfnecho;
 	if ! $UTS_NOAUTOARGS; then # first arg only.
@@ -165,7 +196,9 @@ errifopt() # exit with error if there are options (-*) in $@; autoparse --help o
 	done
 }
 
-Usage() # print $USAGE and also print option despcripts defined using boolopt, valopt, etc.
+Usage() # no args. 
+# print $USAGE and also print option documentation defined using boolopt, valopt (with --rem flag), etc.
+# nb: redefinition of Usage defined in _core utils.
 {
 	OPTIONS="$(getOptUsage)"
 	>&2 cat<<<$USAGE
@@ -173,8 +206,10 @@ Usage() # print $USAGE and also print option despcripts defined using boolopt, v
 }
 
 _UTS_MAXARGS=9999 # arbitrary but large - upper limit
-chkargcount() # check argument ($3+) count is between $1-lower, $2-upper inclusive - otherwise error exit.
-# [-l] - lower limit only
+
+chkargcount() # [-l] <lower-limit> <upper-limit> "$@"
+# check argument count in "$@" is between <lower-limit> and <upper-limit> inclusive - if not,  error with exit.
+# [-l] - lower limit only required, no upper limit.
 {
 	LOWERONLY=false; 
 	if test "$1" = "-l"; then 

@@ -5,28 +5,65 @@
 . utils_core.shi
 if ! alreadyIncluded UTILS_VB; then 
 
-
-### START CONTENT
+## START CONTENT
 
 VBFLAG=${UTS_VBFLAG:-'--vb'}	# can override from environment.
 
-setVerbose() 	{ export UTS_VERBOSE=true; export UTS_VERBOSEFLAG="$VBFLAG"; }	# preferred way to set UTS_VERBOSE=true;
-getVerbose()	{ if $UTS_VERBOSE; then return 0; else return 1; fi; }
-verbose()		{ getVerbose; }
-resetVerbose() 	{ export UTS_VERBOSE=false; export UTS_VERBOSEFLAG=""; }	# preferred way to set UTS_VERBOSE=false;
+setVerbose() 
+# set the verbose flag to TRUE 
+# nb: used by vbecho and similar functions
+{ 
+	export UTS_VERBOSE=true; 
+	export UTS_VERBOSEFLAG="$VBFLAG"; 
+}	
+getVerbose()	
+# return true (0) if verbose flag set to on.
+{ 
+	if $UTS_VERBOSE; then return 0; else return 1; fi; 
+}
+verbose()		
+# return true (0) if verbose flag set to on.
+{ 
+	getVerbose; 
+}
+
+resetVerbose() 	
+# set verbose flag to false.
+# nb: used by vbecho and similar functions
+{ 
+	export UTS_VERBOSE=false; export UTS_VERBOSEFLAG=""; 
+}	
 resetVerbose;
 
-vbvar() # for debug -  print variable - BASHVAR - no $required.
+vbvar() # <bash-var> - nb: no '$' needed or permitted.
+# e.g. vbvar MY_VAR
+# for debug -  print name and value of bash variable - <bash-var>
 {
 	local BASHVAR=$1; chkarg BASHVAR;
 	vbecho "$(basename $0) [${FUNCNAME[1]}()]: $BASHVAR: <${!BASHVAR}>";
 }
 
-vbecho()	{ if $UTS_VERBOSE; then setcol $YELLOW; (>&2 echo $*); setcolnorm; fi }
-vbfnecho()	{ vbecho "$(basename $0) [${FUNCNAME[1]}()]: $*"; }
-vbsleep() { if $UTS_VERBOSE; then sleep $*; fi }
+vbecho() # <echo style string>
+# print <echo style string> if $(verbose) - verbose output flag - is true.
+{ 
+	if $UTS_VERBOSE; then setcol $YELLOW; (>&2 echo $*); setcolnorm; fi 
+}
+vbfnecho()# <echo style string>
+# print <echo style string> if $(verbose) - verbose output flag - is true.
+# precede <echo style string> with function name of calling function.
+{ 
+	vbecho "$(basename $0) [${FUNCNAME[1]}()]: $*"; 
+}
 
-checkIfVerbose() # quick parse for $VBFLAG flag as $1.
+vbsleep() # <seconds>
+# sleep for <seconds> if $(verbose) (verbose output flag) is true.
+{ 
+	if $UTS_VERBOSE; then sleep $*; fi 
+}
+
+checkIfVerbose() # <arg> - deprecated 
+# now autoparses - for backwards compatibility and internal utils use only.
+# quick parse to set if <arg> is $VBFLAG flag (by default '--vb', but can be reset).
 {
 	if test "$1" = "$VBFLAG"; then
 		setVerbose;
@@ -35,11 +72,11 @@ checkIfVerbose() # quick parse for $VBFLAG flag as $1.
 	return 1;
 }
 
-# autoparse verbose flag.
-
+# do autoparsing of verbose flag.
 if ! $UTS_NOAUTOARGS; then
 	if checkIfVerbose $1; then shift; fi
 fi
+
 # nb - re above: parses $1 (only) and if same value as $VBFLAG, sets verbose,
 # also removes VBFLAG from the including script's command line args - so is 
 # transparent to that script.
