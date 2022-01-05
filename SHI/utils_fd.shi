@@ -4,7 +4,9 @@
 
 FD_SUMMARY=$(cat << EO_FD_SUMMARY
 Utilities for file and directory management. Find directories and files, check they exist, find directories not in the 'excluded' 
-list (UTS_XCLUDE: $UTS_XCLUDE).
+list (UTS_XCLUDE). nb: the exclusion list (format: "grep-pattern1|grep-pattern2|...") is removed using a 
+simple 'grep -v' removal search - be sure your exclusion pattern does not contain matches for useful results (possible part file names,
+directory names, etc)
 EO_FD_SUMMARY
 );
 
@@ -195,8 +197,9 @@ mkfindor() # <...args>
 	echo "$RETVAL"
 }
 
-# DOCCO HERE.
-xfinddirs() # ([-i]: include current dir) - find non excluded dirs below current.
+xfinddirs() # [-i]
+# find non excluded dirs below current.
+# -i include current dir 
 {
 	if test "$1" = "-i"; then
 		vbecho "-i"
@@ -207,7 +210,9 @@ xfinddirs() # ([-i]: include current dir) - find non excluded dirs below current
 	fi
 }
 
-xforeachdir() # run a command in each xfinddirs directory.
+xforeachdir() 
+# run a command in each xfinddirs() directory.
+# see also xfinddirs
 {
 	setvar CMD "$*"
 
@@ -220,12 +225,16 @@ xforeachdir() # run a command in each xfinddirs directory.
 	done
 }
 
-xfindfiles() # find files below current dir that match the glob pattern (ls style) in $@.
+xfindfiles() # <...args> ("$@")
+# find files below current dir that match the glob pattern(s) (ls style) in <args>.
+# e.g. xfindfiles *.ts *.js
 {
 	xfind . -type f $(mkfindor "$@")
 }
 
-xfindfilesgrep() # -s: show grep results; list files containing a pattern - no grep output.
+xfindfilesgrep() # <grep arg>
+# return (list, echo)  files containing a pattern with a recursive dir descent search 
+# -s: show grep results; by default: no grep output is shown.
 {
 	local SHOW=false; if test "$1" = "-s"; then SHOW=true; shift; fi
 
@@ -242,7 +251,8 @@ xfindfilesgrep() # -s: show grep results; list files containing a pattern - no g
 	done
 }
 
-xfindcwd() # list files (applying exclusions) in current dir.
+xfindcwd() 
+# list files (applying exclusions) in current dir.
 {
 	for i in $(xfind . -maxdepth 1 | sed 's?\./??g' | grep -v '^\.'); do
 		if test -f $i; then
