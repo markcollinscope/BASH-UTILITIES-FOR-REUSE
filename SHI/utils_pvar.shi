@@ -103,7 +103,7 @@ pvar_get() # <pvar-name>
 }
 
 pvar_clear() # <pvar-name>
-# 'make sure' <pvar-name> doesn't already have a value.
+# 'make sure' <pvar-name> doesn't already have a value - clear it.
 {
 	setvar __PVAR_NAME $1;
 
@@ -112,7 +112,7 @@ pvar_clear() # <pvar-name>
 }
 
 pvar_default() # <pvar-name> [<value>] 
-# if 'value' set, return it (and store it in <pvar-name>; if not, return the value of <pvar-name>
+# if <value> set, return it (and store it in <pvar-name>); if not, return the value of <pvar-name>
 {
 	setvar _PVARTOUSE "$1"
 	local VALUETOUSE="$2";
@@ -140,7 +140,7 @@ pvar_rmcontext()
 }
 
 pvar_rmdir()
-# moves the pvar storage area to a TMP location.
+# moves the pvar storage area (i.e. all pvars, all contexts) to a tmp-dir location (/tmp/...).
 {
 	TMP=$(tmpFile)
 	ensuredirexists $TMP

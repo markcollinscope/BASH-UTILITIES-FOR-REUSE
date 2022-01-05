@@ -111,8 +111,8 @@ roundDown() # <value>
 }
 
 
-getDirs() 
-# echo full path name of dirs, from cwd, recursive, exclude unwanted. [-x]: exclude cwd. TODO
+getDirs() # [-x]: exclude cwd.
+# echo full path name of dirs, from cwd, recursive, exclude unwanted. 
 {
 	eval $(boolopt -x _EXCLUDE "$@");
 	DIR="$(pwd)/"; 
@@ -122,17 +122,19 @@ getDirs()
 	find "$(pwd)/" -type d -print $_FILTER | grep -v -E "$(getGrepExcludes)";
 }
 
-nds() # no double slash - e.g. "nds echo $PATH" - echo PATH with // => /. # TODO - Deprecate...
+nds() # no double slash - e.g. "nds echo $PATH" - echo PATH with // => /.. 
 {
 	ne eval "$@" | sed 's?\/\/?/?g';
 }
 
-explode() # explode "ABCDE" => A B C D E
+explode() # <string>
+# explode "ABCDE" => A B C D E
 {
 	echo $1 | grep -o .
 }
 
-printbetween() # START,END,FILE # print lines between regexps START and END (inclusive) in FILE.
+printbetween() # <start> <end> <file>
+# print lines between regexps <start> and <end> (inclusive) in <file>.
 {
 	eval $(boolopt -n _NUMERIC "$@");
 	setvar START "$1"
@@ -200,7 +202,7 @@ echoPadded() # <padlen> <...text>
 	done
 }
 
-errechoPadded()
+errechoPadded() # <padlen> <...text>
 # errecho <text> (to stderr, &2) in standard manner. If less than <padlen> chars used, pad out with spaces.
 {
 	>&2 echoPadded $*
