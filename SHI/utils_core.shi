@@ -53,7 +53,7 @@ isDir() # <name>
 isfile() # <name>
 # return true (0)  if <name> is a file, false (0) otherwise.
 { 
-	f test -f "$1"; then return 0; else return 1; fi 
+	if test -f "$1"; then return 0; else return 1; fi 
 }; 
 
 isFile() 

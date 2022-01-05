@@ -2,7 +2,7 @@ utils_core.shi /
 utils_fd.shi 		(Part)
 utils_git.shi /
 utils_globals.shi
-utils_map.shi
+utils_map.shi /
 utils_msc.shi
 utils_opts.shi
 utils_pvar.shi

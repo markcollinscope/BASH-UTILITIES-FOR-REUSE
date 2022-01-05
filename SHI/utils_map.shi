@@ -1,16 +1,22 @@
 #!/bin/bash
 
-# NB: This works but has limitations, in particular it is possible to get errors
-# if a Map name is similar (pattern match wise) to a Key name.
-# Watch for updates. Contributions welcome.
+# nb: This works but has limitations, in particular it is possible to get errors
+# if a Map name is similar (pattern match wise) to a Key name. BUT: this is only in the 
+# functions listed as <mainly for debug>. Watch for updates. Basic get/set functions work fine.
+# Contributions welcome # - eg. iterate over keys in multi-dimensional manner.
 
 . utils_core.shi
 if ! alreadyIncluded UTILS_MAP; then
 
-### START CONTENT
+MAP_SUMMARY=$(cat << EOMAP
+Utilities to provide multi-dimentional hash-map style functionality to bash, enabling the addition or extraction of values from a named MAP given any number of keys (one key per dimension).
+EOMAP
+);
 
-### Simulate Multi Dimentional HASH/MAP/ASSOCIATIVE ARRAY.
-### Todo: fully test and perhaps mv 'value' as last arg...
+## START CONTENT
+
+## Simulate Multi Dimentional HASH/MAP/ASSOCIATIVE ARRAY.
+## Todo: fully test and perhaps mv 'value' as last arg...
 
 # e.g. 
 # - name is name of multi-d map.
@@ -59,7 +65,8 @@ _allMapKeyValues()
 
 ## === 'exported' functions - do not use the above directly, they may change. ====
 
-setMapValue()
+setMapValue() # <map-name> <value> <key 1> [<key 2> ... <key N>]
+# insert <value> into the given map by <map-name> enabling it to be recovered by providing the same set of keys as given here.
 {
 	local MAPNAME=$1; chkarg MAPNAME; 	# not mangled.
 	local VAL=$2; chkarg VAL; 			# never mangled.
@@ -69,7 +76,7 @@ setMapValue()
 	_D[$(_createRealKey $MAPNAME $*)]=$VAL
 }
 
-getMapValue()
+getMapValue() # <map-name> <key 1> [<key 2> ... <key N>] returns <value> by echo.
 {
 	local MAPNAME=$1; chkarg MAPNAME;	# not mangled.
 
@@ -77,8 +84,8 @@ getMapValue()
 	echo "${_D[$(_createRealKey $MAPNAME $*)]}"
 }
 
-mapKeys() 
-# list all map keys for $1 (in mangled internal format)
+mapKeys() # <map> (for debug, mainly) returns (by echo) list of all keys in internal format
+# list all map keys for <map> (in mangled internal format)
 {
 	local MAPNAME=$1; chkarg MAPNAME;
 
@@ -90,8 +97,8 @@ mapKeys()
 	done
 }
 
-mapKeyValues() 
-# list all map values for $1 (keys shown in mangled internal format)
+mapKeyValues()  # <map<> (for debug, mainly) return: (by echo) key value pairs.
+# list all map values for <map> (keys shown in mangled internal format)
 {
 	MAPNAME=$1; chkarg MAPNAME;
 

@@ -22,7 +22,7 @@ if ! alreadyIncluded UTILS_GLOBALS; then
 
 GLOB_SUMMARY=$(cat <<EOSUMMARY
 Global variables used across utilities functions. Preset values will take precedence over defaults, which are provided herein.
-So to override defaults, simply define (e.g. UTS_PVAR) a new value *before* including this (or any) utility function definition file (.shi).
+So to override defaults, simply define (e.g. UTS_PVARDIR) a new value *before* including this (or any) utility function definition file (.shi).
 EOSUMMARY
 );
 
