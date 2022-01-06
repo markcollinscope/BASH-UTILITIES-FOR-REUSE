@@ -2,10 +2,10 @@
 
 . utils_core.shi
 
-GIT_SUMMARY=$(cat <<EOGITSUMMARY
+GIT_SUMMARY=$(cat << END_GIT
 Utitlites to assist in the automation of git related activities. In particular allows detection of the 'current' git repo.
 e.g. get currrent git root dir, is this a git repo? what's the current branch called ... etc.
-EOGITSUMMARY
+END_GIT
 );
 
 if ! alreadyIncluded UTILS_GIT; then

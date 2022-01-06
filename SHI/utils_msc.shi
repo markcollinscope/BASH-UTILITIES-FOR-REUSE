@@ -6,14 +6,14 @@ if ! alreadyIncluded UTILS_MSC; then
 . utils_vb.shi
 . utils_fd.shi
 
-MSC_SUMMARY=$(cat << EO_MSC
+MSC_SUMMARY=$(cat << END_MSC
 Provides misc servces for thing like:
 * padded output
 * stripping whitespaces
 * counting arguments
 * checking a scripts software dependencies &
 * tarring up directories.
-EO_MSC
+END_MSC
 );
 
 softwareRequired() # <software-name> - e.g. cpp, tar, git ...

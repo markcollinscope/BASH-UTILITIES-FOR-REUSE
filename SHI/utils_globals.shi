@@ -20,10 +20,10 @@ fi
 if ! alreadyIncluded UTILS_GLOBALS; then
 # no indent.
 
-GLOB_SUMMARY=$(cat <<EOSUMMARY
+GLOB_SUMMARY=$(cat << END_GLOB
 Global variables used across utilities functions. Preset values will take precedence over defaults, which are provided herein.
 So to override defaults, simply define (e.g. UTS_PVARDIR) a new value *before* including this (or any) utility function definition file (.shi).
-EOSUMMARY
+END_GLOB
 );
 
 ###
