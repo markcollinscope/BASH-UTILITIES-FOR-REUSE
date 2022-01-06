@@ -2,22 +2,18 @@
 # Core functions used in all other *utils*.
 
 # the following file contain global values used across utils e.g. git dir, scripts dirs, log dirs ... one time include if present.
-_UTILS_GLOB=$(which utils_globals.shi)
-if test -f "$_UTILS_GLOB"; then
-. $_UTILS_GLOB;
-fi
+
+. utils_globals.shi
 
 if ! alreadyIncluded UTILS_CORE; then
 
 ### START CONTENT
 
 CORE_SUMMARY=$(cat <<END_CORE
-
 Core utility functions for bash. These functions are used across other utility functionas extensively. The level of functionality is not high level, more for convenience or readibility. e.g. 
 * 'script' - print the currently executing scripts base file name.
 * 'Usage' - print usage message (based on bash var USAGE) for currently running script.
 etc.
-
 END_CORE
 );
 
@@ -35,12 +31,14 @@ nostderr()
 
 null() # <...args>
 # if any args supplied return true (0), else return false (1); uses test -z
+# e.g. < if null "$@"; then ... fi >
 { 
 	if test -z "$*"; then return 0; else return 1; fi 
 }; 
 
 isdir() # <name>
 # return true (0)  if <name> is a directory, false (0) otherwise.
+# e.g. < if isdir "$NAME"; then ... fi >
 { 
 	if test -d "$1"; then return 0; else return 1; fi 
 }; 
@@ -50,8 +48,10 @@ isDir() # <name>
 { 	
 	isdir "$@"; 
 } 
+
 isfile() # <name>
 # return true (0)  if <name> is a file, false (0) otherwise.
+# e.g. < if isfile "$NAME"; then ... fi >
 { 
 	if test -f "$1"; then return 0; else return 1; fi 
 }; 
@@ -63,7 +63,7 @@ isFile()
 } 
 
 script() 
-# echo name (no path) of current bash script *file* name.
+# echo name (no path) of current (containing) bash script file.
 { 
 	echo $(basename $0); 
 }; 	
@@ -293,16 +293,16 @@ checkNotEmptyString() # <msg> [ <bash var name> ]
 
 xgrep() # <... standard 'grea' args>
 # call grep with args given, but exclude certain patterns from results 
-# see UTS_GREPEXCLUDEFILES - for defaults. 	Is configurable.
+# see UTS_EXCLUDE - for defaults. 	Is configurable.
 { 
-	grep "$@" | grep -v -E "$(getGrepExcludes)"; 
+	grep "$@" | grep -v -E "$(getExcludes)"; 
 }
 
 xfind() # <... standard find args>
 # call find with args given, but exclude certain patterns from results (e.g. 'node_modules')- 
-# see UTS_GREPEXCLUDEFILES - defaults set. Is configurable.
+# see UTS_EXCLUDE - defaults set. Is configurable.
 { 
-	find "$@" | grep -v -E "$(getGrepExcludes)"; 
+	find "$@" | grep -v -E "$(getExcludes)"; 
 }
 
 # END

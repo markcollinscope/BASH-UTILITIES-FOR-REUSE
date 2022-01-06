@@ -39,10 +39,10 @@ export UTS_SCRIPTTPL=${UTS_SCRIPTTPL:-"script.tpl"}		# template for 'new' script
 export UTS_SUNIT_TEST=${UTS_SUNIT_TEST:-"_stest"}		# string identifying a function as a unit test.
 
 # external (node_modules) directories to ignore/remove from script (recursive) searches, etc. (to remove irrelevent output)
-export UTS_GREPEXCLUDEDIRS=\
-${UTS_GREPEXCLUDEDIRS:-"node_modules|Binary|sublime|SCRAP|SCRAPS|DVBinspector-1.10.1|\.ssh|\.git|vendor|XDIR"}
+export UTS_EXCLUDE=\
+${UTS_EXCLUDE:-"node_modules|Binary|sublime|SCRAP|SCRAPS|DVBinspector-1.10.1|\.ssh|\.git|vendor|XDIR"}
 
-getGrepExcludes() 	{ echo $UTS_GREPEXCLUDEDIRS; }; export -f getGrepExcludes; 	# get global search excludes.
+getExcludes() 	{ echo $UTS_EXCLUDE; }; export -f getExcludes; 	# get global search excludes.
 getGlobLogDir() 	{ echo $UTS_LOGDIR; }; export -f getGlobLogDir; 			# get dir in which to put log files.
 getGlobBackupDir() 	{ echo $UTS_BACKUPDIR; }; export -f getGlobBackupDir;  		# get dir to copy to for backups, etc.
 ###

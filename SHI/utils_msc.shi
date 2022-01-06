@@ -119,7 +119,7 @@ getDirs() # [-x]: exclude cwd.
 
 	if $_EXCLUDE; then _FILTER="| grep -v -E ^$DIR$"; fi
 
-	find "$(pwd)/" -type d -print $_FILTER | grep -v -E "$(getGrepExcludes)";
+	find "$(pwd)/" -type d -print $_FILTER | grep -v -E "$(getExcludes)";
 }
 
 nds() # no double slash - e.g. "nds echo $PATH" - echo PATH with // => /.. 

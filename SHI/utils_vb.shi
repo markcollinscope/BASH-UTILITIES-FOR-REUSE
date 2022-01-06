@@ -2,8 +2,10 @@
 
 # utils to enable addtional (perhaps debug) information to be printed (to stderr) only when UTS_VERBOSE flag is set.
 
-. utils_core.shi
+. utils_globals.shi
+
 if ! alreadyIncluded UTILS_VB; then 
+. utils_core.shi
 
 ## START CONTENT
 
