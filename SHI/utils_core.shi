@@ -2,17 +2,16 @@
 # Core functions used in all other *utils*.
 
 # the following file contain global values used across utils e.g. git dir, scripts dirs, log dirs ... one time include if present.
-
 . utils_globals.shi
 
 if ! alreadyIncluded UTILS_CORE; then
-
-### START CONTENT
+### START CONTENT - no indent.
 
 CORE_SUMMARY=$(cat <<END_CORE
 Core utility functions for bash. These functions are used across other utility functionas extensively. The level of functionality is not high level, more for convenience or readibility. e.g. 
 * 'script' - print the currently executing scripts base file name.
 * 'Usage' - print usage message (based on bash var USAGE) for currently running script.
+* isdir, isfile (convenience / readibility), set colour of output (for echo, errecho), set cursor position... etc.
 etc.
 END_CORE
 );
@@ -30,13 +29,13 @@ nostderr()
 }
 
 null() # <...args>
-# if any args supplied return true (0), else return false (1); uses test -z
+# if any args are supplied return true (0), else return false (1); uses test -z
 # e.g. < if null "$@"; then ... fi >
 { 
 	if test -z "$*"; then return 0; else return 1; fi 
 }; 
 
-isdir() # <name>
+isdir() # <name>n
 # return true (0)  if <name> is a directory, false (0) otherwise.
 # e.g. < if isdir "$NAME"; then ... fi >
 { 
@@ -56,8 +55,8 @@ isfile() # <name>
 	if test -f "$1"; then return 0; else return 1; fi 
 }; 
 
-isFile() 
-# return true (0)  if <name> is a file, false (0) otherwise.
+isFile() # <name> 
+# return true (0)  if <name> is a file, false (0) otherwise  (dulicate of isfile).
 { 
 	isfile "$@"; 
 } 
@@ -69,7 +68,7 @@ script()
 }; 	
 
 scriptName() 
-# print base of current bash script *file* name.
+# print base of current bash script *file* name (duplicate function)
 { 
 	script; 
 };
@@ -102,7 +101,7 @@ _doscriptexit() # <code>
 }
 
 exitok()
-# exit with ok status (0). If in terminal (command line) mode - don't exit terminal shell - instaad print a message.
+# exit with ok status (0). If in terminal (command line) mode - don't exit terminal shell - instead print a message.
 { 
 	_doscriptexit 0; 
 }; 
