@@ -73,7 +73,7 @@ checkIsGitDir()
 }
 
 xfindgitdirs()
-# recursive dir search down from cwd, print (return) all the git root dir names.
+# recursive dir search down from cwd, echo-return all the git root dir names.
 {
 	for i in $(xfinddirs); do
 	(
