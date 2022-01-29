@@ -8,11 +8,7 @@ if ! alreadyIncluded UTILS_CORE; then
 ### START CONTENT - no indent.
 
 CORE_SUMMARY=$(cat <<END_CORE
-Core utility functions for bash. These functions are used across other utility functionas extensively. The level of functionality is not high level, more for convenience or readibility. e.g. 
-* 'script' - print the currently executing scripts base file name.
-* 'Usage' - print usage message (based on bash var USAGE) for currently running script.
-* isdir, isfile (convenience / readibility), set colour of output (for echo, errecho), set cursor position... etc.
-etc.
+Core utility functions for bash. These functions are used across other utility functions extensively. Many are more for convenience or readibility than for extensive functionality, e.g. 'script' - print the basename of the currently running script...
 END_CORE
 );
 

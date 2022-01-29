@@ -16,6 +16,11 @@ UTS_FORCEFLAG="$FFLAG";	# empty or FFLAG (pass onto subscripts - subscript $UTS_
 # See utils_globals.
 ###
 
+UIO_SUMMARY=$(cat <<END_UIO
+Functions that request user input ("warning: do you want to ...") before continuing. Putting "$FFLAG" as the first arguments to a script call 'forces' the functions to skip user input. 
+END_UIO
+);
+
 setForce() 		
 # set the force flag to true.
 { 

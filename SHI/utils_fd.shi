@@ -3,9 +3,9 @@
 . utils_core.shi
 
 FD_SUMMARY=$(cat << END_FD
-Utilities for file and directory management. Find directories and files, check they exist, find directories not in the 'excluded' 
-list (UTS_EXCLUDE). nb: the exclusion list (format: "grep-pattern1|grep-pattern2|...") is removed using a 
-simple 'grep -v' removal search - be sure your exclusion pattern does not contain matches for useful results (possible part file names,
+Utilities for file and directory management. Find directories and files, check they exist, find directories not in the 'excluded' \
+list (UTS_EXCLUDE). nb: the exclusion list (format: "grep-pattern1|grep-pattern2|...") is removed using a \
+simple 'grep -v' removal search - be sure your exclusion pattern does not contain matches for useful results (possible part file names, \
 directory names, etc)
 END_FD
 );

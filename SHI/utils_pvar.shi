@@ -3,7 +3,7 @@
 . utils_globals.shi
 
 PVAR_SUMMARY=$(cat << END_PVAR
-Provides services to enable bash scripts to store 'persistent' variables. Persisent meaning the variable retain their value 
+Provides services to enable bash scripts to store 'persistent' variables. Persisent meaning the variable retain their value \
 across different calls to the same, or another, script.
 END_PVAR
 );

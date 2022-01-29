@@ -7,12 +7,7 @@ if ! alreadyIncluded UTILS_MSC; then
 . utils_fd.shi
 
 MSC_SUMMARY=$(cat << END_MSC
-Provides misc servces for thing like:
-* padded output
-* stripping whitespaces
-* counting arguments
-* checking a scripts software dependencies &
-* tarring up directories.
+Provides misc servces for thing like: padded output; stripping whitespaces; counting arguments; checking a scripts software dependencies & tarring up directories.
 END_MSC
 );
 
@@ -36,7 +31,11 @@ stripwhite() # <string>
  	echo "$RES"
 }
 
-count() { echo $#; } # count #args given, echo number as return.
+count() 
+# count #args given, echo number as return.
+{ 
+	echo $#; 
+} 
 
 concat() # [-s | -c <string>] <args...> - join args together.
 # e.g. concat a b c => 'abc', concat -c : a b c => 'a:b:c' , concat -s a b => "a b" (space between)
@@ -133,13 +132,17 @@ explode() # <string>
 	echo $1 | grep -o .
 }
 
-printbetween() # <start> <end> <file>
+printbetween() # [ -n] <start> <end> <file>
 # print lines between regexps <start> and <end> (inclusive) in <file>.
 {
 	eval $(boolopt -n _NUMERIC "$@");
 	setvar START "$1"
 	setvar END "$2"
 	setvar FILE "$3"
+
+	vbvar START
+	vbvar END
+	vbvar FILE
 
 	if ! $_NUMERIC; then
     	if ! grep $START.*$END $FILE; then

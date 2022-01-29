@@ -25,12 +25,18 @@ Usage()
 	exiterr 1
 }
 
+# option variables.
+ANYFUNCTION=false;
 EXACTMATCH=false;
 SHORTFORMAT=false;
 LONGFORMAT=false;
 PRINTFILENAMEONLY=false;
+FILEPATTERN=""
+
+
 FNEND='()'
 
+eval $(boolopt --rem "match any function (do not give a function name)" -a ANYFUNCTION "$@")
 eval $(boolopt --rem "search for an exact match only" -x EXACTMATCH "$@")
 eval $(boolopt --rem "print matching file name only" -n PRINTFILENAMEONLY "$@")
 eval $(valopt  --rem "specify files (by glob pattern) to match (ls style - e.g. *.sh)" -m FILEPATTERN "$@")
@@ -41,7 +47,11 @@ errifopt "$@";
 
 searchForMatch()
 {
-	setvar PARTFNNAME "$1"; shift;
+	if $ANYFUNCTION; then
+		PARTFNNAME="";
+	else
+		setvar PARTFNNAME "$1"; shift;
+	fi
 
 	local FILEPATTERN=
 
@@ -49,9 +59,11 @@ searchForMatch()
 		FILEPATTERN="*$i $FILEPATTERN"
 	done
 
-	local FUNCT="^[[:alnum:]]*$PARTFNNAME.*$FNEND";
+	local FUNCT="^[[:alnum:]]*$PARTFNNAME[[:alnum:]]*$FNEND";
 	local MATCHES=$(xfindfilesgrep "$FUNCT" $FILEPATTERN)
 	local COUNT=$(count $MATCHES)
+
+	vbecho "MATCHES: <$MATCHES>"
 
 	if $EXACTMATCH; then
 		FUNCT="^$PARTFNNAME$FNEND"
@@ -75,8 +87,8 @@ searchForMatch()
 			printbetween $FUNCT '^}$' $match;
 
 		elif $SHORTFORMAT; then
-			vbfnecho 'Short Option Chosen'
-			printbetween $FUNCT '{' $match | grep -v '^{';
+			vbfnecho "Short Option Chosen ($FUNCT, $match)"
+			printbetween $FUNCT '^{' $match | sed 's/^{//g';
 
 		elif $PRINTFILENAMEONLY; then
 			vbfnecho 'Name Only Option Chosen'
@@ -87,19 +99,21 @@ searchForMatch()
 		fi
 	done
 	return 0;
-
 }
 
 main()
 {
-	if (( $# != 1 )); then Usage; fi
-	setvar PARTFN "$1"
-
 	cd $UTS_SCRIPTDIR
 	vbecho "Starting search in <$(pwd)>"
 	FILEPATTERN=${FILEPATTERN:-"$UTS_BASHINCLUDE"}
 
-	searchForMatch "$PARTFN" "$FILEPATTERN"
+	if $ANYFUNCTION; then
+		searchForMatch "$FILEPATTERN"
+	else
+		if (( $# != 1 )); then Usage; fi
+		setvar PARTFN "$1"
+		searchForMatch "$PARTFN" "$FILEPATTERN"
+	fi
 }
 
 main "$@"

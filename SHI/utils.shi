@@ -2,14 +2,10 @@
 
 # Reordering will change priority of --vb and --ff (and poss other) automatic flag parsing.
 # UTILS TIP: (--vb --ff) is the order in which automatic flag parsing works, (--ff --vb) will fail on --vb.
-. utils_core.shi
-. utils_vb.shi
-. utils_msc.shi
-. utils_pvar.shi
-. utils_opts.shi
-. utils_git.shi
-. utils_uio.shi
-. utils_fd.shi
 
-. utils_map.shi
+UTS_UTILS="utils_core.shi utils_vb.shi utils_msc.shi utils_pvar.shi utils_opts.shi utils_git.shi utils_uio.shi utils_fd.shi utils_map.shi"
+
+for i in $UTS_UTILS; do
+. $i;
+done
 
