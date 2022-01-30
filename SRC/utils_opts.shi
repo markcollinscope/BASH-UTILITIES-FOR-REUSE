@@ -177,8 +177,12 @@ errifopt() # "$@"
 	vbfnecho;
 	if ! $UTS_NOAUTOARGS; then # first arg only.
 		vbfnecho "check first arg: $1"
-		if test "$1" = "--help"; then vbfnecho "is --help"; shift; callFnIfExists Usage; callFnIfExists Help; exitok; fi
-		if test "$1" = "-?"; then vbfnecho "is -?"; shift; callFnIfExists Usage; callFnIfExists Help; exitok; fi
+		if test "$1" = "$UTS_HELPFLAG" || test "$1" = "$UTS_HELP"; then 
+			vbfnecho "got a command line help request (--help or similar)"; shift; 
+			callFnIfExists Usage; 
+			callFnIfExists Help; 
+			exitok; 
+		fi
 	fi
 
 	while ! test -z "$1"; do
@@ -203,7 +207,7 @@ Usage() # no args.
 	>&2 cat<<<$OPTIONS
 }
 
-_UTS_MAXARGS=9999 # arbitrary but large - upper limit
+_MAXARGS=9999 # arbitrary but large - upper limit
 
 chkargcount() # [-l] <lower-limit> <upper-limit> "$@"
 # check argument count in "$@" is between <lower-limit> and <upper-limit> inclusive - if not,  error with exit.
@@ -223,7 +227,7 @@ chkargcount() # [-l] <lower-limit> <upper-limit> "$@"
 		vbfnecho "Upper Limit: $UPPERLIMIT"
 		shift; 
 	else 
-		UPPERLIMIT=$_UTS_MAXARGS; 
+		UPPERLIMIT=$_MAXARGS; 
 	fi
 	chkarg UPPERLIMIT
 	vbvar LOWERLIMIT

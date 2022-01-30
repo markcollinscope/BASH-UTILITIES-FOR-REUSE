@@ -4,9 +4,7 @@
 
 FD_SUMMARY=$(cat << END_FD
 Utilities for file and directory management. Find directories and files, check they exist, find directories not in the 'excluded' \
-list (UTS_EXCLUDE). nb: the exclusion list (format: "grep-pattern1|grep-pattern2|...") is removed using a \
-simple 'grep -v' removal search - be sure your exclusion pattern does not contain matches for useful results (possible part file names, \
-directory names, etc)
+list (UTS_EXCLUDE - defined in egrep format). Functions with 'x' as first char exclude results based on the UTS_EXCLUDE value.
 END_FD
 );
 
@@ -183,7 +181,7 @@ getPath() # [-h]
 
 mkfindor() # <...args>
 # make a find 'or expression' with many filename patterns ("$@").
-# e.g. 'mkfindor *,sh *.shi' echos => '-name *.sh -o -name *.shi'
+# e.g. 'mkfindor *.sh *.shi' echos => '-name *.sh -o -name *.shi'
 {
 	setvar PATT $1
 	shift;
@@ -199,20 +197,17 @@ mkfindor() # <...args>
 
 xfinddirs() # [-i]
 # find non excluded dirs below current.
-# -i include current dir 
+# -i: include current dir in results.
 {
 	if test "$1" = "-i"; then
-		vbecho "-i"
 		xfind . -type d
 	else
-		vbecho "no -i"
 		xfind . -type d | grep -v '^\.$'
 	fi
 }
 
 xforeachdir() 
-# run a command in each xfinddirs() directory.
-# see also xfinddirs
+# run a command in each directory echo-returned by $(xfinddirs).
 {
 	setvar CMD "$*"
 

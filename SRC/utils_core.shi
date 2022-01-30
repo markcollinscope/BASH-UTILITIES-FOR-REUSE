@@ -286,16 +286,16 @@ checkNotEmptyString() # <msg> [ <bash var name> ]
 	fi
 }
 
-xgrep() # <... standard 'grea' args>
-# call grep with args given, but exclude certain patterns from results 
-# see UTS_EXCLUDE - for defaults. 	Is configurable.
+xgrep() # <...normal 'grep' args>
+# call grep with args given, but exclude certain patterns from results (grep -v)
+# $UTS_EXCUDE defines the pattern - in egrep form - see utils_globals.shi.
 { 
 	grep "$@" | grep -v -E "$(getExcludes)"; 
 }
 
 xfind() # <... standard find args>
-# call find with args given, but exclude certain patterns from results (e.g. 'node_modules')- 
-# see UTS_EXCLUDE - defaults set. Is configurable.
+# call find with args given, but exclude certain patterns from results (grep -v)
+# $UTS_EXCUDE defines the pattern - in egrep form - see utils_globals.shi.
 { 
 	find "$@" | grep -v -E "$(getExcludes)"; 
 }

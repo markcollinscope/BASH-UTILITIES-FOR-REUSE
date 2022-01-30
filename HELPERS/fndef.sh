@@ -1,10 +1,12 @@
+#/bin/bash
+
 . utils.shi
 
 USAGE=$(cat <<USG
-
-$0 [-n] show a bash function definition
--n - show fn name only
-
+$(script) [-n] <part-fn-name>
+Show bash function definition(s) - using native bash 'set' format.
+Match any function that contains <part-fn-name> within it.
+-n - show the fn name only
 USG
 )
 

@@ -1,6 +1,9 @@
+#!/bin/bash
 # for debug on utils_...
 
-echo $BASH_SOURCE
+echo "this is a development tool - to enable the re-inclusions of all *.shi files"
+echo ". $(script) to do this on the command line - in-shell."
+echo 
 
 UTILS_CORE=
 UTILS_FD=

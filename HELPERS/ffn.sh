@@ -5,7 +5,7 @@ USAGE=$(cat <<END_USAGE
 
 Usage: $(basename $0) [-options] <part-fn-name>
 
-Search <$UTS_SCRIPTDIR> and sub-dirs for all 'script includes (*$UTS_BASHINCLUDE, etc)' to find bash fns matching the partial name given.
+Search <$UTS_SCRIPTDIR> and sub-dirs for all 'script includes (*.$UTS_BASHINCLUDE, etc)' to find bash fns matching the partial name given.
 <part-fn-name> is a grep style pattern. Do *not* put '()' at the end - this is done automatically.
 Matches functions of the form:
 ---

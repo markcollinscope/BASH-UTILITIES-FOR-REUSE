@@ -72,5 +72,18 @@ Contributions welcome:
 * email:markcollinscope+bashutils@gmail.com, or message here.
 * branch etc. to contribute something new and make a pull request.
 * be patient - do let me know if you're doing something in advance, please.
+
+## Other notes:
+This README.md file was generated from a bash script (see README.sh) using some HELPERS functions (see directory), 
+mainly to extract functions and their documentation from the utils_xxx.shi files.
+
+The HELPER scripts provided are:
 END
+for i in HELPERS/*; do
+	echo SCRIPT: 
+	echo $(basename $i);
+	echo SYNOPSIS:
+	2>&1 $i --help 
+	echo;
+done
 

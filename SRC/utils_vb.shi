@@ -6,13 +6,13 @@
 
 if ! alreadyIncluded UTILS_VB; then 
 
-VBFLAG=${UTS_VBFLAG:-'--vb'}	# can override from environment.
+UTS_VERBOSEFLAG=${UTS_VERBOSEFLAG:-'--vb'}	# can override from environment.
 
 . utils_core.shi
 
 ## START CONTENT
 VB_SUMMARY=$(cat <<END_VB
-Functions mainly used in debugging - that print values, etc. when a 'verbose' flag is set to on. Note that the functionality automatically parses (then removes) "$VBFLAG", if it is the *first* argument to a script, to set verbose on.
+Functions mainly used in debugging - that print values, etc. when a 'verbose' flag is set to on. Note that the functionality automatically parses (then removes) "$UTS_VERBOSEFLAG", if it is the *first* argument to a script, to set verbose on.
 END_VB
 );
 
@@ -21,7 +21,7 @@ setVerbose()
 # nb: used by vbecho and similar functions
 { 
 	export UTS_VERBOSE=true; 
-	export UTS_VERBOSEFLAG="$VBFLAG"; 
+	export UTS_VERBOSEFLAG="$UTS_VERBOSEFLAG"; 
 }
 
 getVerbose()	
@@ -74,9 +74,9 @@ vbsleep() # <seconds>
 
 checkIfVerbose() # <arg> - deprecated 
 # now autoparses - for backwards compatibility and internal utils use only.
-# quick parse to set if <arg> is $VBFLAG flag (by default '--vb', but can be reset).
+# quick parse to set if <arg> is $UTS_VERBOSEFLAG flag (by default '--vb', but can be reset).
 {
-	if test "$1" = "$VBFLAG"; then
+	if test "$1" = "$UTS_VERBOSEFLAG"; then
 		setVerbose;
 		return 0;
 	fi
@@ -88,11 +88,11 @@ if ! $UTS_NOAUTOARGS; then
 	if checkIfVerbose $1; then shift; fi
 fi
 
-# nb - re above: parses $1 (only) and if same value as $VBFLAG, sets verbose,
-# also removes VBFLAG from the including script's command line args - so is 
+# nb - re above: parses $1 (only) and if same value as $UTS_VERBOSEFLAG, sets verbose,
+# also removes UTS_VERBOSEFLAG from the including script's command line args - so is 
 # transparent to that script.
 
-# overall effect: scripts will *automatically* set UTS_VERBOSE if $VBFLAG is first argument
+# overall effect: scripts will *automatically* set UTS_VERBOSE if $UTS_VERBOSEFLAG is first argument
 # to the bash script that includes this file.
 
 ### END CONTENT
