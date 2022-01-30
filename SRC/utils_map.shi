@@ -76,7 +76,8 @@ setMapValue() # <map-name> <value> <key 1> [<key 2> ... <key N>]
 	_D[$(_createRealKey $MAPNAME $*)]=$VAL
 }
 
-getMapValue() # <map-name> <key 1> [<key 2> ... <key N>] returns <value> by echo.
+getMapValue() # <map-name> <key 1> [<key 2> ... <key N>] 
+# echo-returns the value selected by <map-name> and whatever keys were given.
 {
 	local MAPNAME=$1; chkarg MAPNAME;	# not mangled.
 
@@ -84,8 +85,10 @@ getMapValue() # <map-name> <key 1> [<key 2> ... <key N>] returns <value> by echo
 	echo "${_D[$(_createRealKey $MAPNAME $*)]}"
 }
 
-mapKeys() # <map> (for debug, mainly) returns (by echo) list of all keys in internal format
-# list all map keys for <map> (in mangled internal format)
+mapKeys() # <map> (for debug, mainly) 
+# echo-return list of all map keys for <map>
+# nb: this will be in 'mangled' internal format - 
+# understanding will require reading the source code.
 {
 	local MAPNAME=$1; chkarg MAPNAME;
 
@@ -97,8 +100,10 @@ mapKeys() # <map> (for debug, mainly) returns (by echo) list of all keys in inte
 	done
 }
 
-mapKeyValues()  # <map<> (for debug, mainly) return: (by echo) key value pairs.
-# list all map values for <map> (keys shown in mangled internal format)
+mapKeyValues()  # <map<> (for debug, mainly) 
+# echo-return a list of key-value pairs 
+# nb: keys shown in mangled internal format 
+# understanding will require reading the source.
 {
 	MAPNAME=$1; chkarg MAPNAME;
 

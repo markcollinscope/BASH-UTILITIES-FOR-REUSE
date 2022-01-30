@@ -40,7 +40,7 @@ resetVerbose()
 # set verbose flag to false.
 # nb: used by vbecho and similar functions
 { 
-	export UTS_VERBOSE=false; export UTS_VERBOSEFLAG=""; 
+	export UTS_VERBOSE=false; 
 }
 
 resetVerbose;

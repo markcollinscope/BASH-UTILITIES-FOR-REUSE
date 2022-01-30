@@ -27,7 +27,7 @@ file (.shi).
 END_GLOB
 );
 
-###
+### REMOVE THOSE NOT USED WITHIN UTILS - CLIENT CODE SHOULD DEFINE THEIR OWN VARS
 export UTS_SCRIPTDIR=${UTS_SCRIPTDIR:-"$HOME/GIT/scripts"};	# ROOT location of scripts under git control.
 export UTS_PVARDIR=${UTS_PVARDIR:-"$HOME/.PVAR/"};		# used for storage of pvars (see utils_pvar.shi). nb: trailing '/'
 export UTS_LOGDIR=${UTS_LOGDIR:-"$HOME/.LOGS"}			# place to store log files.

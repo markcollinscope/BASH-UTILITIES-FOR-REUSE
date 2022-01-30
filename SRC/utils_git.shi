@@ -36,21 +36,6 @@ gitCurrentBranch()
 	echo $V
 }
 
-# deprecating.
-#getGitRoot() # return the dir name of current git root dir (has .git file).
-#{
-#	checkIsGitDir;
-#
-#	local isRoot=false;
-#
-#	(
-#		while ! isGitRootDir; do
-#			cd ..
-#		done
-#		pwd
-#	)
-#}
-
 isGitRootDir()
 # is the cwd a git root directory - return 0 [T] or 1 [F]
 {

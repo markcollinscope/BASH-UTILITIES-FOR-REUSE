@@ -18,7 +18,7 @@ utils_vb.shi        | Functions mainly used in debugging - that print values, et
 utils_opts.shi 		| Utility functions to enable the automatic parsing of command line option flags (-x, --doit, etc) and their subsequent removal from the command line argument to make processing easier. Options can appear in any position. Use of an optional --rem 'description ...' when specifying command line flag auto processing results in the 'description ...' being added to the Usage description in the containing script (without any further effort). 
 utils_git.shi 		| Utitlites to assist in the automation of git related activities. In particular allows detection of the 'current' git repo. e.g. get currrent git root dir, is this a git repo? what's the current branch called ... etc.
 utils_pvar.shi      | Provides services to enable bash scripts to store 'persistent' variables. Persisent meaning the variable retain their value across different calls to the same, or another, script.
-utils_fd.shi 	    | Utilities for file and directory management. Find directories and files, check they exist, find directories not in the 'excluded' list (UTS_EXCLUDE). nb: the exclusion list (format: "grep-pattern1|grep-pattern2|...") is removed using a simple 'grep -v' removal search - be sure your exclusion pattern does not contain matches for useful results (possible part file names, directory names, etc)
+utils_fd.shi 	    | Utilities for file and directory management. Find directories and files, check they exist, find directories not in the 'excluded' list (UTS_EXCLUDE - defined in egrep format). Functions with 'x' as first char exclude results based on the UTS_EXCLUDE value.
 utils_map.shi 		| Utilities to provide multi-dimentional hash-map style functionality to bash, enabling the addition or extraction of values from a named MAP given any number of keys (one key per dimension).
 utils_msc.shi 		| Provides misc servces for thing like: padded output; stripping whitespaces; counting arguments; checking a scripts software dependencies & tarring up directories.
 utils_uio.shi       | Functions that request user input ("warning: do you want to ...") before continuing. Putting "--ff" as the first arguments to a script call 'forces' the functions to skip user input. 
@@ -130,13 +130,13 @@ checkNotEmptyString() # <msg> [ <bash var name> ]
 # deprecated - use chkarg().
 # e.g. usage: $ 'local NAME=""; checkNotEmptyString "You forgot to give a name!" $NAME' 
 
-xgrep() # <... standard 'grea' args>
-# call grep with args given, but exclude certain patterns from results 
-# see UTS_EXCLUDE - for defaults. 	Is configurable.
+xgrep() # <...normal 'grep' args>
+# call grep with args given, but exclude certain patterns from results (grep -v)
+# $UTS_EXCUDE defines the pattern - in egrep form - see utils_globals.shi.
  
 xfind() # <... standard find args>
-# call find with args given, but exclude certain patterns from results (e.g. 'node_modules')- 
-# see UTS_EXCLUDE - defaults set. Is configurable.
+# call find with args given, but exclude certain patterns from results (grep -v)
+# $UTS_EXCUDE defines the pattern - in egrep form - see utils_globals.shi.
  
  
 ```
@@ -178,7 +178,7 @@ vbsleep() # <seconds>
  
 checkIfVerbose() # <arg> - deprecated 
 # now autoparses - for backwards compatibility and internal utils use only.
-# quick parse to set if <arg> is $VBFLAG flag (by default '--vb', but can be reset).
+# quick parse to set if <arg> is $UTS_VERBOSEFLAG flag (by default '--vb', but can be reset).
 
  
 ```
@@ -336,20 +336,6 @@ gitrootns()
 gitCurrentBranch() 
 # return the current git branch
 
-#getGitRoot() # return the dir name of current git root dir (has .git file).
-#{
-#	checkIsGitDir;
-#
-#	local isRoot=false;
-#
-#	(
-#		while ! isGitRootDir; do
-#			cd ..
-#		done
-#		pwd
-#	)
-#}
-
 isGitRootDir()
 # is the cwd a git root directory - return 0 [T] or 1 [F]
 
@@ -463,15 +449,14 @@ getPath() # [-h]
 
 mkfindor() # <...args>
 # make a find 'or expression' with many filename patterns ("$@").
-# e.g. 'mkfindor *,sh *.shi' echos => '-name *.sh -o -name *.shi'
+# e.g. 'mkfindor *.sh *.shi' echos => '-name *.sh -o -name *.shi'
 
 xfinddirs() # [-i]
 # find non excluded dirs below current.
-# -i include current dir 
+# -i: include current dir in results.
 
 xforeachdir() 
-# run a command in each xfinddirs() directory.
-# see also xfinddirs
+# run a command in each directory echo-returned by $(xfinddirs).
 
 xfindfiles() # <...args> ("$@")
 # find files below current dir that match the glob pattern(s) (ls style) in <args>.
@@ -495,13 +480,18 @@ xfindcwd()
 setMapValue() # <map-name> <value> <key 1> [<key 2> ... <key N>]
 # insert <value> into the given map by <map-name> enabling it to be recovered by providing the same set of keys as given here.
 
-getMapValue() # <map-name> <key 1> [<key 2> ... <key N>] returns <value> by echo.
+getMapValue() # <map-name> <key 1> [<key 2> ... <key N>] 
+# echo-returns the value selected by <map-name> and whatever keys were given.
 
-mapKeys() # <map> (for debug, mainly) returns (by echo) list of all keys in internal format
-# list all map keys for <map> (in mangled internal format)
+mapKeys() # <map> (for debug, mainly) 
+# echo-return list of all map keys for <map>
+# nb: this will be in 'mangled' internal format - 
+# understanding will require reading the source code.
 
-mapKeyValues()  # <map<> (for debug, mainly) return: (by echo) key value pairs.
-# list all map values for <map> (keys shown in mangled internal format)
+mapKeyValues()  # <map<> (for debug, mainly) 
+# echo-return a list of key-value pairs 
+# nb: keys shown in mangled internal format 
+# understanding will require reading the source.
 
  
 ```
@@ -521,3 +511,14 @@ Contributions welcome:
 * email:markcollinscope+bashutils@gmail.com, or message here.
 * branch etc. to contribute something new and make a pull request.
 * be patient - do let me know if you're doing something in advance, please.
+
+## Other notes:
+This README.md file was generated from a bash script (see README.sh) using some HELPERS functions (see directory), 
+mainly to extract functions and their documentation from the utils_xxx.shi files.
+
+The HELPER scripts provided are:
+SCRIPT:
+HELPER_SCRIPTS LICENSE README.md README.sh SRC
+SYNOPSIS:
+README.sh: line 86: HELPERS/*: No such file or directory
+
