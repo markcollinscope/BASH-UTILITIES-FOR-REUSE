@@ -8,12 +8,12 @@ alreadyIncluded()
 	local INCLUDE_GUARD=$1;
 
 	if test -z "${!INCLUDE_GUARD}"; then
-		eval ${INCLUDE_GUARD}="$INCLUDE_GUARD-INCLUDED"
-		if ! test -z "$DEBUGUTILS"; then >&2 echo "${!INCLUDE_GUARD}"; fi
+		eval ${INCLUDE_GUARD}="${INCLUDE_GUARD}-INCLUDED"
 		return 1;
 	fi
 	return 0;
 }
+
 
 fi
 
@@ -53,7 +53,5 @@ getExcludes() 	{ echo $UTS_EXCLUDE; }; export -f getExcludes; 	# get global sear
 getGlobLogDir() 	{ echo $UTS_LOGDIR; }; export -f getGlobLogDir; 			# get dir in which to put log files.
 getGlobBackupDir() 	{ echo $UTS_BACKUPDIR; }; export -f getGlobBackupDir;  		# get dir to copy to for backups, etc.
 ###
-
-debugutils() { if ! test -z "$DEBUGUTILS"; then >&2 echo $*; fi } # UTILSONLY - for debugging (as the developer) these utils.
 
 fi
