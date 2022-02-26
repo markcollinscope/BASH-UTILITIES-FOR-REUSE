@@ -15,15 +15,16 @@ if ! alreadyIncluded UTILS_GIT; then
 ### START CONTENT
 
 gitroot() 
-# output the name of the root git repo given the cwd.
+# echo-return the name of the root git repo given the cwd.
 {
 	checkIsGitDir;
 	git rev-parse --show-toplevel
 }
 
 gitrootns() 
-# as per gitroot - without slashes e.g. [/usr/include]  - replaced with _ giving: [_use_include]
-# enables git root dir to be used as an identifier or filename.
+# echo-return the name of the root git repo given the cwd.
+# however, remoate any '/'s e.g. '/usr/include'  - will be echo-returned as '_usr_include'
+# enables git root dir to be used as an identifier or filename - or context for pvars (see utils).
 {
 	gitroot | sed 's?/?_?g'
 }
@@ -116,7 +117,7 @@ gitDoCommit() # [<message>]
 gitCommitAndPush() # <messasge>
 # commit changes using <message>, then push to origin.
 {
-	gitDoCommit	"$1"
+	gitDoCommit	"$@"
 	gitDoPush
 }
 
