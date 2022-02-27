@@ -85,11 +85,14 @@ checkIfVerbose() # <arg> - deprecated
 
 # do autoparsing of verbose flag.
 if ! $UTS_NOAUTOARGS; then
-	if checkIfVerbose $1; then shift; fi
+	eval $(boolopt $UTS_VERBOSEFLAG USE_VERBOSE_OUTPUT "$@");
+	if $USE_VERBOSE_OUTPUT; then
+		setVerbose;
+	fi
 fi
 
-# nb - re above: parses $1 (only) and if same value as $UTS_VERBOSEFLAG, sets verbose,
-# also removes UTS_VERBOSEFLAG from the including script's command line args - so is 
+# parses command line to see of UTS_VERBOSEFLAG (--vb by defaul) is present,
+# if so,  removes UTS_VERBOSEFLAG from the including script's command line args - so is 
 # transparent to that script.
 
 # overall effect: scripts will *automatically* set UTS_VERBOSE if $UTS_VERBOSEFLAG is first argument

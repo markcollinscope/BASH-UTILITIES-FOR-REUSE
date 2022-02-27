@@ -288,14 +288,14 @@ checkNotEmptyString() # <msg> [ <bash var name> ]
 
 xgrep() # <...normal 'grep' args>
 # call grep with args given, but exclude certain patterns from results (grep -v)
-# $UTS_EXCUDE defines the pattern - in egrep form - see utils_globals.shi.
+# $UTS_EXCLUDE defines the pattern - in egrep form - see utils_globals.shi.
 { 
 	grep "$@" | grep -v -E "$(getExcludes)"; 
 }
 
 xfind() # <... standard find args>
 # call find with args given, but exclude certain patterns from results (grep -v)
-# $UTS_EXCUDE defines the pattern - in egrep form - see utils_globals.shi.
+# $UTS_EXCLUDE defines the pattern - in egrep form - see utils_globals.shi.
 { 
 	find "$@" | grep -v -E "$(getExcludes)"; 
 }

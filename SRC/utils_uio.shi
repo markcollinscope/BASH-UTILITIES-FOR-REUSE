@@ -3,10 +3,8 @@
 . utils_core.shi
 if ! alreadyIncluded UTILS_UIO; then
 
-FFLAG=${UTS_FFLAG:-"--ff"}	# can override from environment.
-
 UTS_FORCE=false;	# override manual intervention requests
-UTS_FORCEFLAG="$FFLAG";	# empty or FFLAG (pass onto subscripts - subscript $UTS_FORCEFLAG)
+UTS_FORCEFLAG=${UTS_FORCEFLAG:-"--ff"}	# can override from environment.
 
 ###
 # The functions below (force related) set the 'force' flaghat override requests for user confirmation.
@@ -17,19 +15,20 @@ UTS_FORCEFLAG="$FFLAG";	# empty or FFLAG (pass onto subscripts - subscript $UTS_
 ###
 
 UIO_SUMMARY=$(cat <<END_UIO
-Functions that request user input ("warning: do you want to ...") before continuing. Putting "$FFLAG" as the first arguments to a script call 'forces' the functions to skip user input. 
+Functions that request user input ("warning: do you want to..., hit any key to...") before continuing. 
+Putting "$UTS_FORCEFLAG" as the first arguments to a script call 'forces' the functions to skip user input (e.g. like rm -f does).
 END_UIO
 );
 
 setForce() 		
 # set the force flag to true.
 { 
-	export UTS_FORCE=true; export UTS_FORCEFLAG="$FFLAG"; 
+	export UTS_FORCE=true; 
 }
 resetForce()	
 # set the force flag to false.
 { 
-	export UTS_FORCE=false; export UTS_FORCEFLAG=""; 
+	export UTS_FORCE=false;
 }
 getForce()		
 # return TRUE if the force flag is set.
@@ -44,7 +43,7 @@ force()
 }
 
 checkIfForce() # <arg> - deprecated - for back compatibility and internal utils use.
-# check if <arg> is $FFLAG- if it is the force flag will be set.
+# check if <arg> is $UTS_FORCEFLAG- if it is the force flag will be set.
 {
 	if test "$1" = "$UTS_FORCEFLAG"; then setForce; return 0; else return 1; fi
 }
@@ -95,9 +94,12 @@ Warning() # [<message>]
 	return $RETURN_VAL;
 }
 
-# Parse $1 of containing script - set force flag is value is $FFLAG (default --ff, but configurable).
+# Parse args of containing script - set force flag is option set (default --ff, but configurable as UTS_FORCEFLAG).
 if ! $UTS_NOAUTOARGS; then
-	if checkIfForce "$1"; then shift; fi # NB: use --vb before --ff if necessary.
+	eval $(boolopt $UTS_FORCEFLAG IGNORE_USER_INPUT "$@");
+	if $IGNORE_USER_INPUT; then 
+		setForce; 
+	fi
 fi
 
 #CONTENT ENDS

@@ -212,19 +212,19 @@ errechoPadded() # <padlen> <...text>
 }
 
 YMD="%y-%m-%d"
-MEDIUM="%y.%m.%d-%H.%M"
-LONGLSORDER="%Y.%m.%d-%H.%M.%S"
+YMD_HM="%y.%m.%d-%H.%M"
+LONG="%Y.%m.%d-%H.%M.%S"
 
-datefmt() # [-l|--long] --s]
+datefmt() # [-l|--long] --s]: echo-return formatted date.
 # -l - use a long format
 # -s - use a short format
 {
 	case $# in
-		0)	date +$MEDIUM;;
+		0)	date +$YMD_HM;;
 		1)
 			case $1 in
 				-l|--long)
-					date +$LONGLSORDER
+					date +$LONG
 					;;
 				-s)		
 					date +$YMD
@@ -237,6 +237,24 @@ datefmt() # [-l|--long] --s]
 		esac;;
 	esac
 }
+
+getarg() # <num> <...args>
+# echo-return the <num>'th argument in <...args> (i.e. $<num>)
+{
+	# TODO - try ${${ARG}} - as a quickie way.
+	setvar ARG "$1";
+	shift;
+	
+	local COUNT=1;
+	for i in $*; do
+		if test "$COUNT" = "$ARG"; then
+			echo $i;
+			break;
+		fi
+		COUNT=$((COUNT+1));
+	done
+}
+
 
 # END CONTENT
 fi
