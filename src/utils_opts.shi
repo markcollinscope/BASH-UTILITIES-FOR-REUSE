@@ -91,7 +91,7 @@ getOptUsage() # [-n]
 
 binopt() # [ --rem <documentation...> ] <flag> <bash var> <default-value> <value-if-flag-given> "$@"
 # called in the form:
-# eval $(boolopt --rem <documentation...' -a AVARIABLE 99 101 "$@")
+# eval $(binopt --rem <documentation...' -a AVARIABLE 99 101 "$@")
 # where: 	<flag> (-a) is the flag to be processed on the including script.
 #			<bash-var> (AVARIABLE) - the bash var to set set to either <default-value> or <other-value>
 #			<defaul-value> - <bash-var> is set to this value if <flag> is not present.
@@ -174,11 +174,8 @@ valopt() # [ --rem <documentation...> ] <flag> <bash var> <value> "$@"
 errifopt() # "$@"
 # exit with error if there are options (-*) present (or left after boolopt, valopt processing)  in "$@" 
 {
-	vbfnecho;
 	if ! $UTS_NOAUTOARGS; then # first arg only.
-		vbfnecho "check first arg: $1"
 		if test "$1" = "$UTS_HELPFLAG" || test "$1" = "$UTS_HELP"; then 
-			vbfnecho "got a command line help request (--help or similar)"; shift; 
 			callFnIfExists Usage; 
 			callFnIfExists Help; 
 			exitok; 
@@ -189,7 +186,6 @@ errifopt() # "$@"
 		case "$1" in
 		-*)
 			errecho "Unknown option: \"$1\""
-			vbfnecho "Usage: $(type -t Usage)";
 			Usage;
 			exiterr -k;
 			;;
@@ -215,7 +211,6 @@ chkargcount() # [-l] <lower-limit> <upper-limit> "$@"
 {
 	LOWERONLY=false; 
 	if test "$1" = "-l"; then 
-		vbfnecho "Lower Limit Only"; 
 		LOWERONLY=true; 
 		shift; 
 	fi
@@ -224,19 +219,15 @@ chkargcount() # [-l] <lower-limit> <upper-limit> "$@"
 
 	if ! $LOWERONLY; then 
 		setvar UPPERLIMIT $1; 
-		vbfnecho "Upper Limit: $UPPERLIMIT"
 		shift; 
 	else 
 		UPPERLIMIT=$_MAXARGS; 
 	fi
 	chkarg UPPERLIMIT
-	vbvar LOWERLIMIT
-	vbvar UPPERLIMIT
 
 	local COUNT=$(count "$@");
 
 	if (( $COUNT < $LOWERLIMIT )) || (( $COUNT > $UPPERLIMIT)); then
-		vbecho "LIMIT CHECK FAILED";
 		local MSG="Incorrect number of arguments - "
 		if $LOWERONLY; then 
 			MSG=$(concat "$MSG" "only $COUNT arguments given - more than: $LOWERLIMIT required")

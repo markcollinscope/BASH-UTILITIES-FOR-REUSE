@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. utils_core.shi
+. utils_globals.shi
 
 GIT_SUMMARY=$(cat << END_GIT
 Utitlites to assist in the automation of git related activities. In particular allows detection of the 'current' git repo. \
@@ -9,7 +9,7 @@ END_GIT
 );
 
 if ! alreadyIncluded UTILS_GIT; then
-
+. utils_core.shi
 . utils_vb.shi
 
 ### START CONTENT

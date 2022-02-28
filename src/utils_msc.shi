@@ -3,7 +3,6 @@
 . utils_globals.shi
 if ! alreadyIncluded UTILS_MSC; then
 . utils_core.shi
-. utils_vb.shi
 . utils_fd.shi
 
 MSC_SUMMARY=$(cat << END_MSC
@@ -140,10 +139,6 @@ printbetween() # [ -n] <start> <end> <file>
 	setvar END "$2"
 	setvar FILE "$3"
 
-	vbvar START
-	vbvar END
-	vbvar FILE
-
 	if ! $_NUMERIC; then
     	if ! grep $START.*$END $FILE; then
         	sed -n "/$START/,/$END/p" $FILE
@@ -194,10 +189,6 @@ echoPadded() # <padlen> <...text>
 
 	local TEXTLEN=$(len $TEXT)
 	local PADDING=$((PADLEN - TEXTLEN));
-
-	vbvar TEXTLEN
-	vbvar PADLEN
-	vbvar PADDING
 
 	echo -n $TEXT;
 	for ((i=0; i<PADDING; i++)) do 

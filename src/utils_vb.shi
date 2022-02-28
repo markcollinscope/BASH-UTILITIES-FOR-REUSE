@@ -5,10 +5,10 @@
 . utils_globals.shi
 
 if ! alreadyIncluded UTILS_VB; then 
-
-UTS_VERBOSEFLAG=${UTS_VERBOSEFLAG:-'--vb'}	# can override from environment.
-
 . utils_core.shi
+. utils_opts.shi
+
+UTS_VERBOSEFLAG=${UTS_VERBOSEFLAG:-'--vb'}	# can override from environment. # final default here!
 
 ## START CONTENT
 VB_SUMMARY=$(cat <<END_VB
@@ -91,12 +91,14 @@ if ! $UTS_NOAUTOARGS; then
 	fi
 fi
 
-# parses command line to see of UTS_VERBOSEFLAG (--vb by defaul) is present,
-# if so,  removes UTS_VERBOSEFLAG from the including script's command line args - so is 
-# transparent to that script.
-
-# overall effect: scripts will *automatically* set UTS_VERBOSE if $UTS_VERBOSEFLAG is first argument
-# to the bash script that includes this file.
+#-- nb
+# ### Autoparsing of Command Line Options
+#
+# This utilities file parses command line to see of UTS_VERBOSEFLAG ('--vb' by default, configurable in utils_globals) is present,
+# if so, removes UTS_VERBOSEFLAG from the including script's command line args - so is 
+# transparent to that script. The overall effect is that any script using this utils file will switch on versose mode (useful debugging)
+# completely transparently to the including script.
+#--
 
 ### END CONTENT
 fi

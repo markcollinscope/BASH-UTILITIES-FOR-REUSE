@@ -5,8 +5,10 @@
 # functions listed as <mainly for debug>. Watch for updates. Basic get/set functions work fine.
 # Contributions welcome # - eg. iterate over keys in multi-dimensional manner.
 
-. utils_core.shi
+. utils_globals.shi
+
 if ! alreadyIncluded UTILS_MAP; then
+. utils_core.shi
 
 MAP_SUMMARY=$(cat << END_MAP
 Utilities to provide multi-dimentional hash-map style functionality to bash, enabling the addition or extraction of values from a named MAP given any number of keys (one key per dimension).

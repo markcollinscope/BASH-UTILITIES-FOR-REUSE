@@ -2,6 +2,7 @@
 
 . utils_core.shi
 if ! alreadyIncluded UTILS_UIO; then
+. utils_opts.shi
 
 UTS_FORCE=false;	# override manual intervention requests
 UTS_FORCEFLAG=${UTS_FORCEFLAG:-"--ff"}	# can override from environment.
