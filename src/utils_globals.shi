@@ -14,16 +14,15 @@ alreadyIncluded()
 	return 0;
 }
 
-
 fi
 
 if ! alreadyIncluded UTILS_GLOBALS; then
 # no indent.
 
 GLOB_SUMMARY=$(cat << END_GLOB
-Global variables used across utilities functions. Preset values will take precedence over defaults, which are provided herein.
-So to override defaults, simply define (e.g. UTS_PVARDIR) a new value *before* including this (or any) utility function definition 
-file (.shi).
+Global variables used across utilities functions. Preset values will take precedence over defaults, which are provided in this file.
+To override defaults, define a new value *before* including this (or any) utility function definition file (.shi) e.g. you could redefine 
+UTS_VERBOSEFLAG to "-v" before including utils.shi (or other utils file) to change the verbose print option from '--vb' toverbose print option from '--vb' to '-v'.
 END_GLOB
 );
 
@@ -42,7 +41,7 @@ export UTS_SUNIT_TEST=${UTS_SUNIT_TEST:-"_stest"}		# string identifying a functi
 # autoparsed command line flags
 export UTS_VERBOSEFLAG=${UTS_VERBOSEFLAG:-'--vb'}
 export UTS_FORCEFLAG=${UTS_FORCEFLAG:-'--ff'}
-export UTS_HELPFLAG=${UTS_HELPFLAG:-'--help'}
+export UTS_HELPFLAG=${UTS_HELPFLAG:-'--he'}
 export UTS_HELP=${UTS_HELP:-'-?'}
 
 # external (node_modules) directories to ignore/remove from script (recursive) searches, etc. (to remove irrelevent output)

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-UTS_UTILS="utils_core.shi utils_map.shi utils_uio.shi utils_fd.shi utils_msc.shi utils_opts.shi utils_vb.shi utils_git.shi utils_pvar.shi" 
+_UTILS="utils_core.shi utils_map.shi utils_uio.shi utils_fd.shi utils_msc.shi utils_opts.shi utils_vb.shi utils_git.shi utils_pvar.shi" 
 
 # current dependencies: Mon 28 Feb 01:44:10 GMT 2022
 #
@@ -18,7 +18,7 @@ UTS_UTILS="utils_core.shi utils_map.shi utils_uio.shi utils_fd.shi utils_msc.shi
 # pvar: vb -> opts -> msc -> fd + globals, core
 
 
-for i in $UTS_UTILS; do
+for i in $_UTILS; do
 . $i;
 done
 

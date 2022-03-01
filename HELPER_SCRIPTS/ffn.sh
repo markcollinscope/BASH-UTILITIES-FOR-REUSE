@@ -59,7 +59,7 @@ searchForMatch()
 		FILEPATTERN="*$i $FILEPATTERN"
 	done
 
-	local FUNCT="^[[:alnum:]]*$PARTFNNAME[[:alnum:]]*$FNEND";
+	local FUNCT="^[[:alnum:]_]*$PARTFNNAME[[:alnum:]_]*$FNEND";
 	local MATCHES=$(xfindfilesgrep "$FUNCT" $FILEPATTERN)
 	local COUNT=$(count $MATCHES)
 

@@ -174,14 +174,6 @@ valopt() # [ --rem <documentation...> ] <flag> <bash var> <value> "$@"
 errifopt() # "$@"
 # exit with error if there are options (-*) present (or left after boolopt, valopt processing)  in "$@" 
 {
-	if ! $UTS_NOAUTOARGS; then # first arg only.
-		if test "$1" = "$UTS_HELPFLAG" || test "$1" = "$UTS_HELP"; then 
-			callFnIfExists Usage; 
-			callFnIfExists Help; 
-			exitok; 
-		fi
-	fi
-
 	while ! test -z "$1"; do
 		case "$1" in
 		-*)

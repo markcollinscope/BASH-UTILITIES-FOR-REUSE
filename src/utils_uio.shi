@@ -103,5 +103,17 @@ if ! $UTS_NOAUTOARGS; then
 	fi
 fi
 
+# do autoparsing of help flags.
+if ! $UTS_NOAUTOARGS; then 
+    eval $(boolopt $UTS_HELPFLAG DO_HELP "$@");
+    eval $(boolopt $UTS_HELP DO_HELP "$@");
+
+	if $DO_HELP; then
+		callFnIfExists Usage; 
+		callFnIfExists Help; 
+		exitok; 
+	fi
+fi
+
 #CONTENT ENDS
 fi
