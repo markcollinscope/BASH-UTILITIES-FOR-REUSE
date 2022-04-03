@@ -8,7 +8,9 @@ LITERAL='```'
 UTILS="utils_core.shi utils_fd.shi utils_git.shi utils_globals.shi utils_map.shi utils_msc.shi utils_opts.shi utils_pvar.shi utils.shi utils_uio.shi utils_vb.shi"
 
 cat << END
-# BASH-UTILS - VERSION 0.9 - REVIEW EDITION
+# BASH-UTILS - VERSION 0.9.0 - CURRENTLY UNDER REVIEW - BUT USABLE
+There may be typos in this documentation. It is still under review.
+
 A set of over 40 bash utility functions to make writing complex well structured Bash Scripts easier.
 
 Broadly speaking the utilities provide functionality to simplify 
