@@ -1,0 +1,131 @@
+#!/bin/bash
+
+. utils_globals.shi
+
+GIT_SUMMARY=$(cat << END_GIT
+Utitlites to assist in the automation of git related activities. In particular allows detection of the 'current' git repo. \
+e.g. get currrent git root dir, is this a git repo? what's the current branch called ... etc.
+END_GIT
+);
+
+if ! alreadyIncluded UTILS_GIT; then
+. utils_core.shi
+. utils_vb.shi
+
+### START CONTENT
+
+gitroot() 
+# echo-return the name of the root git repo given the cwd.
+{
+	checkIsGitDir;
+	git rev-parse --show-toplevel
+}
+
+gitrootns() 
+# echo-return the name of the root git repo given the cwd.
+# however, remoate any '/'s e.g. '/usr/include'  - will be echo-returned as '_usr_include'
+# enables git root dir to be used as an identifier or filename - or context for pvars (see utils).
+{
+	gitroot | sed 's?/?_?g'
+}
+
+gitCurrentBranch() 
+# return the current git branch
+{
+	V=$(git branch 2>/dev/null | grep '*' | sed 's/*//')
+	V=${V:="No-Git-Branch-Available"}
+	echo $V
+}
+
+isGitRootDir()
+# is the cwd a git root directory - return 0 [T] or 1 [F]
+{
+	if test -a ".git"; then return 0; else return 1; fi
+}
+
+isGitDir() 
+# returns T/F [0/1] depending whether the cwd is in a git repo.
+{
+	no ne git rev-parse --is-inside-work-tree
+}
+
+checkIsGitDir() 
+# error and exit if cwd is not within a git repo.
+{
+	if ! $(isGitDir); then
+		errecho "$0: Error <$(pwd)> Not A Git Dir"
+		exiterr -k;
+	fi
+}
+
+xfindgitdirs()
+# recursive dir search down from cwd, echo-return all the git root dir names.
+{
+	for i in $(xfinddirs); do
+	(
+		cd $i;
+		if isGitRootDir; then 
+			echo $i
+		fi
+	)
+	done
+}
+
+gitNeedsCommit()
+# does the current git repo have data to potentially commit?
+{
+	checkIsGitDir;
+
+	if ! test -z "$(git status -s)"; then
+		return 0;
+	else
+		return 1;
+	fi
+}
+
+gitStatus()
+# prints a message if the git repo which contains the cwd requires a git commit.
+{
+	checkIsGitDir;
+
+	if gitNeedsCommit; then	
+		echo "GIT COMMIT REQUIRED IN: $(pwd)"
+	fi
+}
+
+gitAbandonChanges()
+# abandon all changes since the last commit. prints warning message.
+{
+	Warning "Abandon uncommitted changes?"
+	git reset --hard
+}
+
+gitDoPush()
+# push current repo to origin.
+{
+	git push origin $(gitCurrentBranch);
+}
+
+gitDoCommit() # [<message>]
+# undertake a git commit using <message> - or a default message if none supplied.
+{
+	local MSG=${1:-"function $(fnname) - no commit message given - branch is <$(gitCurrentBranch)>"};
+	git add -A
+	git commit -m "$MSG"
+}
+
+gitCommitAndPush() # <messasge>
+# commit changes using <message>, then push to origin.
+{
+	gitDoCommit	"$@"
+	gitDoPush
+}
+
+gitcandpfn() # <message>
+# commit changes using <message>, then push to origin.
+{ 
+	gitCommitAndPush "$@"; 
+}
+
+### END CONTENT
+fi

@@ -1,0 +1,24 @@
+#!/bin/bash
+
+UTS_UTILS="utils_core.shi utils_map.shi utils_uio.shi utils_fd.shi utils_msc.shi utils_opts.shi utils_vb.shi utils_git.shi utils_pvar.shi" 
+
+# current dependencies: Mon 28 Feb 01:44:10 GMT 2022
+#
+# globals (none)
+# 
+# core: globals
+# 
+# map: globals core
+# fd: globals core
+# msc:  globals, core, fd
+# opts: msc -> fd
+# uio: globals, core
+# vb: opts -> msc -> fd + globals, core
+# git: vb -> opts -> msc -> fd + globals, core
+# pvar: vb -> opts -> msc -> fd + globals, core
+
+
+for i in $UTS_UTILS; do
+. $i;
+done
+

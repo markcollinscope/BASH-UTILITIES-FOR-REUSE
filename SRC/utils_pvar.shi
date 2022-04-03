@@ -1,0 +1,170 @@
+#!/bin/bash
+
+. utils_globals.shi
+PVAR_SUMMARY=$(cat << END_PVAR
+Provides services to enable bash scripts to store 'persistent' variables. Persisent meaning the variable retain their value \
+across different calls to the same, or another, script.
+END_PVAR
+);
+
+if ! alreadyIncluded UTILS_PVAR; then
+. utils_core.shi
+. utils_vb.shi
+. utils_msc.shi
+. utils_fd.shi
+
+# START CONTENT
+
+__PVARSUFFIX=".pvar"
+__PVARDIR=${UTS_PVARDIR:-"/tmp/"}
+ensuredirexists $__PVARDIR
+
+_pvardir()
+{
+	echo "$__PVARDIR"
+}
+
+_pvarsuffix()
+{
+	echo $__PVARSUFFIX
+}
+
+_pvar_setsuffix()
+{
+	setvar _SUFFIX "$1"
+	__PVARSUFFIX=$_SUFFIX;
+}
+
+_pvarfilename()
+{
+	setvar _PVARF "$1";
+
+	RES=$(concat "$(_pvardir)" "$_PVARF" "." "$(_pvarsuffix)")
+	vbfnecho "PVARFILE: $RES"
+	echo $RES
+}
+
+_checkpvarisdeclared()
+{
+	setvar __PVARNAME $1
+	local FILE=$(_pvarfilename $__PVARNAME);
+
+	if ! test -f $FILE; then
+		errecho -s "attempted use of pvar <$__PVARNAME> when not declared";
+		exiterr -k;
+	fi
+}
+
+pvar_context() # <context-name> - the context (or namespace) to be used for storing subsequent pvars.
+# Call this function IF you do not want to use the default context (namespace) - which is the calling bash script name.
+{
+	if null "$1"; then errfnecho -s "no context supplied"; exirerr -k; fi
+	_pvar_setsuffix ".$1"
+}
+
+pvar_declare() # <pvar-name> <pvar-init-value>
+# pvars must be declared. <pvar-name> will be intitialised to <pvar-init-value> which must be supplied (non null).
+{
+	setvar __PVAR_NAME "$1"
+	setvar __PVAR_VALUE "$2"
+
+	local FILE=$(_pvarfilename $__PVAR_NAME);
+	if ! test -f $FILE; then
+		echo "$__PVAR_VALUE" > $FILE
+	fi
+}
+
+pvar_set() # <pvar-name> <value>
+# set the pvar <pvar-name> to the given <value>
+{
+	setvar __PVAR_NAME "$1"; shift;
+	setvar PVAR_VALUE "$@"
+
+	_checkpvarisdeclared $__PVAR_NAME;
+
+	local FILE=$(_pvarfilename $__PVAR_NAME);
+	echo "$PVAR_VALUE" > $FILE
+}
+
+pvar_get() # <pvar-name>
+# returns (via echo) the value of <pvar-name> - if any.
+{
+	setvar __PVAR_NAME $1;
+	_checkpvarisdeclared $__PVAR_NAME;
+
+	local FILE=$(_pvarfilename $__PVAR_NAME);
+
+	vbfnecho "PVAR-NAME,FILE: $__PVAR_NAME, $FILE"
+	local PVAR_VALUE=$(cat $FILE)
+	vbfnecho "PVAR-VALUE: $PVAR_VALUE"
+	
+	echo $PVAR_VALUE
+}
+
+pvar_clear() # <pvar-name>
+# 'make sure' <pvar-name> doesn't already have a value - clear it.
+{
+	setvar __PVAR_NAME $1;
+
+	local FILE=$(_pvarfilename $__PVAR_NAME);
+	rm -f $FILE;
+}
+
+pvar_default() # <pvar-name> [<value>] 
+# if <value> set, return it (and store it in <pvar-name>); if not, return the value of <pvar-name>
+{
+	setvar _PVARTOUSE "$1"
+	local VALUETOUSE="$2";
+
+	if null "$VALUETOUSE"; then
+		VALUETOUSE=$(pvar_get $_PVARTOUSE);
+	else
+		pvar_set $_PVARTOUSE $VALUETOUSE;
+	fi
+	echo $VALUETOUSE
+}
+
+pvar_rmcontext()
+# deletes all variables in the current context (namespace).
+{
+	TMP=$(tmpFile)
+	ensuredirexists $TMP
+
+	(
+	cd $(_pvardir);
+	CONTEXT=$(_pvarsuffix)
+	Warning "About to destroy context: <$CONTEXT> (all pvars moved to <$TMP>)"
+	mv *.$(pvarsuffix) $TMP
+	)
+}
+
+pvar_rmdir()
+# moves the pvar storage area (i.e. all pvars, all contexts) to a tmp-dir location (/tmp/...).
+{
+	TMP=$(tmpFile)
+	ensuredirexists $TMP
+	Warning "About to move PVAR dir: <$(_pvardir)> to: <$TMP> (i.e. all existing PVARs will be lost)"
+	mv $(_pvardir) $TMP
+}
+
+if test "$1" = "--testpvar"; then
+	pvar_declare _HELLO	"WORLD"
+	pvar_set _HELLO "this is a pvar value";
+	VAL=$(pvar_get _HELLO)
+	echo RESULT1: $VAL
+
+	pvar_set _HELLO "this is a second value";
+	VAL=$(pvar_get _HELLO)
+	echo RESULT2 $VAL
+
+	pvar_declare _GOODBYE 'pvar'
+	VAL=$(pvar_get _GOODBYE)
+
+	pvar_clear HELLO
+	pvar_declare HELLO "THIS IS THIRD VALUE>"
+	VAL=$(pvar_get _HELLO)
+	echo RESULT3: $VAL
+fi
+
+# END CONTENT
+fi

@@ -1,0 +1,80 @@
+Script started on 2022-04-03 19:33:54+01:00 [TERM="xterm-256color" TTY="/dev/pts/0" COLUMNS="-1" LINES="-1"]
+MYENV_ ===>
+MYENV_BASHMISC=/home/mark/GIT/misc/BASH
+MYENV_GITDIR=/home/mark/GIT
+MYENV_GITREPO=git@github.com:markcollinscope
+MYENV_GITSCRIPTROOT=/home/mark/GIT/scripts
+MYENV_GITSYNCFILE=.gitx
+MYENV_GOOGLEDRIVE=/home/mark/GDRIVE
+MYENV_HACK=/home/mark/GIT/misc/CODE-HACK
+MYENV_HOME=/home/mark
+MYENV_MISCROOT=/home/mark/GIT/misc
+MYENV_NOTE=/home/mark/.note.txt
+MYENV_ORIGPATH=/home/mark/.nvm/versions/node/v6.17.1/bin:/home/mark/bin:/home/ma
+MYENV_SCRIPTBIN=/home/mark/scripts
+MYENV_SCRIPTPATH=/home/mark/scripts:/home/mark/GIT/scripts/SCRIPTS:/home/mark/GI
+MYENV_SCRIPTROOT=/home/mark/GIT/scripts/SCRIPTS
+MYENV_SCRIPTTPL=script.tpl
+MYENV_TODO_FILE=.todo.txt
+MYENV_TODO_ITEM='toimprove|[Tt][Oo][Dd][Oo]|TBD|TBC|ABSTRACT|[Dd]eprecate'
+MYENV_TRASHCAN=/home/mark/.old
+MYENV_TRY=/home/mark/GIT/misc/CODE-TRY
+MYENV_UTSROOT=/home/mark/GIT/scripts/UTILS
+MYENV_WINHOME=/mnt/c/Users/markcollinscope/
+==========
+-------------- environment setup is: --------------
+scr, sc: list scripts
+tpl - find a template matching a name (or part name)
+cptpl - copy a template to local dir
+cdgit - change to git directory
+cdscr: cd /home/mark/GIT/scripts/SCRIPTS
+cduts: cd /home/mark/GIT/scripts/UTILS
+cdmsc: cd /home/mark/GIT/misc
+cdbmsc: cd to bash misc area
+cdov: cd to ov area
+cdlite: cd to lite reaction area
+cdgd: cd to /home/mark/GDRIVE
+cdtry: cd to /home/mark/GIT/misc/CODE-TRY
+mvtry: mv f1 to f2 in /home/mark/GIT/misc/CODE-TRY
+lstry: ls in /home/mark/GIT/misc/CODE-TRY
+cattry: more a file in /home/mark/GIT/misc/CODE-TRY
+ptry: push /home/mark/GIT/misc/CODE-TRY
+cdhack: cd to /home/mark/GIT/misc/CODE-HACK:
+cphack: copy (recursive) file/dir to /home/mark/GIT/misc/CODE-HACK - nb: removes any .git dir
+bash: export: cdsrc: not a function
+cdtsc - change to typescript clone git dir
+vi: Vi uses Vim
+ghis: grep history
+st: sublime_text
+ld: list all . files
+lt: ls -lt (time ordered)
+llt: ls -lt (time ordered, long format)
+ls1: ls - one per line
+pbbc: ping the bbc!
+wsvr: simple web server
+nv: set node version (nvm)
+nvv: print current node version in use
+nodepath: show current node path
+======
+NODE_PATH: undefined
+======
+tsold: mv old tsc (typescript) generated files to: /home/mark/.old
+LPDEST: PRINTME6
+PRINTER: HP-Officejet-5742
+------------------------------------------------------------
+PATH: .:/home/mark/scripts:/home/mark/GIT/scripts/SCRIPTS:/home/mark/GIT/scripts/SCRIPTS/CODE-TRY:/home/mark/GIT/scripts/SCRIPTS/CORE:/home/mark/GIT/scripts/SCRIPTS/FFMPEG:/home/mark/GIT/scripts/SCRIPTS/GIT:/home/mark/GIT/scripts/SCRIPTS/ME-COMPLEX:/home/mark/GIT/scripts/SCRIPTS/ME-SIMPLE:/home/mark/GIT/scripts/SCRIPTS/OV:/home/mark/GIT/scripts/SCRIPTS/SCRIPTS-USE-CORE:/home/mark/GIT/scripts/SCRIPTS/SCRIPT-TOOLS:/home/mark/GIT/scripts/SCRIPTS/SELENIUM:/home/mark/GIT/scripts/SCRIPTS/SH-UNIT:/home/mark/GIT/scripts/SCRIPTS/SPECIALS:/home/mark/GIT/scripts/SCRIPTS/SVN:/home/mark/GIT/scripts/SCRIPTS/TEMPLATES-TPL:/home/mark/GIT/scripts/SCRIPTS/TS:/home/mark/GIT/scripts/SCRIPTS/WORK-IN-PROGRESS:/home/mark/GIT/scripts/UTILS:/home/mark/GIT/scripts/UTILS/HELPER_SCRIPTS:/home/mark/GIT/scripts/UTILS/SRC:/home/mark/GIT/scripts:/home/mark/.nvm/versions/node/v6.17.1/bin:/home/mark/bin:/home/mark/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+------------------------------------------------------------
+autocompletes processed ****
+_git_ncdiff() { _git_checkout; }; export _git_ncdiff ;
+_git_ormb() { _git_checkout; }; export _git_ormb ;
+_git_rmb() { _git_checkout; }; export _git_rmb ;
+*********************
+dot utils? - ctrl-c to exit
+^C..pts/UTILS/HELPER_SCRIPTS[* baseline]: ^C
+..pts/UTILS/HELPER_SCRIPTS[* baseline]: ^C
+..pts/UTILS/HELPER_SCRIPTS[* baseline]: 
+..pts/UTILS/HELPER_SCRIPTS[* baseline]: 
+..pts/UTILS/HELPER_SCRIPTS[* baseline]: 
+..pts/UTILS/HELPER_SCRIPTS[* baseline]: 
+..pts/UTILS/HELPER_SCRIPTS[* baseline]: ^C
+..pts/UTILS/HELPER_SCRIPTS[* baseline]: ^

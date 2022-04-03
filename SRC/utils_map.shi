@@ -1,0 +1,118 @@
+#!/bin/bash
+
+# nb: This works but has limitations, in particular it is possible to get errors
+# if a Map name is similar (pattern match wise) to a Key name. BUT: this is only in the 
+# functions listed as <mainly for debug>. Watch for updates. Basic get/set functions work fine.
+# Contributions welcome # - eg. iterate over keys in multi-dimensional manner.
+
+. utils_globals.shi
+
+if ! alreadyIncluded UTILS_MAP; then
+. utils_core.shi
+
+MAP_SUMMARY=$(cat << END_MAP
+Utilities to provide multi-dimentional hash-map style functionality to bash, enabling the addition or extraction of values from a named MAP given any number of keys (one key per dimension).
+END_MAP
+);
+
+## START CONTENT
+
+## Simulate Multi Dimentional HASH/MAP/ASSOCIATIVE ARRAY.
+## Todo: fully test and perhaps mv 'value' as last arg...
+
+# e.g. 
+# - name is name of multi-d map.
+# - value is a value to be put into the map.
+# - 1 2 3 - are keys (3d in this case)
+# - AA BB - are keys (2d in this case)
+#
+# setMapValue name value 1 2 3 ... N etc.
+# getMapValue name 1 2 3 ... N
+
+# 'local' variable storing multi-d maps.
+declare -A _D
+
+_MANGLE_=_
+_SEP=','
+
+_mangle()	# local usage - convert $1 to its internally used format.
+{
+	echo "$_MANGLE_""$1""$_MANGLE_"
+}
+
+_createRealKey()
+{
+	checkNotEmptyString "error in key(s) (at least one value needed)" $1
+
+	local FULL=
+	for i in $*; do
+		PART=$(_mangle $i)
+		FULL="$FULL$_SEP$PART"
+	done
+	echo $FULL
+}
+
+_allMapKeys()
+{
+	echo ${!_D[@]}	# All mangled.
+}
+
+
+_allMapKeyValues()
+{
+	for mangled_key in $(_allMapKeys); do
+		echo $mangled_key: ${_D[$mangled_key]}
+	done
+}
+
+## === 'exported' functions - do not use the above directly, they may change. ====
+
+setMapValue() # <map-name> <value> <key 1> [<key 2> ... <key N>]
+# insert <value> into the given map by <map-name> enabling it to be recovered by providing the same set of keys as given here.
+{
+	local MAPNAME=$1; chkarg MAPNAME; 	# not mangled.
+	local VAL=$2; chkarg VAL; 			# never mangled.
+	
+	shift 2
+	# will mangle MAPNAME & $*
+	_D[$(_createRealKey $MAPNAME $*)]=$VAL
+}
+
+getMapValue() # <map-name> <key 1> [<key 2> ... <key N>] 
+# echo-returns the value selected by <map-name> and whatever keys were given.
+{
+	local MAPNAME=$1; chkarg MAPNAME;	# not mangled.
+
+	shift
+	echo "${_D[$(_createRealKey $MAPNAME $*)]}"
+}
+
+mapKeys() # <map> (for debug, mainly) 
+# echo-return list of all map keys for <map>
+# nb: this will be in 'mangled' internal format - 
+# understanding will require reading the source code.
+{
+	local MAPNAME=$1; chkarg MAPNAME;
+
+	local MANGLED_MAPNAME=$(_mangle $MAPNAME)
+	for mangled_key in $(_allMapKeys); do
+		if [[ "$mangled_key" =~ $MANGLED_MAPNAME ]]; then 
+			echo $mangled_key
+		fi
+	done
+}
+
+mapKeyValues()  # <map<> (for debug, mainly) 
+# echo-return a list of key-value pairs 
+# nb: keys shown in mangled internal format 
+# understanding will require reading the source.
+{
+	MAPNAME=$1; chkarg MAPNAME;
+
+	for mangled_key in $(mapKeys $MAPNAME); do
+		echo "$mangled_key: ${_D[$mangled_key]}"
+	done
+}
+
+# END CONTENT
+fi

@@ -1,0 +1,251 @@
+#!/bin/bash
+
+. utils_globals.shi
+if ! alreadyIncluded UTILS_MSC; then
+. utils_core.shi
+. utils_fd.shi
+
+MSC_SUMMARY=$(cat << END_MSC
+Provides misc servces for thing like: padded output; stripping whitespaces; counting arguments; checking a scripts software dependencies & tarring up directories.
+END_MSC
+);
+
+softwareRequired() # <software-name> - e.g. cpp, tar, git ...
+# check if <software-name> is installed, if not print error. exit.
+{
+	setvar SW "$1";
+	
+	if null "$(which $SW)"; then
+		errecho "Software not installed <$SW> - please install to use this script/option"
+		exiterr -k;
+	fi
+}
+
+stripwhite() # <string>
+# <string> => <string> but without excess whitespace (\t and space) & control chars
+{
+	RES="$1";
+
+	RES=$(echo $RES | xargs)		# obscure trick.
+ 	echo "$RES"
+}
+
+count() 
+# count #args given, echo number as return.
+{ 
+	echo $#; 
+} 
+
+concat() # [-s | -c <string>] <args...> - join args together.
+# e.g. concat a b c => 'abc', concat -c : a b c => 'a:b:c' , concat -s a b => "a b" (space between)
+{ 
+
+	local RES=
+	local ADDCHAR=
+	local TOADDCHAR=
+
+	if test "$1" = "-c"; then TOADDCHAR=$2; shift 2; fi;
+
+	if test "$1" = "-s"; then 
+		shift; 
+		RES=$(concat -c ' ' "$*");
+	else
+		for i in "$@"; do 
+			RES="$RES$ADDCHAR$i";
+			ADDCHAR=$TOADDCHAR
+		done;
+	fi
+
+	echo "$RES"
+}
+
+delimit() # [-d <_LIMITCHAR>] <string> - was useful once... deprecate... TBD.
+# e.g. delimit <string> => %%<string>%%, delimit -d x <string> => x<string>x.
+{
+	local _LIMITCHAR=%%
+
+	if test "$1" = '-d'; 
+	then 	
+		_LIMITCHAR=$2; 
+		shift 2; 
+	fi
+
+	echo $_LIMITCHAR$1$_LIMITCHAR;
+}
+
+randomString() # <numchars - default 10>
+# return a random string (by echo).
+{
+	NUM=$1
+	if test -z "$NUM"; then NUM=10; fi
+
+	chars="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+
+	for ((i=0; i<$NUM; i++))
+	do
+		echo -n ${chars:RANDOM%${#chars}:1}
+	done
+}
+
+isNum() # <arg>
+# return (via exit code) if <arg> is a valid number. e.g. if isNum xxx; then ...
+{
+	setvar NUM $1
+
+	if [[ "$NUM" =~ ^[0-9]*$ ]]; then
+		return 0;
+	else
+		return 1;
+	fi
+}
+
+roundDown() # <value>
+# round down <value> to whole int.
+{
+	NUM=$1
+	checkNotEmptyString "$(fnname) requires a number argument" $NUM
+
+	echo "$NUM/1" | bc
+}
+
+
+getDirs() # [-x]: exclude cwd.
+# echo full path name of dirs, from cwd, recursive, exclude unwanted. 
+{
+	eval $(boolopt -x _EXCLUDE "$@");
+	DIR="$(pwd)/"; 
+
+	if $_EXCLUDE; then _FILTER="| grep -v -E ^$DIR$"; fi
+
+	find "$(pwd)/" -type d -print $_FILTER | grep -v -E "$(getExcludes)";
+}
+
+nds() # no double slash - e.g. "nds echo $PATH" - echo PATH with // => /.. 
+{
+	ne eval "$@" | sed 's?\/\/?/?g';
+}
+
+explode() # <string>
+# explode "ABCDE" => A B C D E
+{
+	echo $1 | grep -o .
+}
+
+printbetween() # [ -n] <start> <end> <file>
+# print lines between regexps <start> and <end> (inclusive) in <file>.
+{
+	eval $(boolopt -n _NUMERIC "$@");
+	setvar START "$1"
+	setvar END "$2"
+	setvar FILE "$3"
+
+	if ! $_NUMERIC; then
+    	if ! grep $START.*$END $FILE; then
+        	sed -n "/$START/,/$END/p" $FILE
+    	fi
+	else
+		sed -n "${START},${END}p" $FILE
+	fi
+}
+
+len() # <string>
+# how many chars in <string> - what is its length.
+{
+	setvar STRING "$1"
+	count $(explode "$STRING")
+}
+
+tardir() # <dir> 
+# tar up a directory <dir> into a tar file.
+{
+	setvar DIR "$1";
+	checkdirexists "$DIR"
+	local OUT="$DIR".tar.gz 
+	tar -zcvf "$OUT" "$DIR"
+	echo "$OUT"
+}
+
+untardir() # <tar file name> 
+# 'untar' file (<tar-file-name>) created using tardir() fn.
+{
+	setvar FILE "$1"
+	checkfileexits "$FILE"
+	tar -zxvf "$FILE"
+}
+
+echoPadded() # <padlen> <...text>
+# echo <text> in standard manner. If less than <padlen> chars used, pad out with spaces.
+{
+	setvar PADLEN $1;
+	shift;
+	setvar TEXT "$*";
+
+	if ! isNum $PADLEN; then
+		echo notnum
+		errecho "$(fnname) - must supply a number as argument";
+		callFnIfExists Usage;
+		exiterr 1;
+	fi	
+
+	local TEXTLEN=$(len $TEXT)
+	local PADDING=$((PADLEN - TEXTLEN));
+
+	echo -n $TEXT;
+	for ((i=0; i<PADDING; i++)) do 
+		echo -n " ";  
+	done
+}
+
+errechoPadded() # <padlen> <...text>
+# errecho <text> (to stderr, &2) in standard manner. If less than <padlen> chars used, pad out with spaces.
+{
+	>&2 echoPadded $*
+}
+
+YMD="%y-%m-%d"
+YMD_HM="%y.%m.%d-%H.%M"
+LONG="%Y.%m.%d-%H.%M.%S"
+
+datefmt() # [-l|--long] --s]: echo-return formatted date.
+# -l - use a long format
+# -s - use a short format
+{
+	case $# in
+		0)	date +$YMD_HM;;
+		1)
+			case $1 in
+				-l|--long)
+					date +$LONG
+					;;
+				-s)		
+					date +$YMD
+				;;
+				*) 
+					errfnecho "unknown option/arg"; 
+					callFnIfExists Usage; 
+					exiterr -k;
+				;;
+		esac;;
+	esac
+}
+
+getarg() # <num> <...args>
+# echo-return the <num>'th argument in <...args> (i.e. $<num>)
+{
+	# TODO - try ${${ARG}} - as a quickie way.
+	setvar ARG "$1";
+	shift;
+	
+	local COUNT=1;
+	for i in $*; do
+		if test "$COUNT" = "$ARG"; then
+			echo $i;
+			break;
+		fi
+		COUNT=$((COUNT+1));
+	done
+}
+
+
+# END CONTENT
+fi

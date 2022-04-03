@@ -1,0 +1,306 @@
+#!/bin/bash
+# Core functions used in all other *utils*.
+
+# the following file contain global values used across utils e.g. git dir, scripts dirs, log dirs ... one time include if present.
+. utils_globals.shi
+
+if ! alreadyIncluded UTILS_CORE; then
+### START CONTENT - no indent.
+
+CORE_SUMMARY=$(cat <<END_CORE
+Core utility functions for bash. These functions are used across other utility functions extensively. 
+Many are more for convenience or readibility than for extensive functionality, e.g. '$(script)' - print the basename of 
+the currently running script, check if a file or directory exists (isFile, isDir), check for null argument in if (null), etc.
+END_CORE
+);
+
+nostdout() 
+# turn off standard output.
+{ 
+	exec > /dev/null; 
+} 	
+
+nostderr() 
+# turn of standard error.
+{ 
+	exec 2> /dev/null; 
+}
+
+null() # <...args>
+# if any args are supplied return true (0), else return false (1); uses test -z
+# e.g. < if null "$@"; then ... fi >
+{ 
+	if test -z "$*"; then return 0; else return 1; fi 
+}; 
+
+isdir() # <name>n
+# return true (0)  if <name> is a directory, false (0) otherwise.
+# e.g. < if isdir "$NAME"; then ... fi >
+{ 
+	if test -d "$1"; then return 0; else return 1; fi 
+}; 
+
+isDir() # <name>
+# return true (0)  if <name> is a directory, false (0) otherwise.
+{ 	
+	isdir "$@"; 
+} 
+
+isfile() # <name>
+# return true (0)  if <name> is a file, false (0) otherwise.
+# e.g. < if isfile "$NAME"; then ... fi >
+{ 
+	if test -f "$1"; then return 0; else return 1; fi 
+}; 
+
+isFile() # <name> 
+# return true (0)  if <name> is a file, false (0) otherwise  (dulicate of isfile).
+{ 
+	isfile "$@"; 
+} 
+
+script() 
+# echo name (no path) of current (containing) bash script file.
+{ 
+	echo $(basename $0); 
+}; 	
+
+scriptName() 
+# print base of current bash script *file* name (duplicate function)
+{ 
+	script; 
+};
+
+callFnIfExists() # <name> <...args>
+# if <name> is a function, call it with <...args>, otherwise do nothing.
+{ 
+	if test "$(type -t $1)" = "function" ; then "$@"; fi 
+}
+
+Usage() 
+# default Usage function. Autocalled by bash utils - details of usage expected in bash $USAGE variable.
+{ 
+	USAGE="$(echo "$USAGE" | sed 's?\./??' )"; 
+	errecho "$USAGE"; 
+} 
+
+_doscriptexit() # <code>
+# exit with code, if not in terminal mode, otherwise print message.
+{ 
+	local EXITCODE=$1;
+
+	if test "$0" = "bash" || test "$0" = "sh"; then # don't exit on terminal cmd line! deeply annoying!
+		2>&1 echo "'exit' called in function <${FUNCNAME[2]}> - status <$EXITCODE>"
+	elif test "$EXITCODE" = "-k"; then
+		kill 0
+	else
+		exit $EXITCODE;
+	fi
+}
+
+exitok()
+# exit with ok status (0). If in terminal (command line) mode - don't exit terminal shell - instead print a message.
+{ 
+	_doscriptexit 0; 
+}; 
+
+exiterr() # [ -k | <exit code>]
+# exit with non-ok status ($1). If in terminal (command line) mode - don't exit terminal -instaad print a message.
+# use -k option to exit from nested subprocesses.
+{ 
+	local EXITCODE=1; 
+	if ! test -z "$1"; then EXITCODE=$1; fi;
+	
+	_doscriptexit $EXITCODE;
+}
+
+chkarg() # <bash variable name> [<level> (default 2)]
+# if <bash variable name> does not have a value - print error and exit.
+# <level> - how many levels of function call to find function name (for error message)
+# e.g. 2: use function calling chkarg; 3: function that calls function that calls this function. etc.
+{
+	local VARNAME=$1; 	
+	local LEVEL=${2:-2};
+	
+	local VALUE=${!VARNAME}
+	local FNNAME=$(fnname -l $LEVEL)
+
+	if null "$VALUE"; then 
+		errecho "[$FNNAME]: Call to fn has missing argument <$VARNAME>"
+		exiterr;
+	fi
+} 
+
+chkvar() 
+# as chkarg
+{ 
+	chkarg "$@"; 
+} 
+
+chkval() 
+# as chkarg
+{ 
+	chkarg "$@"; 
+} 
+
+setvar() # <bash var name> <value>
+# set <bash var name> to <value> - if <value> is undefined - error and exit.
+# use to check parameters passed to functions correctly.
+{ 
+	local VARNAME="$1"; chkarg VARNAME;
+	local VALUE="$2"; 
+
+	local THISFN=$(fnname);
+	local CALLINGFN=$(fnname -l 2)
+
+	if null "$VALUE"; then
+		errecho "$(script): <$THISFN> (caller: <$CALLINGFN>, var: <$VARNAME>) - no value given for second arg (\$2)"
+		exiterr -k;
+	fi
+
+	eval "$VARNAME"="\"$VALUE\""; 
+} 
+
+### color codes (vt100)
+ BLACK="\e[30m"
+ RED="\e[31m"		
+ LIGHTRED="\e[91m"	
+ GREEN="\e[32m"		
+ YELLOW="\e[33m"
+ BLUE="\e[34m"
+ MAGENTA="\e[35m"
+ CYAN="\e[36m"
+ WHITE="\e[37m"
+ NORMAL="\e[0m"
+ RESET=$NORMAL
+### 
+
+isTerminalOutput() 
+# if the current output stream (1, 2 ...) is to a terminal return true (0), else false (1)
+{
+	local OUTPUT=1; if ! null "$1"; then OUTPUT="$1"; fi
+    if test -t $OUTPUT; then return 0; else return 1; fi
+}
+
+# set to <true> to turn color off.
+UTS_NOCOLOR=${UTS_NOCOLOR:-false}
+
+setcol() # <color code>
+# set text color - see VT100 color codes provided.
+{
+	local COLOR=$1; chkarg COLOR;
+	if $UTS_NOCOLOR; then return 0; fi
+
+	if isTerminalOutput; then echo -n -e $COLOR; fi
+	if isTerminalOutput 2; then >&2 echo -n -e $COLOR; fi
+
+	return 0;
+}
+
+setcolnorm() 
+# reset text color to 'normal'. 
+{
+	setcol $NORMAL
+}
+resetcol() 
+# reset text color to 'normal'. 
+{ 	
+	setcolnorm; 
+} 
+
+scrCurPos() # [ <x> <y> ]
+# Position the cursor at(row,column(relative top rhs) as per <x>,<y> - or at 0,0 if either args not given.
+{
+	local ROW=$1;
+ 	local COL=$2;
+ 	
+ 	if ! null $ROW && ! null $COL; then
+ 		local OUTPUT="\e[""${ROW}"";""${COL}""H"
+ 		echo -ne "$OUTPUT"
+ 	else
+ 		echo -ne "\e[H"
+ 	fi
+}
+
+scrClear() # no args.
+# clear the screen.
+{
+	echo -ne "\e[2J"
+}
+
+errecho() # [-s] <...args>
+# print message to stderr. -s: precede message with using script name
+{  
+	setcol $RED; 
+	if test "$1" = "-s"; then
+		>&2 echo "$(script): "
+		shift;
+	fi
+	>&2 echo "$*" 
+	resetcol; 
+}
+
+errfnecho() # <...args>
+# always precedes error with script and bash function name.
+# print message to stderr.
+{ 
+	errecho -s "[${FUNCNAME[1]}()]: $*"; 
+}
+
+fnname() # [-l <call-fn-level>] 
+# echo the current function name (the function calling this one)
+# -l:  e.g. "fnname -l 2"  echo name of function  calling function calling this function.
+{
+	local ARG_FLAG=$1;
+	local ARG_LEVEL=$2;
+	local FN_LEVEL=1;
+
+	if test "$ARG_FLAG" = "-l"; then 
+		if test -z "$ARG_LEVEL"; then errfnecho "[fnname -l NO LEVEL PROVIDED]"; exiterr -k; fi
+		FN_LEVEL=$ARG_LEVEL; 
+	fi
+	echo "${FUNCNAME[$FN_LEVEL]}"
+}
+
+ne() # <bash command ... >
+# run command without those irritating error messages! (ne: No Error) e.g. $ ne errecho hello - no output
+{ 
+	2>/dev/null $*; 
+}	
+
+no() # <bash command ...>
+# run command without std output! (no: No Output) - e.g. $ no echo hello - no output
+{ 
+	>/dev/null $*; 
+}		
+
+checkNotEmptyString() # <msg> [ <bash var name> ] 
+# deprecated - use chkarg().
+# e.g. usage: $ 'local NAME=""; checkNotEmptyString "You forgot to give a name!" $NAME' 
+{
+	local ERROR_MSG="$1";
+	local VALUE_TO_CHECK="$2";
+
+	if test -z "$VALUE_TO_CHECK"; then 
+		errecho "$0 - [$(fnname -l 2)] $ERROR_MSG"; 
+		callFnIfExists Usage
+		exiterr
+	fi
+}
+
+xgrep() # <...normal 'grep' args>
+# call grep with args given, but exclude certain patterns from results (grep -v)
+# $UTS_EXCLUDE defines the pattern - in egrep form - see utils_globals.shi.
+{ 
+	grep "$@" | grep -v -E "$(getExcludes)"; 
+}
+
+xfind() # <... standard find args>
+# call find with args given, but exclude certain patterns from results (grep -v)
+# $UTS_EXCLUDE defines the pattern - in egrep form - see utils_globals.shi.
+{ 
+	find "$@" | grep -v -E "$(getExcludes)"; 
+}
+
+# END
+fi

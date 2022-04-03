@@ -1,0 +1,118 @@
+#!/bin/bash
+
+. utils_core.shi
+if ! alreadyIncluded UTILS_UIO; then
+. utils_opts.shi
+
+UTS_FORCE=false;	# override manual intervention requests
+UTS_FORCEFLAG=${UTS_FORCEFLAG:-"--ff"}	# can override from environment.
+
+###
+# The functions below (force related) set the 'force' flaghat override requests for user confirmation.
+# See Warning(), HitAnyKeyToContiue() etc.
+# Similar to 'rm -f xxx' for example.
+# By default '--ff' in a containing script with trigger the force flag to be set. The value '--ff' can be overridden.
+# See utils_globals.
+###
+
+UIO_SUMMARY=$(cat <<END_UIO
+Functions that request user input ("warning: do you want to..., hit any key to...") before continuing.
+END_UIO
+);
+
+setForce() 		
+# set the force flag to true.
+{ 
+	export UTS_FORCE=true; 
+}
+resetForce()	
+# set the force flag to false.
+{ 
+	export UTS_FORCE=false;
+}
+getForce()		
+# return TRUE if the force flag is set.
+{ 
+	if $UTS_FORCE; then return 0; else return 1; fi; 
+}
+
+force()			
+# return TRUE if the force flag is set.
+{ 
+	getForce; 
+}
+
+checkIfForce() # <arg> - deprecated - for back compatibility and internal utils use.
+# check if <arg> is $UTS_FORCEFLAG- if it is the force flag will be set.
+{
+	if test "$1" = "$UTS_FORCEFLAG"; then setForce; return 0; else return 1; fi
+}
+
+hitAnyKeyToContinue() # [<message>] 
+# print <message> and wait for 'enter' key press.
+{
+	local MSG=$1
+
+	if $(force); then return; fi
+	
+	MSG="$MSG - hit enter to continue - ctl-c to exit"
+	errecho $MSG
+	read x
+}
+
+Warning() # [<message>] 
+# show <message> - then wait for yes/n response, exit on 'n'.
+# [-n] - do not exit on "no" reponse - return false (1) instead.
+# <message> is optional. Default is 'Continue?'
+{
+	local EXITONNO=true; if test "$1" = "-n"; then EXITONNO=false; shift; fi
+	local OPTIONAL_MSG="$1";
+	local MSG="CONTINUE?" # default.
+
+	local RETURN_VAL=0;
+	if $(force); then return $RETURN_VAL; fi
+
+	if ! test -z "$OPTIONAL_MSG"; then MSG="$OPTIONAL_MSG"; fi
+	MSG="$MSG [yes|n]"
+
+	while true; do
+		errecho $MSG
+		read yn
+		case $yn in
+			[Yy]es ) 
+				break;;
+			[Nn]* ) 
+				if "$EXITONNO";
+				then 
+					exiterr;
+				else 
+					RETURN_VAL=1; break; 
+				fi;;
+			* ) errecho "Please answer yes or no (n).";;
+		esac
+	done
+	return $RETURN_VAL;
+}
+
+# Parse args of containing script - set force flag is option set (default --ff, but configurable as UTS_FORCEFLAG).
+if ! $UTS_NOAUTOARGS; then
+	eval $(boolopt $UTS_FORCEFLAG IGNORE_USER_INPUT "$@");
+	if $IGNORE_USER_INPUT; then 
+		setForce; 
+	fi
+fi
+
+# do autoparsing of help flags.
+if ! $UTS_NOAUTOARGS; then 
+    eval $(boolopt $UTS_HELPFLAG DO_HELP "$@");
+    eval $(boolopt $UTS_HELP DO_HELP "$@");
+
+	if $DO_HELP; then
+		callFnIfExists Usage; 
+		callFnIfExists Help; 
+		exitok; 
+	fi
+fi
+
+#CONTENT ENDS
+fi

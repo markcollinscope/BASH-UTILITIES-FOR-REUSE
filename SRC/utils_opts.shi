@@ -1,0 +1,243 @@
+#!/bin/bash
+
+. utils_globals.shi
+if ! alreadyIncluded UTILS_OPTS; then
+
+OPTS_SUMMARY=$(cat << END_OPTS
+Utility functions to enable the automatic parsing of command line option flags (-x, --doit, etc) and their subsequent 
+removal from the command line argument \
+to make processing easier. Options can appear in any position. 
+Use of an optional --rem 'description ...' when specifying command line flag auto processing results in 
+the 'description ...' part *automatically* being added to the Usage description of the containing script. 
+END_OPTS
+);
+
+. utils_core.shi
+. utils_msc.shi
+
+## functions to enable printing of 'autocomplete' command to be eval'd to setup cmd line autocomplete (bash autocomplete).
+## nb: at present this is focused on git-autocompletion - e.g. optautocomplete "_git_customcommand() { _git_checkout; }" would set-up a
+## 'git customcommand' script to automatically present the same bash autocomplete options as 'git checkout'.
+
+__USEAUTOCOMPLETE=false;
+__AUTOCOMPLETEOPTION="--autocomplete" 
+
+optautocomplete() # <auto complete command>
+# e.g. a scripts could contain:
+# optautocomplete "_git_rmb() { _git_checkout; }; export _git_rmb" - see bash and git autocomplete for more details.
+{
+	setvar AC "$*"
+	if $__USEAUTOCOMPLETE; then
+		echo $AC;
+		exitok;
+	fi
+}
+
+# if autoargument processing (uts_globals) is turned on.
+if ! $UTS_NOAUTOARGS; then
+	# if the first argument to the script including this file is '--autocomplete@
+	if test "$1" = "$__AUTOCOMPLETEOPTION"; then  
+		# switch on auto complete for bash/git.
+		__USEAUTOCOMPLETE=true;
+		shift;
+	fi
+fi
+
+# for use in building up options description, as part of Usage call.
+__USAGE_FILE=$(tmpFile);
+rm -f $__USAGE_FILE;
+
+__DOCFLAG="--rem"
+__OPTIONS="Options:"
+
+_addOptRem()
+{
+	setvar FLG "$1";
+	setvar TXT "$2";
+
+	if ! test -f $__USAGE_FILE; then 
+		echo $__OPTIONS > $__USAGE_FILE;
+	fi
+
+	echo "$FLG $TXT" >> $__USAGE_FILE;
+}
+
+_processRem() 
+{
+	local USEDOC="$1"
+	local RET=
+
+	if test "$USEDOC" = "$__DOCFLAG"; then
+		setvar TEXT "$2";
+		setvar FLAG "$3";
+		_addOptRem "$FLAG" "$TEXT";
+		RET="shift 2";
+	fi
+	echo $RET;
+}
+
+getOptUsage() # [-n]
+# print option documentation a given by '--rem' argument to xxxopt functions.
+# -n: don't print "Options:" at head of option list.
+{
+	local FILTER=false;
+
+	if test "$1" = "-n"; then 
+		FILTER=true;
+	fi
+
+	if test -f $__USAGE_FILE; then
+		$FILTER || cat $__USAGE_FILE;
+		$FILTER && ( cat $__USAGE_FILE | grep -v "$__OPTIONS" );
+	fi
+}
+
+binopt() # [ --rem <documentation...> ] <flag> <bash var> <default-value> <value-if-flag-given> "$@"
+# called in the form:
+# eval $(binopt --rem <documentation...' -a AVARIABLE 99 101 "$@")
+# where: 	<flag> (-a) is the flag to be processed on the including script.
+#			<bash-var> (AVARIABLE) - the bash var to set set to either <default-value> or <other-value>
+#			<defaul-value> - <bash-var> is set to this value if <flag> is not present.
+#			<value-if-flag-given> - <bash-var> is set to this value if <flag> is present
+# --rem is optional. If given <documentation...> will be added to Usage of containing script.
+{
+	eval $(_processRem "$@");
+
+	setvar FLAG "$1"
+	setvar VAR "$2"
+	setvar DEFAULT_VALUE "$3"
+	setvar OTHER_VALUE "$4"
+	shift 4;
+
+	local ARGS=
+
+	EVAL="$VAR=\"$DEFAULT_VALUE\""
+	while ! null "$1"; do
+		if test "$1" = "$FLAG"; then
+			EVAL="$VAR=\"$OTHER_VALUE\""
+		else
+			ARGS="$ARGS \"$1\"";
+		fi
+		shift;
+	done
+
+
+	echo "set -- $ARGS; $EVAL"
+}
+
+boolopt() # [ --rem <documentation...> ] <flag> <bash var> "$@"
+# called in the form:
+# eval $(boolopt --rem <documentation...' -a AVARIABLE "$@"
+# where: 	<flag> (-a) is the flag to be processed on the including script.
+#			<bash-var> (AVARIABLE) - the bash var to set set to either 'true' or 'false'
+# --rem is optional. If given <documentation...> will be added to Usage of containing script.
+# 
+# AVARIABLE is set to true if <flag> is present on the script call command line.
+{
+	eval $(_processRem "$@");
+	
+	setvar FLAG "$1"
+	setvar VAR "$2"
+	shift 2;
+
+	binopt "$FLAG" "$VAR" false true "$@"
+}
+
+valopt() # [ --rem <documentation...> ] <flag> <bash var> <value> "$@"
+# called in the form:
+# eval $(valopt --rem <documentation...' -a AVARIABLE hello "$@")
+# where: 	<flag> (-a) is the flag to be processed on the including script.
+#			<bash-var> (AVARIABLE) - the bash var to set set to either <default-value> or <other-value>
+#			<value> - the value AVARIABLE is set to if <flag> is present. AVARIABLE will undefined if not.
+# --rem is optional. If given <documentation...> will be added to Usage of containing script.
+{
+
+	eval $(_processRem "$@");
+
+	setvar FLAG "$1"
+	setvar VAR "$2"
+	shift 2;
+
+	local ARGS=
+	local EVAL=
+
+	while ! test -z "$1"; do
+		if test "$1" = "$FLAG"; then
+			EVAL="$VAR=\"$2\""
+			shift 2;
+		else
+			ARGS="$ARGS \"$1\"";
+			shift
+		fi
+	done
+
+	echo "set -- $ARGS; $EVAL "
+}
+
+errifopt() # "$@"
+# exit with error if there are options (-*) present (or left after boolopt, valopt processing)  in "$@" 
+{
+	while ! test -z "$1"; do
+		case "$1" in
+		-*)
+			errecho "Unknown option: \"$1\""
+			Usage;
+			exiterr -k;
+			;;
+		esac
+		shift;
+	done
+}
+
+Usage() # no args. 
+# print $USAGE and also print option documentation defined using boolopt, valopt (with --rem flag), etc.
+# nb: redefinition of Usage defined in _core utils.
+{
+	OPTIONS="$(getOptUsage)"
+	>&2 cat<<<$USAGE
+	>&2 cat<<<$OPTIONS
+}
+
+_MAXARGS=9999 # arbitrary but large - upper limit
+
+chkargcount() # [-l] <lower-limit> <upper-limit> "$@"
+# check argument count in "$@" is between <lower-limit> and <upper-limit> inclusive - if not,  error with exit.
+# [-l] - lower limit only required, no upper limit.
+{
+	LOWERONLY=false; 
+	if test "$1" = "-l"; then 
+		LOWERONLY=true; 
+		shift; 
+	fi
+	setvar LOWERLIMIT $1;
+	shift;
+
+	if ! $LOWERONLY; then 
+		setvar UPPERLIMIT $1; 
+		shift; 
+	else 
+		UPPERLIMIT=$_MAXARGS; 
+	fi
+	chkarg UPPERLIMIT
+
+	local COUNT=$(count "$@");
+
+	if (( $COUNT < $LOWERLIMIT )) || (( $COUNT > $UPPERLIMIT)); then
+		local MSG="Incorrect number of arguments - "
+		if $LOWERONLY; then 
+			MSG=$(concat "$MSG" "only $COUNT arguments given - more than: $LOWERLIMIT required")
+		elif (( $LOWERLIMIT == $UPPERLIMIT )); then
+			MSG=$(concat "$MSG" "$COUNT arguments given - expected $LOWERLIMIT");
+		else
+			MSG=$(concat "$MSG" "expected (between): $LOWERLIMIT and $UPPERLIMIT - got $COUNT");
+		fi
+		errecho "$MSG"
+
+		callFnIfExists Usage;
+		exiterr -k;
+	fi
+}
+
+# END CONTENT
+fi
+
