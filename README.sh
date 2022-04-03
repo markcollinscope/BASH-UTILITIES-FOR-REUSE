@@ -11,7 +11,15 @@ cat << END
 # BASH-UTILS - VERSION 0.9 - REVIEW EDITION
 A set of over 40 bash utility functions to make writing complex well structured Bash Scripts easier.
 
-Broadly speaking the utilities provide functionality to simplify writing bash functions (check arguments, etc), under take debugging or verbose output (when -v flag passed into a script), get or override user input (-f type flag), check or ensure files and directories exist, do useful stuff with git directories, create map data structures (multi-d), and a whole load of other useful miscellaneous stuff.
+Broadly speaking the utilities provide functionality to simplify 
+* run time checking bash functions - argument checking for functions, etc, 
+* under take debugging or verbose output (when --vb flag passed into a script), 
+* get or override user input (-f type flag), 
+* check or ensure files and directories exist, 
+* do useful stuff with git directories, 
+* create map data structures (multi-d), 
+
+and a whole load of other useful miscellaneous stuff.
 
 ## Using the utilities
 To use any of the utilities they must  be 'included' within your script. 

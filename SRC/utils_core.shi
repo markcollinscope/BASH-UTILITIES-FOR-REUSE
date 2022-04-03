@@ -8,7 +8,9 @@ if ! alreadyIncluded UTILS_CORE; then
 ### START CONTENT - no indent.
 
 CORE_SUMMARY=$(cat <<END_CORE
-Core utility functions for bash. These functions are used across other utility functions extensively. Many are more for convenience or readibility than for extensive functionality, e.g. 'script' - print the basename of the currently running script...
+Core utility functions for bash. These functions are used across other utility functions extensively. 
+Many are more for convenience or readibility than for extensive functionality, e.g. '$(script)' - print the basename of 
+the currently running script, check if a file or directory exists (isFile, isDir), check for null argument in if (null), etc.
 END_CORE
 );
 
