@@ -57,7 +57,7 @@ cat << END
 ## Functions Descriptions By File
 END
 
-for i in $UTS_UTILS; do
+for i in $UTILS; do
 	echo "### $i"
 	echo '```'
 	ffn ".*" -s -m "$i" | grep -v "^_"
@@ -66,6 +66,7 @@ for i in $UTS_UTILS; do
 done
 
 cat << END
+
 
 ### File naming
 
@@ -77,23 +78,35 @@ cat << END
 
 * *test -z xxx vs. [[ -z xxx ]]* - the code currently uses the 'test' form of condition for 'if' statements, etc. e.g. 'test -z "$X"' - is $X an empty string. If enough people complain I could be tempted to convert this - but is it worth it?
 
+## HELPER SCRIPTS and related notes
+
+This README.md file was generated from a bash script (see README.sh) using some HELPER functions (see HELPER related sub-directory), 
+mainly to extract functions and their documentation from the utils_xxx.shi files.
+
+The HELPER scripts provided are:
+
+END
+
+(
+HELPERS="ffn.sh fndef.sh"
+cd HELPER*;
+
+for i in $HELPERS; do
+	echo SCRIPT: $(basename $i);
+	echo
+	echo USAGE:
+	2>&1 exec "$i"
+	echo;
+done
+)
+
+cat << CATEND
+
 ## Comments and Contributions Welcome
-Contributions welcome:
+
+Feedback or Contributions welcome:
 * email:markcollinscope+bashutils@gmail.com, or message here.
 * branch etc. to contribute something new and make a pull request.
 * be patient - do let me know if you're doing something in advance, please.
 
-## Other notes:
-This README.md file was generated from a bash script (see README.sh) using some HELPERS functions (see directory), 
-mainly to extract functions and their documentation from the utils_xxx.shi files.
-
-The HELPER scripts provided are:
-END
-for i in HELPERS/*; do
-	echo SCRIPT: 
-	echo $(basename $i);
-	echo SYNOPSIS:
-	2>&1 $i --help 
-	echo;
-done
-
+CATEND

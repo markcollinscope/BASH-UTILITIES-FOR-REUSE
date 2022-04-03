@@ -186,7 +186,7 @@ isTerminalOutput()
 UTS_NOCOLOR=${UTS_NOCOLOR:-false}
 
 setcol() # <color code>
-# set text color - see VT100 color codes.
+# set text color - see VT100 color codes provided.
 {
 	local COLOR=$1; chkarg COLOR;
 	if $UTS_NOCOLOR; then return 0; fi
