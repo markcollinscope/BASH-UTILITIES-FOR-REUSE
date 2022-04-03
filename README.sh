@@ -55,7 +55,7 @@ utils_globals.shi   | This is a set of bash variables that are useful in scripts
 END
 
 cat << END
-## Functions Descriptions By File
+## Functions Descriptions Per File
 END
 
 for i in $UTILS; do

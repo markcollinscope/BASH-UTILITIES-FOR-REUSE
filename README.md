@@ -37,7 +37,7 @@ Putting "--ff" as the first arguments to a script call 'forces' the functions to
 _					| _
 utils.sh            | put '. utils.sh' at the top of your script to includes all utils files listed above.
 utils_globals.shi   | This is a set of bash variables that are useful in scripts - globally assigned values for backup directories, git directories, etc.  Defaults are provided but if set externally and exported these values can be overridden. Some functions *will* expect the values to be set. It is possible to override any value without editing the file - environment takes precedence.
-## Functions Descriptions By File
+## Functions Descriptions Per File
 ### utils_core.shi
 ```
 nostdout() 
@@ -461,7 +461,6 @@ pvar_rmdir()
 
 UIO_SUMMARY=$(cat <<END_UIO
 Functions that request user input ("warning: do you want to..., hit any key to...") before continuing.
-
 END_UIO
 );
 
