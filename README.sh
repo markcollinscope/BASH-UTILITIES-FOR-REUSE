@@ -8,22 +8,23 @@ LITERAL='```'
 UTILS="utils_core.shi utils_fd.shi utils_git.shi utils_globals.shi utils_map.shi utils_msc.shi utils_opts.shi utils_pvar.shi utils.shi utils_uio.shi utils_vb.shi"
 
 cat << END
-# BASH-UTILS - VERSION 0.9.0 - CURRENTLY UNDER REVIEW - BUT USABLE
+# BASH-UTILS - VERSION 0.9.0 - UNDER REVIEW - USABLE
 There may be typos in this documentation. It is still under review.
 
-A set of over 40 bash utility functions to make writing complex well structured Bash Scripts easier.
+A set of over 60 bash utility functions to make writing complex well structured Bash Scripts easier.
 
 Broadly speaking the utilities provide functionality to simplify 
 * run time checking bash functions - argument checking for functions, etc, 
-* under take debugging or verbose output (when --vb flag passed into a script), 
+* under take debugging or verbose output (when -v or --vb flag passed into a script), 
 * get or override user input (-f type flag), 
 * check or ensure files and directories exist, 
-* do useful stuff with git directories, 
+* do useful stuff with git directories, move stuff around, commit stuff from scripts.
 * create map data structures (multi-d), 
 
-and a whole load of other useful miscellaneous stuff.
+and a whole load of other useful stuff.
 
 ## Using the utilities
+
 To use any of the utilities they must  be 'included' within your script. 
 To do this put:
 
