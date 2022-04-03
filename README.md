@@ -460,8 +460,7 @@ pvar_rmdir()
 ###
 
 UIO_SUMMARY=$(cat <<END_UIO
-Functions that request user input ("warning: do you want to..., hit any key to...") before \
-continuing. Putting "$UTS_FORCEFLAG" as the first arguments to a script call 'forces' the functions to skip user input (e.g. like rm -f does).
+Functions that request user input ("warning: do you want to..., hit any key to...") before continuing. Putting "$UTS_FORCEFLAG" as the first arguments to a script call 'forces' the functions to skip user input (e.g. like rm -f does).
 END_UIO
 );
 
