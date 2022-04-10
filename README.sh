@@ -110,24 +110,21 @@ This README.md file was generated from a bash script (see README.sh) using some 
 mainly to extract functions and their documentation from the utils_xxx.shi files.
 
 The HELPER scripts provided are:
-
-ND
+END
 
 TMPF=$(tmpFile)
 
-2>&1 (
 HELPERS="ffn.sh fndef.sh"
 cd HELPER*;
 
 for i in $HELPERS; do
 	echo "### HELPER SCRIPT: $(basename $i)";
-	$i "--hh"
-done
-) > $TMPF
+	2>&1 $i "--hh"
+done > $TMPF
 
-$LITERAL
-cat < $TMPF
-$LITERAL
+echo $LITERAL
+cat $TMPF
+echo $LITERAL
 
 cat << END
 ## Comments and Contributions Welcome
