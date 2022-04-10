@@ -15,15 +15,15 @@ if ! alreadyIncluded UTILS_GIT; then
 ### START CONTENT
 
 gitroot() 
-# echo-return the name of the root git repo given the cwd.
+# echo-return the name of the root git directory given the cwd.
 {
 	checkIsGitDir;
 	git rev-parse --show-toplevel
 }
 
 gitrootns() 
-# echo-return the name of the root git repo given the cwd.
-# however, remoate any '/'s e.g. '/usr/include'  - will be echo-returned as '_usr_include'
+# echo-return the name of the root git directory given the cwd.
+# however, remove any '/'s e.g. '/usr/include'  - will be echo-returned as '_usr_include'
 # enables git root dir to be used as an identifier or filename - or context for pvars (see utils).
 {
 	gitroot | sed 's?/?_?g'
@@ -52,7 +52,7 @@ isGitDir()
 checkIsGitDir() 
 # error and exit if cwd is not within a git repo.
 {
-	if ! $(isGitDir); then
+	if ! $(isGitDir); then # tbd - check.
 		errecho "$0: Error <$(pwd)> Not A Git Dir"
 		exiterr -k;
 	fi
