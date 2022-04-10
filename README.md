@@ -26,7 +26,7 @@ To do this put:
 ```
 Filename            | Notes
 --------------------|--------------
-utils_core.shi      | Core utility functions for bash. These functions are used across other utility functions extensively. Many are more for convenience or readibility than for extensive functionality, e.g. 'script' - print the basename of the currently running script... functions include dir/file checking/creation, null arg checking, bash argument checking and default Usage() function (requried USAGE var to be defined).
+utils_core.shi      | Core utility functions for bash. These functions are used across other utility functions extensively. Many are more for convenience or readibility than for extensive functionality, e.g. 'script' - print the basename of the currently running script... functions include dir/file checking/creation, null arg checking, bash argument checking and default Usage() function (requires USAGE var to be defined).
 utils_vb.shi        | Functions mainly used in debugging - that print values, etc. when a 'verbose' flag is set to TRUE/ON.  Note that the functionality automatically parses (then removes) "--vb", if it is an argument to a script using these utils. If detected the 'verbose' flag (UTS_VERBOSE) is set to TRUE/ON. If not detected UTS_VERSBOSE will be set to FALSE/OFF.
 utils_opts.shi 		| Utility functions to enable the automatic parsing of command line option flags (-x, --doit, etc) and their subsequent removal from the command line argument to make processing easier. Options can appear in any position. Use of an optional --rem 'description ...' when specifying command line flag auto processing results in the 'description ...' being added automatically to the Usage description in the containing script (assuming it uses the default Usage() function).
 utils_git.shi 		| Utitlites to assist in the automation of git related activities. In particular allows detection of the 'current' git repo. e.g. get currrent git root dir, is this a git repo? what's the current branch called ... etc.
@@ -41,10 +41,6 @@ utils_globals.shi   | This is a set of bash variables that are useful in scripts
 ## Functions Descriptions Per File
 ### utils_core.shi
 ```
-Core utility functions for bash. These functions are used across other utility functions extensively. Many are more for convenience or readibility than for extensive functionality, e.g. 'script' - print the basename of the currently running script... functions include dir/file checking/creation, null arg checking, bash argument checking and default Usage() function (requried USAGE var to be defined).
-END_CORE
-);
-
 nostdout() 
 # turn off standard output.
  
@@ -55,7 +51,7 @@ null() # <...args>
 # if any args are supplied return true (0), else return false (1); uses test -z
 # e.g. < if null "$@"; then ... fi >
  
-isdir() # <name>n
+isdir() # <name>
 # return true (0)  if <name> is a directory, false (1) otherwise.
 # e.g. < if isdir "$NAME"; then ... fi >
  
@@ -131,9 +127,6 @@ errfnecho() # <...args>
 # always precedes error with script and bash function name.
 # print message to stderr.
  
-	errecho -s "[${FUNCNAME[1]} ()]: $*"; 
-}
-
 fnname() # [-l <call-fn-level>] 
 # echo the current function name (the function calling this one)
 # -l:  e.g. "fnname -l 2"  echo name of function  calling function calling this function.
@@ -367,18 +360,6 @@ getarg() # <num> <...args>
 ```
 ### utils_opts.shi
 ```
-(assuming it uses the default Usage() function).
-END_OPTS
-);
-
-. utils_core.shi
-. utils_msc.shi
-
-## functions to enable printing of 'autocomplete' command to be eval'd to setup cmd line autocomplete (bash autocomplete).
-## nb: at present this is focused on git-autocompletion - e.g. optautocomplete "_git_customcommand() { _git_checkout; }" would set-up a
-## 'git customcommand' script to automatically present the same bash autocomplete options as 'git checkout'.
-
-
 optautocomplete() # <auto complete command>
 # e.g. a scripts could contain:
 # optautocomplete "_git_rmb() { _git_checkout; }; export _git_rmb" - see bash and git autocomplete for more details.
@@ -467,19 +448,6 @@ pvar_rmdir()
 ```
 ### utils_uio.shi
 ```
-# See Warning(), HitAnyKeyToContiue() etc.
-# Similar to 'rm -f xxx' for example.
-# By default '--ff' in a containing script with trigger the force flag to be set. The value '--ff' can be overridden.
-# See utils_globals.
-###
-
-UIO_SUMMARY=$(cat <<END_UIO
-Functions that request user input ("warning: do you want to..., hit any key to...") before continuing. \
-Putting "$UTS_FORCEFLAG" as an arguments to a script call 'forces' the functions to skip user input (e.g. like rm -f does).\
-Parsing of UTS_FORCEFLAG ($UTS_FORCEFLAG) is automatic.
-END_UIO
-);
-
 setForce() 		
 # set the force flag to true.
  
@@ -525,9 +493,6 @@ vbvar() # <bash-var> - nb: no '$' needed or permitted.
 # e.g. vbvar MY_VAR
 # for debug -  print name and value of bash variable - <bash-var>
 
-	vbecho "$(basename $0) [${FUNCNAME[1]}()]: $BASHVAR: <${!BASHVAR}>";
-}
-
 vbecho() # <string>
 # print <string> if $(verbose) - verbose output flag - is true.
  
@@ -535,9 +500,6 @@ vbfnecho() # <string>
 # print <echo style string> if $(verbose) - verbose output flag - is true.
 # precede <echo style string> with function name of calling function.
  
-	vbecho "$(basename $0) [${FUNCNAME[1]}()]: $*"; 
-}
-
 vbsleep() # <seconds>
 # sleep for <seconds> if $(verbose) (verbose output flag) is true.
  

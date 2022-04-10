@@ -63,7 +63,7 @@ END
 for i in $UTILS; do
 	echo "### $i"
 	echo '```'
-	ffn ".*" -s -m "$i" | grep -v "^_"
+	ffn "[^].*" -s -m "$i" | grep -v "^_"
 	echo ' '
 	echo '```'
 done
