@@ -413,9 +413,6 @@ valopt() # [ --rem <documentation...> ] <flag> <bash var> <value> "$@"
 #			<value> - the value AVARIABLE is set to if <flag> is present. AVARIABLE will undefined if not.
 # --rem is optional. If given <documentation...> will be added to Usage of containing script.
 
-errifopt() # "$@"
-# exit with error if there are options (-*) present (or left after boolopt, valopt processing)  in "$@" 
-
 Usage() # no args. 
 # print $USAGE and also print option documentation defined using boolopt, valopt (with --rem flag), etc.
 # nb: redefinition of Usage defined in _core utils.
@@ -423,6 +420,12 @@ Usage() # no args.
 chkargcount() # [-l] <lower-limit> <upper-limit> "$@"
 # check argument count in "$@" is between <lower-limit> and <upper-limit> inclusive - if not,  error with exit.
 # [-l] - lower limit only required, no upper limit.
+
+# print usage if help has been requested on the command line.
+
+errifopt() # "$@"
+# exit with error if there are options (-*) present (or left after boolopt, valopt processing)  in "$@" 
+# if help has been requested by command line flag (e.g. --hh) it will be shown.
 
  
 ```
@@ -484,9 +487,6 @@ Warning() # [-n] [<message>]
 # [-n] - do not exit on "no" reponse - return false (1) instead.
 # <message> is optional. Default is 'Continue?'
 
-processHelp() 
-# print usage if help has been requested on the command line.
-
  
 ```
 ### utils_vb.shi
@@ -541,18 +541,18 @@ This README.md file was generated from a bash script (see README.sh) using some 
 mainly to extract functions and their documentation from the utils_xxx.shi files.
 
 The HELPER scripts provided are:
-
 ### ffn.sh
 ```
 
 Usage: ffn.sh [-options] <part-fn-name>
 
-Search </home/mark/GIT/scripts> and sub-dirs for all 'script includes (*.shi, etc)' to find bash fns matching the partial name given.
+Search <MYENV_SCRIPTROOT> and sub-dirs for all 'script includes (*.shi, etc)' to find bash fns matching the partial name given.
 <part-fn-name> is a grep style pattern. Do *not* put '()' at the end - this is done automatically.
+
+nb: you must define MYENV_SCRIPTROOT in your environment for this function to work, or an error will be given.
+
 Matches functions of the form:
----
-afunctionname() - start of line, alphanumeric name, () at the end, no spaces.
----
+"afunctionname()" - i.e. function name is at start of line, alphanumeric name, () at the end, no spaces in name or before ().
 Options:
 -a match any function (do not give a function name)
 -x search for an exact match only
@@ -564,10 +564,9 @@ Options:
 
 ```
 
-
 ### fndef.sh
 ```
-fndef.sh [-n] <part-fn-name>
+fndef.sh  <part-fn-name>
 Show bash function definition(s) - using native bash 'set' format (full listing)
 Match any function that contains <part-fn-name> within it.
 

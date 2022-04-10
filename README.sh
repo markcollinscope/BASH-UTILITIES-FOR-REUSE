@@ -124,7 +124,6 @@ HELPERS="ffn.sh fndef.sh"
 cd HELPER*;
 
 for i in $HELPERS; do
-	echo >> $TMPF
 	echo "### $(basename $i)" >> $TMPF
 	echo $LITERAL >> $TMPF
 	$i "--hh" 2>> $TMPF
