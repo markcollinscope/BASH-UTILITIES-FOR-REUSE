@@ -79,12 +79,11 @@ utils_globals.shi   | This is a set of bash variables that are useful in scripts
 END
 
 cat << END
-## Functions Descriptions Per File
+## Per File - Detailed Description of Functions.
 END
 
 # Utils file list:
 _UTILS="utils_core.shi utils_fd.shi utils_git.shi utils_map.shi utils_msc.shi utils_opts.shi utils_pvar.shi utils_uio.shi utils_vb.shi"
-
 
 for i in $_UTILS; do
 	echo "### $i"
@@ -95,8 +94,6 @@ for i in $_UTILS; do
 done
 
 cat << END
-
-
 ### File naming
 
 * *.shi (shell include) is used as a suffix for all utility files.
@@ -121,16 +118,17 @@ HELPERS="ffn.sh fndef.sh"
 cd HELPER*;
 
 for i in $HELPERS; do
-	echo SCRIPT: $(basename $i);
-	echo
-	echo USAGE:
-	2>&1 exec "$i"
+	cat << END
+		### HELPER SCRIPT: $(basename $i);
+		$LITERAL
+END
+	2>&1 $i "--options"
+
 	echo;
 done
 )
 
-cat << CATEND
-
+cat << END
 ## Comments and Contributions Welcome
 
 Feedback or Contributions welcome:
@@ -138,4 +136,4 @@ Feedback or Contributions welcome:
 * branch etc. to contribute something new and make a pull request.
 * be patient - do let me know if you're doing something in advance, please.
 
-CATEND
+END

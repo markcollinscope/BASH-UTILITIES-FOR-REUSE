@@ -66,7 +66,7 @@ utils_uio.shi       | Functions that request user input ("warning: do you want t
 _					| _
 utils.shi            | put '. utils.shi' at the top of your script to includes all utils files listed above.
 utils_globals.shi   | This is a set of bash variables that are useful in scripts - globally assigned values for backup directories, git directories, etc.  Defaults are provided but if set externally and exported these values can be overridden. Some functions *will* expect the values to be set. It is possible to override any value without editing the file - environment takes precedence.
-## Functions Descriptions Per File
+## Per File - Detailed Description of Functions.
 ### utils_core.shi
 ```
 nostdout() 
@@ -522,8 +522,6 @@ checkIfVerbose() # <arg> - deprecated
 
  
 ```
-
-
 ### File naming
 
 * *.shi (shell include) is used as a suffix for all utility files.
@@ -541,9 +539,8 @@ mainly to extract functions and their documentation from the utils_xxx.shi files
 
 The HELPER scripts provided are:
 
-SCRIPT: ffn.sh
-
-USAGE:
+		### HELPER SCRIPT: ffn.sh;
+		```
 
 Usage: ffn.sh [-options] <part-fn-name>
 
@@ -561,6 +558,15 @@ Options:
 -s use shorter output format (prints fn upto first blank line)
 -l use longer detailed output format
 -d use bash native (set) output format
+
+		### HELPER SCRIPT: fndef.sh;
+		```
+./fndef.sh - [main] Missing function name
+fndef.sh [-n] <part-fn-name>
+Show bash function definition(s) - using native bash 'set' format.
+Match any function that contains <part-fn-name> within it.
+-n - show the fn name only
+
 
 ## Comments and Contributions Welcome
 
