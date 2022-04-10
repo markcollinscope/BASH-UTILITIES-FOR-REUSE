@@ -558,8 +558,7 @@ Options:
 -s use shorter output format (prints fn upto first blank line)
 -l use longer detailed output format
 -d use bash native (set) output format
-```
-
+	```
 	```
 	### HELPER SCRIPT: fndef.sh;
 ./fndef.sh - [main] Missing function name
@@ -568,8 +567,7 @@ Show bash function definition(s) - using native bash 'set' format.
 Match any function that contains <part-fn-name> within it.
 -n - show the fn name only
 
-```
-
+	```
 ## Comments and Contributions Welcome
 
 Feedback or Contributions welcome:

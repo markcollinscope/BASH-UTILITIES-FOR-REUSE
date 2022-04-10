@@ -123,8 +123,9 @@ for i in $HELPERS; do
 	### HELPER SCRIPT: $(basename $i);
 END
 	2>&1 $i "--options"
-	echo $LITERAL
-	echo;
+	cat << END
+	$LITERAL
+END
 done
 )
 
