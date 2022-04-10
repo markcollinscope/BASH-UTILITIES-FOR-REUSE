@@ -26,37 +26,23 @@ To do this put:
 ```
 Filename            | Notes
 --------------------|--------------
-utils_core.shi      | Core utility functions for bash. 
-These functions are used across other utility functions extensively. 
-Many are more for convenience or readibility than for extensive functionality, e.g. 'script' - print the basename of the 
-currently running script... functions include dir/file checking/creation, null arg checking, bash argument checking 
-and default Usage() function (requried USAGE var to be defined).
-utils_vb.shi        | Functions mainly used in debugging - that print values, etc. when a 'verbose' flag is set to TRUE/ON. 
-Note that the functionality automatically parses (then removes) "--vb", if it is an argument to a script
-using these utils. If detected the 'verbose' flag (UTS_VERBOSE) is set to TRUE/ON. If not detected UTS_VERSBOSE will be
-set to FALSE/OFF.
-utils_opts.shi 		| Utility functions to enable the automatic parsing of command line option flags (-x, --doit, etc) 
-and their subsequent removal from the command line argument to make processing easier. 
-Options can appear in any position. 
-Use of an optional --rem 'description ...' when specifying command line flag auto processing 
-results in the 'description ...' being added automatically to the Usage description in the containing script 
-(assuming it uses the default Usage() function).
+utils_core.shi      | Core utility functions for bash. These functions are used across other utility functions extensively. Many are more for convenience or readibility than for extensive functionality, e.g. 'script' - print the basename of the currently running script... functions include dir/file checking/creation, null arg checking, bash argument checking and default Usage() function (requried USAGE var to be defined).
+utils_vb.shi        | Functions mainly used in debugging - that print values, etc. when a 'verbose' flag is set to TRUE/ON.  Note that the functionality automatically parses (then removes) "--vb", if it is an argument to a script using these utils. If detected the 'verbose' flag (UTS_VERBOSE) is set to TRUE/ON. If not detected UTS_VERSBOSE will be set to FALSE/OFF.
+utils_opts.shi 		| Utility functions to enable the automatic parsing of command line option flags (-x, --doit, etc) and their subsequent removal from the command line argument to make processing easier. 
+Options can appear in any position. Use of an optional --rem 'description ...' when specifying command line flag auto processing results in the 'description ...' being added automatically to the Usage description in the containing script (assuming it uses the default Usage() function).
 utils_git.shi 		| Utitlites to assist in the automation of git related activities. In particular allows detection of the 'current' git repo. e.g. get currrent git root dir, is this a git repo? what's the current branch called ... etc.
-utils_pvar.shi      | Provides services to enable bash scripts to store 'persistent' variables. Persisent meaning the variable retain their value across different calls to the same, or another, script.
+utils_pvar.shi      | Provides services to enable bash scripts to store 'persistent' variables. Persisent meaning the variable retain their value across different calls to the same, or another, script. Enables the setting of context to determine the exact scope of persistent vars.
 utils_fd.shi 	    | Utilities for file and directory management. Find directories and files, check they exist, find directories not in the 'excluded' list (UTS_EXCLUDE - defined in egrep format). Functions with 'x' as first char exclude results based on the UTS_EXCLUDE value.
-utils_map.shi 		| Utilities to provide multi-dimentional hash-map style functionality to bash, enabling the addition or 
-extraction of values from a named MAP given any number of keys (one key per dimension).
+utils_map.shi 		| Utilities to provide multi-dimentional hash-map style functionality to bash, enabling the addition or extraction of values from a named MAP given any number of keys (one key per dimension).
 utils_msc.shi 		| Provides misc servces for thing like: padded output; stripping whitespaces; counting arguments; checking a scripts software dependencies & tarring up directories.
-utils_uio.shi       | Functions that request user input ("warning: do you want to..., hit any key to...") before continuing. 
-Putting "--ff" as an arguments to a script call 'forces' the functions to skip user input (e.g. like rm -f does).
-Parsing of UTS_FORCEFLAG (--ff) is automatic.
+utils_uio.shi       | Functions that request user input ("warning: do you want to..., hit any key to...") before continuing. Putting "--ff" as an arguments to a script call 'forces' the functions to skip user input (e.g. like rm -f does).Parsing of UTS_FORCEFLAG (--ff) is automatic.
 _					| _
 utils.sh            | put '. utils.sh' at the top of your script to includes all utils files listed above.
 utils_globals.shi   | This is a set of bash variables that are useful in scripts - globally assigned values for backup directories, git directories, etc.  Defaults are provided but if set externally and exported these values can be overridden. Some functions *will* expect the values to be set. It is possible to override any value without editing the file - environment takes precedence.
 ## Functions Descriptions Per File
 ### utils_core.shi
 ```
-Core utility functions for bash.  These functions are used across other utility functions extensively. Many are more for convenience or readibility than for extensive functionality, e.g. 'script' - print the basename of the currently running script... functions include dir/file checking/creation, null arg checking, bash argument checking and default Usage() function (requried USAGE var to be defined).
+Core utility functions for bash. These functions are used across other utility functions extensively. Many are more for convenience or readibility than for extensive functionality, e.g. 'script' - print the basename of the currently running script... functions include dir/file checking/creation, null arg checking, bash argument checking and default Usage() function (requried USAGE var to be defined).
 END_CORE
 );
 
