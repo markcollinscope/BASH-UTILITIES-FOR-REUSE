@@ -1,10 +1,10 @@
 #!/bin/bash
 
 . utils_globals.shi
-PVAR_SUMMARY=$(cat << END_PVAR
+PVAR_SUMMARY=$(cat << END
 Provides services to enable bash scripts to store 'persistent' variables. Persisent meaning the variable retain their value \
 across different calls to the same, or another, script. Enables the setting of context to determine the exact scope of persistent vars.
-END_PVAR
+END
 );
 
 if ! alreadyIncluded UTILS_PVAR; then
@@ -16,7 +16,7 @@ if ! alreadyIncluded UTILS_PVAR; then
 # START CONTENT
 
 __PVARSUFFIX=".pvar"
-__PVARDIR=${UTS_PVARDIR:-"/tmp/"}
+__PVARDIR=${UTS_PVARDIR:-"/tmp/PVARS"}
 ensuredirexists $__PVARDIR
 
 _pvardir()

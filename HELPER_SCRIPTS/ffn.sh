@@ -44,9 +44,9 @@ eval $(boolopt --rem "match any function (do not give a function name)" -a ANYFU
 eval $(boolopt --rem "search for an exact match only" -x EXACTMATCH "$@")
 eval $(boolopt --rem "print matching file name only" -n PRINTFILENAMEONLY "$@")
 eval $(valopt  --rem "specify files (by glob pattern) to match (ls style - e.g. *.sh)" -m FILEPATTERN "$@")
-eval $(boolopt --rem "use shorter output format (prints fn upto first blank line)" -s SHORTFORMAT "$@")
-eval $(boolopt --rem "use longer detailed output format" -l LONGFORMAT "$@")
-eval $(boolopt --rem "use bash native (set) output format" -d USEBASHNATIVE "$@")
+eval $(boolopt --rem "use shorter output format (prints fn upto open brace)" -s SHORTFORMAT "$@")
+eval $(boolopt --rem "use longer detailed output format (full listing)" -l LONGFORMAT "$@")
+eval $(boolopt --rem "use bash native (set) output format (full listing, after parsing by bash)" -d USEBASHNATIVE "$@")
 errifopt "$@";
 
 searchForMatch()

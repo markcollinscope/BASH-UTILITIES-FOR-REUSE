@@ -10,10 +10,18 @@ fi
 LITERAL='```'
 
 cat << END
-# BASH-UTILS - VERSION 0.9.0 - UNDER FINAL REVIEW - PRODUCTION RELEASE - CAN BE USED.
+# BASH-UTILS - VERSION 0.9.1 - UNDER FINAL REVIEW - PRODUCTION RELEASE - CAN BE USED.
+
+[nb: There may be typos in this documentation. It is still under review. Please let the author know if you spot any.]
+
 A set of around 100 bash utility functions to make writing complex well structured Bash Scripts easier.
 
-nb: There may be typos in this documentation. It is still under review. Please let the author know of any.
+In this README:
+* How to setup the utilities for use.
+* List of source files and their contents in overview.
+* Detailed description of each function in each file.
+* Descriptions of HELPER functions provided. These search for function(s) by part names - and give details from there. Useful if you can't remember a function name or what options, etc. it has.
+
 
 Broadly speaking the utilities provide functionality to simplify 
 * run time checking bash functions - argument checking for functions, etc, 
@@ -47,23 +55,27 @@ $LITERAL
 nb: bash functions 'return' values in one of two ways - either by echo-return (echoing a value) - in which case the calling script
 must use something like the following to pick up the return:
 $LITERAL
-VALUE=\$(function) 
+VALUE=\$(fn) 
 $LITERAL
 
-Alternatively they may 'return' values is using a 'return' statement explicity - return 0 or non-0.
+Alternatively they may 'return' values is using a 'return' statement explicity - either 0 or non-0.
 $LITERAL
 0 - will be evaluated as True in bash conditional statements
-Non-0 - will be evaluated as False in bash conditional statements. So:
+Non-0 - will be evaluated as False in bash conditional statements.
 
 boolf() { return 1; }
-if boolf; then ... else ... fi 
+if boolf; then 
+	... 
+else 
+	... 
+fi 
 $LITERAL
 
-would execute the 'else' part of the bash 'if' expression.
+would execute the 'else' part of this 'if' expression.
 END
 
 cat << END
-## The Source
+## Source Files and Overview of Content
 
 ### Summary of Functionality
 
