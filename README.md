@@ -565,6 +565,15 @@ Show bash function definition(s) - using native bash 'set' format (full listing)
 Match any function that contains <part-fn-name> within it.
 
 
+```
+
+```
+
+
+```
+
+```
+
 ## Comments and Contributions Welcome
 
 Feedback or Contributions welcome:

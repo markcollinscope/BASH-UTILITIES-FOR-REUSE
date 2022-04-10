@@ -2,6 +2,11 @@
 
 . utils.shi
 
+if ! test "$(pwd)" = "$(gitroot)"; then
+	errecho 'not in git root directory for utils'
+	exiterr;
+fi
+
 LITERAL='```'
 
 cat << END
@@ -119,12 +124,13 @@ HELPERS="ffn.sh fndef.sh"
 cd HELPER*;
 
 for i in $HELPERS; do
+	echo >> $TMPF
 	echo "### $(basename $i)";
 	echo $LITERAL >> $TMPF
 	2>&1 $i "--hh" >> $TMPF
-	echo > $TMPF
+	echo >> $TMPF
 	echo $LITERAL >> $TMPF
-	echo > $TMPF
+	echo >> $TMPF
 done 
 
 cat $TMPF

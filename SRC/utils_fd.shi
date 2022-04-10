@@ -82,15 +82,18 @@ fdmatch() # <shell glob pattern>
 	stat -t $1 > /dev/null 2>&1
 }
 
+__TMPDIR='/tmp/UTILS-TMPDIR'
 tmpFile() # [ <num> ] 
 # generate a tmp file name with <num> unique charactors in it. Default 5.
 {
+	ensuredirexists $__TMPDIR
+
 	local LEN="$1"
 	if null "$LEN"; then LEN=5; fi
 
 	PREFIX=$(script)
 	
-	local TMP="/tmp/$PREFIX.$(randomString $LEN)"
+	local TMP="$__TMPDIR/$PREFIX.$(randomString $LEN)"
 	echo $TMP
 }
 
