@@ -48,6 +48,10 @@ if boolf; then ... else ... fi
 ```
 
 would execute the 'else' part of the bash 'if' expression.
+## The Source
+
+### Summary of Functionality
+
 Filename            | Notes
 --------------------|--------------
 utils_core.shi      | Core utility functions for bash. These functions are used across other utility functions extensively. Many are more for convenience or readibility than for extensive functionality, e.g. 'script' - print the basename of the currently running script... functions include dir/file checking/creation, null arg checking, bash argument checking and default Usage() function (requires USAGE var to be defined).
