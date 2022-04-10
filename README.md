@@ -539,35 +539,25 @@ mainly to extract functions and their documentation from the utils_xxx.shi files
 
 The HELPER scripts provided are:
 
-	```
-	### HELPER SCRIPT: ffn.sh;
+ND
 
-Usage: ffn.sh [-options] <part-fn-name>
+TMPF=/tmp/README.sh.t70kh
 
-Search </home/mark/GIT/scripts> and sub-dirs for all 'script includes (*.shi, etc)' to find bash fns matching the partial name given.
-<part-fn-name> is a grep style pattern. Do *not* put '()' at the end - this is done automatically.
-Matches functions of the form:
----
-afunctionname() - start of line, alphanumeric name, () at the end, no spaces.
----
-Options:
--a match any function (do not give a function name)
--x search for an exact match only
--n print matching file name only
--m specify files (by glob pattern) to match (ls style - e.g. *.sh)
--s use shorter output format (prints fn upto first blank line)
--l use longer detailed output format
--d use bash native (set) output format
-	```
-	```
-	### HELPER SCRIPT: fndef.sh;
-./fndef.sh - [main] Missing function name
-fndef.sh [-n] <part-fn-name>
-Show bash function definition(s) - using native bash 'set' format.
-Match any function that contains <part-fn-name> within it.
--n - show the fn name only
+2>&1 (
+HELPERS="ffn.sh fndef.sh"
+cd HELPER*;
 
-	```
+for i in ; do
+	echo "### HELPER SCRIPT: utils_vb.shi";
+	utils_vb.shi "--hh"
+done
+) > 
+
+```
+cat < 
+```
+
+cat << END
 ## Comments and Contributions Welcome
 
 Feedback or Contributions welcome:

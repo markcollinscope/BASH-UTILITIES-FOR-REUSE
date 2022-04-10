@@ -111,23 +111,23 @@ mainly to extract functions and their documentation from the utils_xxx.shi files
 
 The HELPER scripts provided are:
 
-END
+ND
 
-(
+TMPF=$(tmpFile)
+
+2>&1 (
 HELPERS="ffn.sh fndef.sh"
 cd HELPER*;
 
 for i in $HELPERS; do
-	cat << END
-	$LITERAL
-	### HELPER SCRIPT: $(basename $i);
-END
-	2>&1 $i "--options"
-	cat << END
-	$LITERAL
-END
+	echo "### HELPER SCRIPT: $(basename $i)";
+	$i "--hh"
 done
-)
+) > $TMPF
+
+$LITERAL
+cat < $TMPF
+$LITERAL
 
 cat << END
 ## Comments and Contributions Welcome
