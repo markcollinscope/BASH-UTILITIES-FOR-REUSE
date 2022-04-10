@@ -125,9 +125,9 @@ cd HELPER*;
 
 for i in $HELPERS; do
 	echo >> $TMPF
-	echo "### $(basename $i)";
+	echo "### $(basename $i)" >> $TMPF
 	echo $LITERAL >> $TMPF
-	2>&1 $i "--hh" >> $TMPF
+	$i "--hh" 2>> $TMPF
 	echo >> $TMPF
 	echo $LITERAL >> $TMPF
 	echo >> $TMPF

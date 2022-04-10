@@ -541,7 +541,9 @@ This README.md file was generated from a bash script (see README.sh) using some 
 mainly to extract functions and their documentation from the utils_xxx.shi files.
 
 The HELPER scripts provided are:
+
 ### ffn.sh
+```
 
 Usage: ffn.sh [-options] <part-fn-name>
 
@@ -559,18 +561,16 @@ Options:
 -s use shorter output format (prints fn upto first blank line)
 -l use longer detailed output format
 -d use bash native (set) output format
+
+```
+
+
 ### fndef.sh
+```
 fndef.sh [-n] <part-fn-name>
 Show bash function definition(s) - using native bash 'set' format (full listing)
 Match any function that contains <part-fn-name> within it.
 
-
-```
-
-```
-
-
-```
 
 ```
 
