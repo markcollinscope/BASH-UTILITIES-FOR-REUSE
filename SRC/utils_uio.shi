@@ -106,15 +106,19 @@ fi
 
 # do autoparsing of help flags.
 if ! $UTS_NOAUTOARGS; then 
-    eval $(boolopt $UTS_HELPFLAG DO_HELP "$@");
-    eval $(boolopt $UTS_HELP DO_HELP "$@");
+    eval $(boolopt $UTS_HELPFLAG __DO_HELP "$@");
+    eval $(boolopt $UTS_HELP __DO_HELP "$@");
+fi
 
-	if $DO_HELP; then
+processHelp() 
+# print usage if help has been requested on the command line.
+{
+	if $__DO_HELP; then
 		callFnIfExists Usage; 
 		callFnIfExists Help; 
 		exitok; 
 	fi
-fi
+}
 
 #CONTENT ENDS
 fi

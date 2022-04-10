@@ -484,6 +484,9 @@ Warning() # [-n] [<message>]
 # [-n] - do not exit on "no" reponse - return false (1) instead.
 # <message> is optional. Default is 'Continue?'
 
+processHelp() 
+# print usage if help has been requested on the command line.
+
  
 ```
 ### utils_vb.shi
@@ -538,8 +541,7 @@ This README.md file was generated from a bash script (see README.sh) using some 
 mainly to extract functions and their documentation from the utils_xxx.shi files.
 
 The HELPER scripts provided are:
-```
-### HELPER SCRIPT: ffn.sh
+### ffn.sh
 
 Usage: ffn.sh [-options] <part-fn-name>
 
@@ -549,11 +551,20 @@ Matches functions of the form:
 ---
 afunctionname() - start of line, alphanumeric name, () at the end, no spaces.
 ---
+Options:
+-a match any function (do not give a function name)
+-x search for an exact match only
+-n print matching file name only
+-m specify files (by glob pattern) to match (ls style - e.g. *.sh)
+-s use shorter output format (prints fn upto first blank line)
+-l use longer detailed output format
+-d use bash native (set) output format
+### fndef.sh
+fndef.sh [-n] <part-fn-name>
+Show bash function definition(s) - using native bash 'set' format (full listing)
+Match any function that contains <part-fn-name> within it.
 
-### HELPER SCRIPT: fndef.sh
 
-
-```
 ## Comments and Contributions Welcome
 
 Feedback or Contributions welcome:

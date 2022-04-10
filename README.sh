@@ -113,18 +113,21 @@ The HELPER scripts provided are:
 END
 
 TMPF=$(tmpFile)
+rm -rf $TMPF
 
 HELPERS="ffn.sh fndef.sh"
 cd HELPER*;
 
 for i in $HELPERS; do
-	echo "### HELPER SCRIPT: $(basename $i)";
-	2>&1 $i "--hh"
-done > $TMPF
+	echo "### $(basename $i)";
+	echo $LITERAL >> $TMPF
+	2>&1 $i "--hh" >> $TMPF
+	echo > $TMPF
+	echo $LITERAL >> $TMPF
+	echo > $TMPF
+done 
 
-echo $LITERAL
 cat $TMPF
-echo $LITERAL
 
 cat << END
 ## Comments and Contributions Welcome
