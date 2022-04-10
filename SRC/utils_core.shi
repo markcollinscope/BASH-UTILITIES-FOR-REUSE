@@ -32,27 +32,27 @@ null() # <...args>
 }; 
 
 isdir() # <name>n
-# return true (0)  if <name> is a directory, false (0) otherwise.
+# return true (0)  if <name> is a directory, false (1) otherwise.
 # e.g. < if isdir "$NAME"; then ... fi >
 { 
 	if test -d "$1"; then return 0; else return 1; fi 
 }; 
 
 isDir() # <name>
-# return true (0)  if <name> is a directory, false (0) otherwise.
+# return true (0)  if <name> is a directory, false (1) otherwise.
 { 	
 	isdir "$@"; 
 } 
 
 isfile() # <name>
-# return true (0)  if <name> is a file, false (0) otherwise.
+# return true (0)  if <name> is a file, false (1) otherwise.
 # e.g. < if isfile "$NAME"; then ... fi >
 { 
 	if test -f "$1"; then return 0; else return 1; fi 
 }; 
 
 isFile() # <name> 
-# return true (0)  if <name> is a file, false (0) otherwise  (dulicate of isfile).
+# return true (0)  if <name> is a file, false (1) otherwise  (duplicate of isfile).
 { 
 	isfile "$@"; 
 } 
@@ -184,7 +184,8 @@ isTerminalOutput()
 UTS_NOCOLOR=${UTS_NOCOLOR:-false}
 
 setcol() # <color code>
-# set text color - see VT100 color codes.
+# set text color - see VT100 color codes in this file. 
+# color code values include: BLACK RED LIGHTRED GREEN YELLOW BLUE MAGENTA CYAN WHITE NORMAL RESET (both WHITE).
 {
 	local COLOR=$1; chkarg COLOR;
 	if $UTS_NOCOLOR; then return 0; fi
@@ -242,7 +243,7 @@ errfnecho() # <...args>
 # always precedes error with script and bash function name.
 # print message to stderr.
 { 
-	errecho -s "[${FUNCNAME[1]}()]: $*"; 
+	errecho -s "[${FUNCNAME[1]} ()]: $*"; 
 }
 
 fnname() # [-l <call-fn-level>] 

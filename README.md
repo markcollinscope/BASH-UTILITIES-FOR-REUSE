@@ -36,7 +36,7 @@ utils_map.shi 		| Utilities to provide multi-dimentional hash-map style function
 utils_msc.shi 		| Provides misc servces for thing like: padded output; stripping whitespaces; counting arguments; checking a scripts software dependencies & tarring up directories.
 utils_uio.shi       | Functions that request user input ("warning: do you want to..., hit any key to...") before continuing. Putting "--ff" as an arguments to a script call 'forces' the functions to skip user input (e.g. like rm -f does).Parsing of UTS_FORCEFLAG (--ff) is automatic.
 _					| _
-utils.sh            | put '. utils.sh' at the top of your script to includes all utils files listed above.
+utils.shi            | put '. utils.shi' at the top of your script to includes all utils files listed above.
 utils_globals.shi   | This is a set of bash variables that are useful in scripts - globally assigned values for backup directories, git directories, etc.  Defaults are provided but if set externally and exported these values can be overridden. Some functions *will* expect the values to be set. It is possible to override any value without editing the file - environment takes precedence.
 ## Functions Descriptions Per File
 ### utils_core.shi
@@ -56,18 +56,18 @@ null() # <...args>
 # e.g. < if null "$@"; then ... fi >
  
 isdir() # <name>n
-# return true (0)  if <name> is a directory, false (0) otherwise.
+# return true (0)  if <name> is a directory, false (1) otherwise.
 # e.g. < if isdir "$NAME"; then ... fi >
  
 isDir() # <name>
-# return true (0)  if <name> is a directory, false (0) otherwise.
+# return true (0)  if <name> is a directory, false (1) otherwise.
  	
 isfile() # <name>
-# return true (0)  if <name> is a file, false (0) otherwise.
+# return true (0)  if <name> is a file, false (1) otherwise.
 # e.g. < if isfile "$NAME"; then ... fi >
  
 isFile() # <name> 
-# return true (0)  if <name> is a file, false (0) otherwise  (dulicate of isfile).
+# return true (0)  if <name> is a file, false (1) otherwise  (duplicate of isfile).
  
 script() 
 # echo name (no path) of current (containing) bash script file.
@@ -109,7 +109,8 @@ isTerminalOutput()
 # if the current output stream (1, 2 ...) is to a terminal return true (0), else false (1)
 
 setcol() # <color code>
-# set text color - see VT100 color codes.
+# set text color - see VT100 color codes in this file. 
+# color code values include: BLACK RED LIGHTRED GREEN YELLOW BLUE MAGENTA CYAN WHITE NORMAL RESET (both WHITE).
 
 setcolnorm() 
 # reset text color to 'normal'. 
@@ -130,7 +131,7 @@ errfnecho() # <...args>
 # always precedes error with script and bash function name.
 # print message to stderr.
  
-	errecho -s "[${FUNCNAME[1]}()]: $*"; 
+	errecho -s "[${FUNCNAME[1]} ()]: $*"; 
 }
 
 fnname() # [-l <call-fn-level>] 
