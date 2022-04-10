@@ -8,11 +8,14 @@ if ! alreadyIncluded UTILS_VB; then
 . utils_core.shi
 . utils_opts.shi
 
-UTS_VERBOSEFLAG=${UTS_VERBOSEFLAG:-'--vb'}	# can override from environment. # final default here!
+UTS_VERBOSEFLAG=${UTS_VERBOSEFLAG:-'--vb'}	# can override from environment. # default of last resort here!
 
 ## START CONTENT
 VB_SUMMARY=$(cat <<END_VB
-Functions mainly used in debugging - that print values, etc. when a 'verbose' flag is set to on. Note that the functionality automatically parses (then removes) "$UTS_VERBOSEFLAG", if it is the *first* argument to a script, to set verbose on.
+Functions mainly used in debugging - that print values, etc. when a 'verbose' flag is set to TRUE/ON. 
+Note that the functionality automatically parses (then removes) "$UTS_VERBOSEFLAG", if it is an argument to a script
+using these utils. If detected the 'verbose' flag (UTS_VERBOSE) is set to TRUE/ON. If not detected UTS_VERSBOSE will be
+set to FALSE/OFF.
 END_VB
 );
 

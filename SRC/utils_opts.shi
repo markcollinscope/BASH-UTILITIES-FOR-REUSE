@@ -4,8 +4,12 @@
 if ! alreadyIncluded UTILS_OPTS; then
 
 OPTS_SUMMARY=$(cat << END_OPTS
-Utility functions to enable the automatic parsing of command line option flags (-x, --doit, etc) and their subsequent removal from the command line argument \
-to make processing easier. Options can appear in any position. Use of an optional --rem 'description ...' when specifying command line flag auto processing results in the 'description ...' being added to the Usage description in the containing script (without any further effort). 
+Utility functions to enable the automatic parsing of command line option flags (-x, --doit, etc) 
+and their subsequent removal from the command line argument to make processing easier. 
+Options can appear in any position. 
+Use of an optional --rem 'description ...' when specifying command line flag auto processing 
+results in the 'description ...' being added automatically to the Usage description in the containing script 
+(assuming it uses the default Usage() function).
 END_OPTS
 );
 

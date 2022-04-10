@@ -24,6 +24,8 @@ Global variables used across utilities functions. Preset values will take preced
 To override defaults, define a new value *before* including this (or any) utility function definition file (extension .$UTS_BASHINCLUDE).
 For example you could: set 'UTS_VERBOSEFLAG="-v"' before including utils.shi (or other utils file) in order to change the verbose print 
 option from '--vb' to '-v'.
+
+nb: it is not necessary to include this file directly, it will be included by other *.shi files.
 END_GLOB
 );
 
@@ -43,7 +45,7 @@ export UTS_BASHINCLUDE=${UTS_BASHINCLUDE:-"shi"}		# extension used for bash incl
 export UTS_VERBOSEFLAG=${UTS_VERBOSEFLAG:-'--vb'}
 export UTS_FORCEFLAG=${UTS_FORCEFLAG:-'--ff'}
 export UTS_HELPFLAG=${UTS_HELPFLAG:-'--options'}
-export UTS_HELP=${UTS_HELP:-'--opt'}
+export UTS_HELP=${UTS_HELP:-'--hh'}
 
 # external (e.g. node_modules) directories to ignore/remove from script (recursive) searches, etc. (to remove irrelevent output)
 export UTS_EXCLUDE=\
