@@ -4,14 +4,11 @@
 
 LITERAL='```'
 
-# Utils file list:
-UTILS="utils_core.shi utils_fd.shi utils_git.shi utils_globals.shi utils_map.shi utils_msc.shi utils_opts.shi utils_pvar.shi utils.shi utils_uio.shi utils_vb.shi"
-
 cat << END
-# BASH-UTILS - VERSION 0.9.0 - UNDER REVIEW - USABLE
-There may be typos in this documentation. It is still under review.
-
+# BASH-UTILS - VERSION 0.9.0 - UNDER FINAL REVIEW - PRODUCTION RELEASE - CAN BE USED.
 A set of around 100 bash utility functions to make writing complex well structured Bash Scripts easier.
+
+nb: There may be typos in this documentation. It is still under review. Please let the author know of any.
 
 Broadly speaking the utilities provide functionality to simplify 
 * run time checking bash functions - argument checking for functions, etc, 
@@ -28,17 +25,41 @@ and a whole load of other useful stuff.
 ## Using the utilities
 
 To use any of the utilities they must  be 'included' within your script. 
-To do this put:
+
+To do this - having cloned this repo:
+* copy the contents of the SRC directory to a place on your PATH.
+* put the following at the top of your script(s).
 
 $LITERAL
+# this is optional - and shows the redefinition of a default 
+# value ('--vb') within utilities, see later documentation.
+export UTS_VERBOSEFLAG='-v' 
+
 . utils.shi  
 # note the 'dot' (.)
 $LITERAL
+
+nb: bash functions 'return' values in one of two ways - either by echo-return (echoing a value) - in which case the calling script
+must use something like the following to pick up the return:
+$LITERAL
+VALUE=\$(function) 
+$LITERAL
+
+Alternatively they may 'return' values is using a 'return' statement explicity - return 0 or non-0.
+$LITERAL
+0 - will be evaluated as True in bash conditional statements
+Non-0 - will be evaluated as False in bash conditional statements. So:
+
+boolf() { return 1; }
+if boolf; then ... else ... fi 
+$LITERAL
+
+would execute the 'else' part of the bash 'if' expression.
 END
 
 ## The Source
 
-### The files and associated notes:
+### src files and associated notes:
 cat << END
 Filename            | Notes
 --------------------|--------------
@@ -60,7 +81,11 @@ cat << END
 ## Functions Descriptions Per File
 END
 
-for i in $UTILS; do
+# Utils file list:
+_UTILS="utils_core.shi utils_fd.shi utils_git.shi utils_map.shi utils_msc.shi utils_opts.shi utils_pvar.shi utils_uio.shi utils_vb.shi"
+
+
+for i in $_UTILS; do
 	echo "### $i"
 	echo '```'
 	ffn "[^].*" -s -m "$i" | grep -v "^_"

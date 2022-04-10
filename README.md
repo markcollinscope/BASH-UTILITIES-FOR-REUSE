@@ -1,7 +1,7 @@
-# BASH-UTILS - VERSION 0.9.0 - UNDER REVIEW - USABLE
-There may be typos in this documentation. It is still under review.
-
+# BASH-UTILS - VERSION 0.9.0 - UNDER FINAL REVIEW - PRODUCTION RELEASE - CAN BE USED.
 A set of around 100 bash utility functions to make writing complex well structured Bash Scripts easier.
+
+nb: There may be typos in this documentation. It is still under review. Please let the author know of any.
 
 Broadly speaking the utilities provide functionality to simplify 
 * run time checking bash functions - argument checking for functions, etc, 
@@ -18,12 +18,36 @@ and a whole load of other useful stuff.
 ## Using the utilities
 
 To use any of the utilities they must  be 'included' within your script. 
-To do this put:
+
+To do this - having cloned this repo:
+* copy the contents of the SRC directory to a place on your PATH.
+* put the following at the top of your script(s).
 
 ```
+# this is optional - and shows the redefinition of a default 
+# value ('--vb') within utilities, see later documentation.
+export UTS_VERBOSEFLAG='-v' 
+
 . utils.shi  
 # note the 'dot' (.)
 ```
+
+nb: bash functions 'return' values in one of two ways - either by echo-return (echoing a value) - in which case the calling script
+must use something like the following to pick up the return:
+```
+VALUE=$(function) 
+```
+
+Alternatively they may 'return' values is using a 'return' statement explicity - return 0 or non-0.
+```
+0 - will be evaluated as True in bash conditional statements
+Non-0 - will be evaluated as False in bash conditional statements. So:
+
+boolf() { return 1; }
+if boolf; then ... else ... fi 
+```
+
+would execute the 'else' part of the bash 'if' expression.
 Filename            | Notes
 --------------------|--------------
 utils_core.shi      | Core utility functions for bash. These functions are used across other utility functions extensively. Many are more for convenience or readibility than for extensive functionality, e.g. 'script' - print the basename of the currently running script... functions include dir/file checking/creation, null arg checking, bash argument checking and default Usage() function (requires USAGE var to be defined).
@@ -83,7 +107,7 @@ exitok()
 # exit with ok status (0). If in terminal (command line) mode - don't exit terminal shell - instead print a message.
  
 exiterr() # [ -k | <exit code>]
-# exit with non-ok status ($1). If in terminal (command line) mode - don't exit terminal -instaad print a message.
+# exit with non-ok status ($1). If in terminal (command line) mode - don't exit terminal - instead print a message.
 # use -k option to exit from nested subprocesses.
  
 chkarg() # <bash variable name> [<level> (default 2)]
@@ -107,6 +131,7 @@ isTerminalOutput()
 setcol() # <color code>
 # set text color - see VT100 color codes in this file. 
 # color code values include: BLACK RED LIGHTRED GREEN YELLOW BLUE MAGENTA CYAN WHITE NORMAL RESET (both WHITE).
+# precede color code with $ (e.g. $BLACK).
 
 setcolnorm() 
 # reset text color to 'normal'. 
@@ -259,18 +284,6 @@ gitCommitAndPush() # <messasge>
 gitcandpfn() # <message>
 # commit changes using <message>, then push to origin.
  
- 
-```
-### utils_globals.shi
-```
-alreadyIncluded()
-
-getExcludes() 	{ echo $UTS_EXCLUDE; }; export -f getExcludes; 	# get global search excludes.
-getGlobLogDir() 	{ echo $UTS_LOGDIR; }; export -f getGlobLogDir; 			# get dir in which to put log files.
-getGlobBackupDir() 	{ echo $UTS_BACKUPDIR; }; export -f getGlobBackupDir;  		# get dir to copy to for backups, etc.
-###
-
-fi
  
 ```
 ### utils_map.shi
@@ -440,10 +453,6 @@ pvar_rmcontext()
 pvar_rmdir()
 # moves the pvar storage area (i.e. all pvars, all contexts) to a tmp-dir location (/tmp/...).
 
- 
-```
-### utils.shi
-```
  
 ```
 ### utils_uio.shi

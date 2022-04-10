@@ -103,7 +103,7 @@ exitok()
 }; 
 
 exiterr() # [ -k | <exit code>]
-# exit with non-ok status ($1). If in terminal (command line) mode - don't exit terminal -instaad print a message.
+# exit with non-ok status ($1). If in terminal (command line) mode - don't exit terminal - instead print a message.
 # use -k option to exit from nested subprocesses.
 { 
 	local EXITCODE=1; 
@@ -186,6 +186,7 @@ UTS_NOCOLOR=${UTS_NOCOLOR:-false}
 setcol() # <color code>
 # set text color - see VT100 color codes in this file. 
 # color code values include: BLACK RED LIGHTRED GREEN YELLOW BLUE MAGENTA CYAN WHITE NORMAL RESET (both WHITE).
+# precede color code with $ (e.g. $BLACK).
 {
 	local COLOR=$1; chkarg COLOR;
 	if $UTS_NOCOLOR; then return 0; fi
