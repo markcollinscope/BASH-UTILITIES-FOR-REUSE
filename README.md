@@ -1,15 +1,17 @@
 # BASH-UTILS - VERSION 0.9.0 - UNDER REVIEW - USABLE
 There may be typos in this documentation. It is still under review.
 
-A set of over 60 bash utility functions to make writing complex well structured Bash Scripts easier.
+A set of around 100 bash utility functions to make writing complex well structured Bash Scripts easier.
 
 Broadly speaking the utilities provide functionality to simplify 
 * run time checking bash functions - argument checking for functions, etc, 
-* under take debugging or verbose output (when -v or --vb flag passed into a script), 
+* assist undertaking of debugging (verbose output when -v or --vb flag passed into a script - flag configurable), 
 * get or override user input (-f type flag), 
+* create cross-script or same-script (as defined by context) 'persistent' bash variables that hide implementation details.
 * check or ensure files and directories exist, 
-* do useful stuff with git directories, move stuff around, commit stuff from scripts.
-* create map data structures (multi-d), 
+* do useful stuff with git directories, move stuff around, commit stuff from scripts, branch from scripts, etc.
+* automatically process command line flags (e.g. script -x -y -z 200 arg1 arg2) as either boolean flags or values to be set) - and automatically add usage documentation if you use the default Usage() function (provided automatically),
+* enable the creation of map data structures (multi-d), 
 
 and a whole load of other useful stuff.
 
@@ -486,8 +488,8 @@ pvar_rmdir()
 ###
 
 UIO_SUMMARY=$(cat <<END_UIO
-Functions that request user input ("warning: do you want to..., hit any key to...") before continuing. 
-Putting "$UTS_FORCEFLAG" as an arguments to a script call 'forces' the functions to skip user input (e.g. like rm -f does).
+Functions that request user input ("warning: do you want to..., hit any key to...") before continuing. \
+Putting "$UTS_FORCEFLAG" as an arguments to a script call 'forces' the functions to skip user input (e.g. like rm -f does).\
 Parsing of UTS_FORCEFLAG ($UTS_FORCEFLAG) is automatic.
 END_UIO
 );
