@@ -119,11 +119,11 @@ cd HELPER*;
 
 for i in $HELPERS; do
 	cat << END
-		### HELPER SCRIPT: $(basename $i);
-		$LITERAL
+	$LITERAL
+	### HELPER SCRIPT: $(basename $i);
 END
 	2>&1 $i "--options"
-
+	echo $LITERAL
 	echo;
 done
 )

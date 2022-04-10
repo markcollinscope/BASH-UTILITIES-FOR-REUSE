@@ -540,7 +540,6 @@ mainly to extract functions and their documentation from the utils_xxx.shi files
 The HELPER scripts provided are:
 
 		### HELPER SCRIPT: ffn.sh;
-		```
 
 Usage: ffn.sh [-options] <part-fn-name>
 
@@ -560,7 +559,6 @@ Options:
 -d use bash native (set) output format
 
 		### HELPER SCRIPT: fndef.sh;
-		```
 ./fndef.sh - [main] Missing function name
 fndef.sh [-n] <part-fn-name>
 Show bash function definition(s) - using native bash 'set' format.
