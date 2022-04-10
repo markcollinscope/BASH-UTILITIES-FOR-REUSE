@@ -57,10 +57,11 @@ $LITERAL
 would execute the 'else' part of the bash 'if' expression.
 END
 
+cat << END
 ## The Source
 
-### src files and associated notes:
-cat << END
+### Summary of Functionality
+
 Filename            | Notes
 --------------------|--------------
 utils_core.shi      | $CORE_SUMMARY
