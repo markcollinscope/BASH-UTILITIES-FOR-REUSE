@@ -56,7 +56,7 @@ utils_globals.shi   | This is a set of bash variables that are useful in scripts
 ## Functions Descriptions Per File
 ### utils_core.shi
 ```
-and default Usage() function (requried USAGE var to be defined).
+Core utility functions for bash.  These functions are used across other utility functions extensively. Many are more for convenience or readibility than for extensive functionality, e.g. 'script' - print the basename of the currently running script... functions include dir/file checking/creation, null arg checking, bash argument checking and default Usage() function (requried USAGE var to be defined).
 END_CORE
 );
 
