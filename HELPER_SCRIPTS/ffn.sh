@@ -10,7 +10,7 @@ Search <MYENV_SCRIPTROOT> and sub-dirs for all 'script includes (*.$UTS_BASHINCL
 
 nb: you must define MYENV_SCRIPTROOT in your environment for this function to work, or an error will be given.
 
-Matches functions of the form:
+Only matches functions of the form:
 "afunctionname()" - i.e. function name is at start of line, alphanumeric name, () at the end, no spaces in name or before ().
 
 END_USAGE
