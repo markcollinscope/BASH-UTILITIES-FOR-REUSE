@@ -12,7 +12,7 @@ UTS_VERBOSEFLAG=${UTS_VERBOSEFLAG:-'--vb'}	# can override from environment. # de
 
 ## START CONTENT
 VB_SUMMARY=$(cat <<END_VB
-Functions mainly used in debugging - that print values, etc. when a 'verbose' flag is set to TRUE/ON.  Note that the functionality automatically parses (then removes) "$UTS_VERBOSEFLAG", if it is an argument to a script using these utils. If detected the 'verbose' flag (UTS_VERBOSE) is set to TRUE/ON. If not detected UTS_VERSBOSE will be set to FALSE/OFF.
+Functions mainly used in debugging - that print values, etc. when a 'verbose' flag is set to TRUE/ON.  Note that the functionality automatically parses (then removes) "$UTS_VERBOSEFLAG", if it is an argument to a script using these utils. If detected the 'verbose' flag (UTS_VERBOSE) is set to TRUE/ON. If not detected UTS_VERBOSE will be set to FALSE/OFF.
 END_VB
 );
 
