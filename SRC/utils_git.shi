@@ -3,8 +3,7 @@
 . utils_globals.shi
 
 GIT_SUMMARY=$(cat << END_GIT
-Utitlites to assist in the automation of git related activities. In particular allows detection of the 'current' git repo. \
-e.g. get currrent git root dir, is this a git repo? what's the current branch called ... etc.
+Utitlites to assist in the automation of git related activities within bash scripts. Things like: What's the current git root directory? Is the cwd in a git repo? What's the current branch name? Is a commit required in the current git repo? Commit and push the current repo to the origin... etc.
 END_GIT
 );
 
@@ -13,6 +12,19 @@ if ! alreadyIncluded UTILS_GIT; then
 . utils_vb.shi
 
 ### START CONTENT
+
+isGitRootDir()
+# is the cwd a git root directory - return 0 [T] or 1 [F]
+{
+	if test -a ".git"; then return 0; else return 1; fi
+}
+
+isGitDir() 
+# returns T/F [0/1] depending whether the cwd is in a git repo.
+{
+	no ne git rev-parse --is-inside-work-tree
+}
+
 
 gitroot() 
 # echo-return the name of the root git directory given the cwd.
@@ -29,24 +41,24 @@ gitrootns()
 	gitroot | sed 's?/?_?g'
 }
 
+gitrootif()
+# echo-return the root git directory given the cwd. 
+# if not in a git root directory, echo-return '.' (full stop) i.e. current directory.
+# enables things like: $ cd $(gitrootif) - change to git root dir if there is not, else stay where you are.
+{
+	if isGitDir; then
+		gitroot;
+	else
+		echo '.'
+	fi
+}
+
 gitCurrentBranch() 
 # return the current git branch
 {
 	V=$(git branch 2>/dev/null | grep '*' | sed 's/*//')
 	V=${V:="No-Git-Branch-Available"}
 	echo $V
-}
-
-isGitRootDir()
-# is the cwd a git root directory - return 0 [T] or 1 [F]
-{
-	if test -a ".git"; then return 0; else return 1; fi
-}
-
-isGitDir() 
-# returns T/F [0/1] depending whether the cwd is in a git repo.
-{
-	no ne git rev-parse --is-inside-work-tree
 }
 
 checkIsGitDir() 
@@ -122,7 +134,7 @@ gitCommitAndPush() # <messasge>
 }
 
 gitcandpfn() # <message>
-# commit changes using <message>, then push to origin.
+# commit changes using <message>, then push to origin - duplicate for back-compatibilty.
 { 
 	gitCommitAndPush "$@"; 
 }
