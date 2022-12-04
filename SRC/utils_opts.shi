@@ -210,7 +210,7 @@ chkargcount() # [-l] <lower-limit> <upper-limit> "$@"
 	if (( $COUNT < $LOWERLIMIT )) || (( $COUNT > $UPPERLIMIT)); then
 		local MSG="Incorrect number of arguments - "
 		if $LOWERONLY; then 
-			MSG=$(concat "$MSG" "only $COUNT arguments given - more than: $LOWERLIMIT required")
+			MSG=$(concat "$MSG" "$COUNT arguments given - at least: $LOWERLIMIT are required")
 		elif (( $LOWERLIMIT == $UPPERLIMIT )); then
 			MSG=$(concat "$MSG" "$COUNT arguments given - expected $LOWERLIMIT");
 		else
