@@ -129,17 +129,20 @@ chkarg() # <bash variable name> [<level> (default 2)]
 	fi
 } 
 
-chkvar() 
-# as chkarg
+chkvar() # as chkarg - overloaded to show intent.
 { 
 	chkarg "$@"; 
 } 
 
-chkval() 
-# as chkarg
+chkval() # as chkarg - overloaded to show intent.
 { 
 	chkarg "$@"; 
 } 
+
+chkenvvar() # as chkarg - overloaded to show intent.
+{
+	chkarg "$@"; 
+}
 
 setvar() # <bash var name> <value>
 # set <bash var name> to <value> - if <value> is undefined - error and exit.
