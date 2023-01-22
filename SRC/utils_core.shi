@@ -124,7 +124,7 @@ chkarg() # <bash variable name> [<level> (default 2)]
 	local FNNAME=$(fnname -l $LEVEL)
 
 	if null "$VALUE"; then 
-		errecho "[$FNNAME]: Call to fn has missing argument <$VARNAME>"
+		errecho "[$FNNAME]: undefined argument, variable or environment variable: <$VARNAME>"
 		exiterr;
 	fi
 } 

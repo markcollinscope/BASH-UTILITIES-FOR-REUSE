@@ -1,3 +1,4 @@
 cdgitroot - change to git root directory if this is a git repo, otherwise stay where you are!
 decide if origin/lappie is of any use to anyone!
+pushverbose, popverbose ...
 
