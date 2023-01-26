@@ -206,9 +206,10 @@ YMD="%y-%m-%d"
 YMD_HM="%y.%m.%d-%H.%M"
 LONG="%Y.%m.%d-%H.%M.%S"
 
-datefmt() # [-l|--long] --s]: echo-return formatted date.
+datefmt() # [-l|--long|-s|--iso]: echo-return formatted date.
 # -l - use a long format
 # -s - use a short format
+# --iso - use iso standard format
 {
 	case $# in
 		0)	date +$YMD_HM;;
@@ -219,9 +220,12 @@ datefmt() # [-l|--long] --s]: echo-return formatted date.
 					;;
 				-s)		
 					date +$YMD
-				;;
+					;;
+				--iso)
+    				date --iso-8601=seconds;
+					;;
 				*) 
-					errfnecho "unknown option/arg"; 
+					errfnecho "unknown option/arg: $1"; 
 					callFnIfExists Usage; 
 					exiterr -k;
 				;;
