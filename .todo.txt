@@ -18,3 +18,4 @@ Either in exsing uts_ or new one (?) add the function family for varDefault etc.
 o Sort out docco -bash script.
 
 *******************
+UTS_SCRIPTROOT -- helper functions use. Not good, I think as not really a UTS_ thing...
