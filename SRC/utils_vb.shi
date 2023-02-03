@@ -21,7 +21,7 @@ setVerbose()
 # nb: used by vbecho and similar functions
 { 
 	export UTS_VERBOSE=true; 
-	export UTS_VERBOSEFLAG="$UTS_VERBOSEFLAG"; 
+	export UTS_VERBOSE_PASSTHRU="$UTS_VERBOSEFLAG";
 }
 
 getVerbose()	
