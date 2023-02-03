@@ -101,7 +101,7 @@ gitStatus()
 	checkIsGitDir;
 
 	if gitNeedsCommit; then	
-		echo "GIT COMMIT REQUIRED IN: $(pwd)"
+		errecho "GIT COMMIT REQUIRED IN: $(pwd)"
 	fi
 }
 
