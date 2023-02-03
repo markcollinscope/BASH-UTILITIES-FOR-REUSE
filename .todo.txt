@@ -1,6 +1,5 @@
-**************
-cdgitroot - change to git root directory if this is a git repo, otherwise stay where you are!
-decide if origin/lappie is of any use to anyone!
+*******************
+Extend gitrootif function with '--dir' option as alternative to '.' default.
 
 *******************
 o _vb ...
@@ -11,6 +10,13 @@ o OPTS:
 vb-show-ops ... or print values on verbose flag. verbose is better - I think.
 
 ********************
+Options:
+1.	Multiple flags as per => '--xx|-x|--yyyy'
+2.	multi-opt => $(multiopt ... --flag VAR "$@");
+	- continue processing ongoing cmd line args as '--flag' options until either (a) end of input, or (b) next --flag.
+	- limitations - cannot terminate a multi-opt with a normal argument - wouldn't know difference.
+
+********************
 o DEFAULT-VAR stuff.
 Either in exsing uts_ or new one (?) add the function family for varDefault etc.
 
@@ -19,3 +25,11 @@ o Sort out docco -bash script.
 
 *******************
 UTS_SCRIPTROOT -- helper functions use. Not good, I think as not really a UTS_ thing...
+*******************
+
+
+---
+DONE DONE DONE!!!
+
+cdgitroot - change to git root directory if this is a git repo, otherwise stay where you are!
+decide if origin/lappie is of any use to anyone! => done as gitrootif function. 
