@@ -35,7 +35,7 @@ optautocomplete() # <auto complete command>
 
 # if autoargument processing (uts_globals) is turned on.
 if ! $UTS_NOAUTOARGS; then
-	# if the first argument to the script including this file is '--autocomplete@
+	# if the first argument to the script including this file is '--autocomplete'
 	if test "$1" = "$__AUTOCOMPLETEOPTION"; then  
 		# switch on auto complete for bash/git.
 		__USEAUTOCOMPLETE=true;
@@ -145,7 +145,7 @@ boolopt() # [ --rem <documentation...> ] <flag> <bash var> "$@"
 
 valopt() # [ --rem <documentation...> ] <flag> <bash var> <value> "$@"
 # called in the form:
-# eval $(valopt --rem <documentation...' -a AVARIABLE hello "$@")
+# eval $(valopt --rem 'documentation...' -a AVARIABLE hello "$@")
 # where: 	<flag> (-a) is the flag to be processed on the including script.
 #			<bash-var> (AVARIABLE) - the bash var to set set to either <default-value> or <other-value>
 #			<value> - the value AVARIABLE is set to if <flag> is present. AVARIABLE will undefined if not.
