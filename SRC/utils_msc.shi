@@ -21,6 +21,38 @@ softwareRequired() # <software-name> - e.g. cpp, tar, git ...
 	fi
 }
 
+setIFS() # <value>
+# set IFS (Internal Field Separator) to <value>
+# save a copy of the old value. to reset it back, call 'resetIFS (no args)'
+# nb: this is not a stack (push/pop style) function - only stores previous value.
+{
+	___IFS_OLD=$IFS;
+
+	setvar IFS "$1"
+}
+
+resetIFS()
+# set IFS (Internal Field Separator) back to its previous value before 
+# the last call to 'setIFS'. If no previous value - do nothing.
+{
+	if ! null $___IFS_OLD; then
+		IFS=$___IFS_OLD;
+	fi
+}
+
+splitValue() # [--sep <separator>] <value>
+# split <value> into separate fields using <separator> (default '|' - pipe symbol) as the delimiter.
+# nb: changes the value of  IFS - call the 'resetIFS' function (no args)  to restore IFS to its 
+# previous value if necessary. nb: '--sep' is optional.
+{
+	local SEP='|'
+	eval $(valopt --sep SEP "$@");
+	setvar _VALUE "$1"
+	
+	setIFS $SEP
+	echo $_VALUE
+}
+
 stripwhite() # <string>
 # <string> => <string> but without excess whitespace (\t and space) & control chars
 {
