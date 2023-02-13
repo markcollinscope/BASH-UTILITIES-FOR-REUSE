@@ -27,6 +27,8 @@ o Sort out docco -bash script.
 UTS_SCRIPTROOT -- helper functions use. Not good, I think as not really a UTS_ thing...
 *******************
 
+NEW-
+substWithNull $1 $2 - substitutes $1 to null ("") in $2
 
 ---
 DONE DONE DONE!!!
