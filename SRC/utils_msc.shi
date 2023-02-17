@@ -250,6 +250,68 @@ getarg() # <num> <...args>
 	done
 }
 
+_varDefaultName() # <var-name>
+# hides details of how default values are stored.
+# well, as much as possible!
+{
+	setvar VAR_NAME "$1"
+	vbvar VAR_NAME
+
+	# local, opaque.
+	local DEFAULT_EXT="___DEFAULT_XXX";
+
+	DEFAULT_NAME=$(concat $VAR_NAME $DEFAULT_EXT)
+	echo $DEFAULT_NAME;
+}
+
+default() # <var-name> [<default-value>]
+# get/set the 'default' value of a bash VAR. 
+# and save a copy of the default value.
+# if <default-value> is given - acts as a setter.
+# if not - echo-returns value already set - so acts as a getter.
+{
+	if test $# = 1; then
+		setvar VAR_NAME "$1";
+		local DEFAULT_VAR_NAME=$(_varDefaultName $VAR_NAME);
+		vbvar DEFAULT_VAR_NAME
+
+		local VALUE=${!DEFAULT_VAR_NAME}
+		vbfnecho "<$DEFAULT_VAR_NAME> (default-of <$VAR_NAME>) has value: <$VALUE>";
+
+		echo $VALUE;
+	else
+		setvar _VAR_NAME "$1";
+		setvar _DEFAULT_VALUE "$2"
+
+		vbvar _VAR_NAME
+		vbvar _DEFAULT_VALUE
+
+		local DEFAULT_VAR_NAME=$(_varDefaultName $_VAR_NAME);
+		vbvar DEFAULT_VAR_NAME
+
+		eval $DEFAULT_VAR_NAME=$_DEFAULT_VALUE;
+		eval $_VAR_NAME=$_DEFAULT_VALUE;
+	
+		# TODO REMOVE AFTER EXTENSIVE TESTING.
+		vbfnecho "<$_VAR_NAME> - has corresponding default: <$DEFAULT_VAR_NAME>"
+		vbfnecho "<$_VAR_NAME> - default value is: <$(default $_VAR_NAME)>"
+		vbfnecho "<$DEFAULT_VAR_NAME> - has value: <${!DEFAULT_VAR_NAME}>"
+	fi
+}
+
+isDefault() # <var-name>
+# return 'true' (0) if <var-name> still has its default value 
+# as given by 'default' function. If not, return 'false' (non-0).
+{
+	setvar VAR_NAME "$1"
+	local DEFAULT_VALUE=$(default $VAR_NAME)
+
+	vbvar VAR_NAME
+	vbvar DEFAULT_VALUE
+
+	test "${!VAR_NAME}" = "$DEFAULT_VALUE"
+}
+
 
 # END CONTENT
 fi
