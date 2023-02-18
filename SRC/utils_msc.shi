@@ -255,7 +255,6 @@ _varDefaultName() # <var-name>
 # well, as much as possible!
 {
 	setvar VAR_NAME "$1"
-	vbvar VAR_NAME
 
 	# local, opaque.
 	local DEFAULT_EXT="___DEFAULT_XXX";
@@ -273,29 +272,18 @@ default() # <var-name> [<default-value>]
 	if test $# = 1; then
 		setvar VAR_NAME "$1";
 		local DEFAULT_VAR_NAME=$(_varDefaultName $VAR_NAME);
-		vbvar DEFAULT_VAR_NAME
 
 		local VALUE=${!DEFAULT_VAR_NAME}
-		vbfnecho "<$DEFAULT_VAR_NAME> (default-of <$VAR_NAME>) has value: <$VALUE>";
 
 		echo $VALUE;
 	else
 		setvar _VAR_NAME "$1";
 		setvar _DEFAULT_VALUE "$2"
 
-		vbvar _VAR_NAME
-		vbvar _DEFAULT_VALUE
-
 		local DEFAULT_VAR_NAME=$(_varDefaultName $_VAR_NAME);
-		vbvar DEFAULT_VAR_NAME
 
 		eval $DEFAULT_VAR_NAME=$_DEFAULT_VALUE;
 		eval $_VAR_NAME=$_DEFAULT_VALUE;
-	
-		# TODO REMOVE AFTER EXTENSIVE TESTING.
-		vbfnecho "<$_VAR_NAME> - has corresponding default: <$DEFAULT_VAR_NAME>"
-		vbfnecho "<$_VAR_NAME> - default value is: <$(default $_VAR_NAME)>"
-		vbfnecho "<$DEFAULT_VAR_NAME> - has value: <${!DEFAULT_VAR_NAME}>"
 	fi
 }
 
@@ -311,7 +299,6 @@ isDefault() # <var-name>
 
 	test "${!VAR_NAME}" = "$DEFAULT_VALUE"
 }
-
 
 # END CONTENT
 fi

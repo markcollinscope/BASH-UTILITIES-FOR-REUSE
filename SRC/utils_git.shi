@@ -67,8 +67,8 @@ gitCurrentBranch()
 checkIsGitDir() 
 # error and exit if cwd is not within a git repo.
 {
-	if ! $(isGitDir); then # tbd - check.
-		errecho "$0: Error <$(pwd)> Not A Git Dir"
+	if ! $(isGitDir); then
+		errecho "$0: Error <$(pwd)> is not under Git source control - cannot continue. Bye!"
 		exiterr -k;
 	fi
 }

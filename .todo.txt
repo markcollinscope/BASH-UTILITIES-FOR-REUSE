@@ -17,8 +17,8 @@ Options:
 	- limitations - cannot terminate a multi-opt with a normal argument - wouldn't know difference.
 
 ********************
-o DEFAULT-VAR stuff.
-Either in exsing uts_ or new one (?) add the function family for varDefault etc.
+o UTILS_GIT?
+	- chkGitIsCommitted <error-msg>?
 
 *******************
 o Sort out docco -bash script.
@@ -35,3 +35,5 @@ DONE DONE DONE!!!
 
 cdgitroot - change to git root directory if this is a git repo, otherwise stay where you are!
 decide if origin/lappie is of any use to anyone! => done as gitrootif function. 
+o DEFAULT-VAR stuff.  see default isDefault in _msc.shi
+

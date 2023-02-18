@@ -83,6 +83,16 @@ checkIfVerbose() # <arg> - deprecated
 	return 1;
 }
 
+vbeval() # <command>
+# eval (bash fn) the <command> given. 
+# print it first if verbose option is set.
+{
+	CMD="$@"
+	vbecho $CMD;
+	eval $CMD
+}
+
+
 # do autoparsing of verbose flag.
 if ! $UTS_NOAUTOARGS; then
 	eval $(boolopt $UTS_VERBOSEFLAG USE_VERBOSE_OUTPUT "$@");
