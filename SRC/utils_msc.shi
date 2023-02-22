@@ -206,9 +206,10 @@ YMD="%y-%m-%d"
 YMD_HM="%y.%m.%d-%H.%M"
 LONG="%Y.%m.%d-%H.%M.%S"
 
-datefmt() # [-l|--long] --s]: echo-return formatted date.
+datefmt() # [-l|--long|-s|--iso]: echo-return formatted date.
 # -l - use a long format
 # -s - use a short format
+# --iso - use iso standard format
 {
 	case $# in
 		0)	date +$YMD_HM;;
@@ -219,9 +220,12 @@ datefmt() # [-l|--long] --s]: echo-return formatted date.
 					;;
 				-s)		
 					date +$YMD
-				;;
+					;;
+				--iso)
+    				date --iso-8601=seconds;
+					;;
 				*) 
-					errfnecho "unknown option/arg"; 
+					errfnecho "unknown option/arg: $1"; 
 					callFnIfExists Usage; 
 					exiterr -k;
 				;;
@@ -246,6 +250,55 @@ getarg() # <num> <...args>
 	done
 }
 
+_varDefaultName() # <var-name>
+# hides details of how default values are stored.
+# well, as much as possible!
+{
+	setvar VAR_NAME "$1"
+
+	# local, opaque.
+	local DEFAULT_EXT="___DEFAULT_XXX";
+
+	DEFAULT_NAME=$(concat $VAR_NAME $DEFAULT_EXT)
+	echo $DEFAULT_NAME;
+}
+
+default() # <var-name> [<default-value>]
+# get/set the 'default' value of a bash VAR. 
+# and save a copy of the default value.
+# if <default-value> is given - acts as a setter.
+# if not - echo-returns value already set - so acts as a getter.
+{
+	if test $# = 1; then
+		setvar VAR_NAME "$1";
+		local DEFAULT_VAR_NAME=$(_varDefaultName $VAR_NAME);
+
+		local VALUE=${!DEFAULT_VAR_NAME}
+
+		echo $VALUE;
+	else
+		setvar _VAR_NAME "$1";
+		setvar _DEFAULT_VALUE "$2"
+
+		local DEFAULT_VAR_NAME=$(_varDefaultName $_VAR_NAME);
+
+		eval $DEFAULT_VAR_NAME=$_DEFAULT_VALUE;
+		eval $_VAR_NAME=$_DEFAULT_VALUE;
+	fi
+}
+
+isDefault() # <var-name>
+# return 'true' (0) if <var-name> still has its default value 
+# as given by 'default' function. If not, return 'false' (non-0).
+{
+	setvar VAR_NAME "$1"
+	local DEFAULT_VALUE=$(default $VAR_NAME)
+
+	vbvar VAR_NAME
+	vbvar DEFAULT_VALUE
+
+	test "${!VAR_NAME}" = "$DEFAULT_VALUE"
+}
 
 # END CONTENT
 fi

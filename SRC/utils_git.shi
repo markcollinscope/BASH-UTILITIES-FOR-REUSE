@@ -41,15 +41,18 @@ gitrootns()
 	gitroot | sed 's?/?_?g'
 }
 
-gitrootif()
+gitrootif() # [--dir <path/to/director>]
 # echo-return the root git directory given the cwd. 
-# if not in a git root directory, echo-return '.' (full stop) i.e. current directory.
-# enables things like: $ cd $(gitrootif) - change to git root dir if there is not, else stay where you are.
+# if not in a git root directory, echo-return '.' (full stop) i.e. current directory - or <path/to/directory> 
+# if --dir used. Enables things like: $ cd $(gitrootif) - change to git root dir if there is not, else stay where you are.
 {
+	DIR=.;
+	eval $(valopt --dir DIR "$@");
+
 	if isGitDir; then
 		gitroot;
 	else
-		echo '.'
+		echo "$DIR";
 	fi
 }
 
@@ -64,8 +67,8 @@ gitCurrentBranch()
 checkIsGitDir() 
 # error and exit if cwd is not within a git repo.
 {
-	if ! $(isGitDir); then # tbd - check.
-		errecho "$0: Error <$(pwd)> Not A Git Dir"
+	if ! $(isGitDir); then
+		errecho "$0: Error <$(pwd)> is not under Git source control - cannot continue. Bye!"
 		exiterr -k;
 	fi
 }
@@ -101,7 +104,7 @@ gitStatus()
 	checkIsGitDir;
 
 	if gitNeedsCommit; then	
-		echo "GIT COMMIT REQUIRED IN: $(pwd)"
+		errecho "GIT COMMIT REQUIRED IN: $(pwd)"
 	fi
 }
 

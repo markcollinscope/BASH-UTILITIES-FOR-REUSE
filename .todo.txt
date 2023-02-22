@@ -1,5 +1,40 @@
+*******************
+Extend gitrootif function with '--dir' option as alternative to '.' default.
+
+*******************
+o _vb ...
+vbPush, vbPop ...
+
+********************
+o OPTS:
+vb-show-ops ... or print values on verbose flag. verbose is better - I think.
+
+********************
+Options:
+1.	Multiple flags as per => '--xx|-x|--yyyy'
+2.	multi-opt => $(multiopt ... --flag VAR "$@");
+	- continue processing ongoing cmd line args as '--flag' options until either (a) end of input, or (b) next --flag.
+	- limitations - cannot terminate a multi-opt with a normal argument - wouldn't know difference.
+
+********************
+o UTILS_GIT?
+	- chkGitIsCommitted <error-msg>?
+
+*******************
+o Sort out docco -bash script.
+
+*******************
+UTS_SCRIPTROOT -- helper functions use. Not good, I think as not really a UTS_ thing...
+*******************
+
+NEW-
+substWithNull $1 $2 - substitutes $1 to null ("") in $2
+
+---
+DONE DONE DONE!!!
+
 cdgitroot - change to git root directory if this is a git repo, otherwise stay where you are!
-decide if origin/lappie is of any use to anyone!
-pushverbose, popverbose ...
+decide if origin/lappie is of any use to anyone! => done as gitrootif function. 
+o DEFAULT-VAR stuff.  see default isDefault in _msc.shi
 
 EVAL - add check for --val XXX where XXX is missing (no arg supplied).

@@ -21,7 +21,7 @@ setVerbose()
 # nb: used by vbecho and similar functions
 { 
 	export UTS_VERBOSE=true; 
-	export UTS_VERBOSEFLAG="$UTS_VERBOSEFLAG"; 
+	export UTS_VERBOSE_PASSTHRU="$UTS_VERBOSEFLAG";
 }
 
 getVerbose()	
@@ -82,6 +82,16 @@ checkIfVerbose() # <arg> - deprecated
 	fi
 	return 1;
 }
+
+vbeval() # <command>
+# eval (bash fn) the <command> given. 
+# print it first if verbose option is set.
+{
+	CMD="$@"
+	vbecho $CMD;
+	eval $CMD
+}
+
 
 # do autoparsing of verbose flag.
 if ! $UTS_NOAUTOARGS; then

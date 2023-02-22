@@ -232,7 +232,7 @@ scrClear() # no args.
 }
 
 errecho() # [-s] <...args>
-# print message to stderr. -s: precede message with using script name
+# print message to stderr. -s: precede message with including script name
 {  
 	setcol $RED; 
 	if test "$1" = "-s"; then
@@ -266,18 +266,18 @@ fnname() # [-l <call-fn-level>]
 }
 
 ne() # <bash command ... >
-# run command without those irritating error messages! (ne: No Error) e.g. $ ne errecho hello - no output
+# run command without those irritating error messages! (ne: No Error) e.g. $ ne errecho hello; - no output
 { 
 	2>/dev/null $*; 
 }	
 
 no() # <bash command ...>
-# run command without std output! (no: No Output) - e.g. $ no echo hello - no output
+# run command without std output! (no: No Output) - e.g. $ no echo hello; - no output
 { 
 	>/dev/null $*; 
 }		
 
-checkNotEmptyString() # <msg> [ <bash var name> ] 
+checkNotEmptyString() # <msg> [ <bash var name> ] - deprecated.
 # deprecated - use chkarg().
 # e.g. usage: $ 'local NAME=""; checkNotEmptyString "You forgot to give a name!" $NAME' 
 {
