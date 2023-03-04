@@ -294,10 +294,16 @@ isDefault() # <var-name>
 	setvar VAR_NAME "$1"
 	local DEFAULT_VALUE=$(default $VAR_NAME)
 
-	vbvar VAR_NAME
-	vbvar DEFAULT_VALUE
-
 	test "${!VAR_NAME}" = "$DEFAULT_VALUE"
+}
+
+rmSafely() # <file/dir>
+# safely rm a file by moving to a /tmp file 
+{
+	setvar TARGET "$1";
+	local _TMP=$(tmpFile).$TARGET;
+
+	mv $TARGET $_TMP
 }
 
 # END CONTENT
