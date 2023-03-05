@@ -83,9 +83,10 @@ checkIfVerbose() # <arg> - deprecated
 	return 1;
 }
 
-vbeval() # <command>
+evalvb() # <command>
 # eval (bash fn) the <command> given. 
 # print it first if verbose option is set.
+# nb: this function does the 'eval' regardless of verbose status.
 {
 	CMD="$@"
 	vbecho $CMD;
