@@ -133,6 +133,7 @@ explode() # <string>
 
 printbetween() # [ -n] <start> <end> <file>
 # print lines between regexps <start> and <end> (inclusive) in <file>.
+# -n: print between line numbers <start>,<end> - integer values.
 {
 	eval $(boolopt -n _NUMERIC "$@");
 	setvar START "$1"
@@ -146,6 +147,16 @@ printbetween() # [ -n] <start> <end> <file>
 	else
 		sed -n "${START},${END}p" $FILE
 	fi
+}
+
+excludebetween() # <start> <end> <file>
+# exclude lines between regexps <start> and <end> (inclusive) in <file>.
+{
+	setvar START "$1"
+	setvar END "$2"
+	setvar FILE "$3"
+
+	sed "/$START/,/$END/d" $FILE
 }
 
 len() # <string>
@@ -298,7 +309,7 @@ isDefault() # <var-name>
 }
 
 rmSafely() # <file/dir>
-# safely rm a file by moving to a /tmp file 
+# 'safely' rm a file by moving to a /tmp
 {
 	setvar TARGET "$1";
 	local _TMP=$(tmpFile).$TARGET;
