@@ -66,7 +66,6 @@ ensuredirexists() # <dir>
 
 	if ! test -d "$DIR"; then
 		mkdir -p $DIR
-		vbfnecho "Created: $DIR"
 	fi
 	local XC=$?
 	
@@ -218,8 +217,7 @@ xforeachdir()
 
 	for i in $(xfinddirs); do
 	(
-		vbfnecho $i;
-		cd $i;
+		Cd $i;
 		eval $CMD;
 	)
 	done
