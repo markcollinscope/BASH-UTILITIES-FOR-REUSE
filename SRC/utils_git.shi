@@ -108,6 +108,13 @@ gitStatus()
 	fi
 }
 
+gitBranches()
+# list all local branches
+{
+	checkIsGitDir;
+	git branch | sed 's/\*//'
+}
+
 gitAbandonChanges()
 # abandon all changes since the last commit. prints warning message.
 {
