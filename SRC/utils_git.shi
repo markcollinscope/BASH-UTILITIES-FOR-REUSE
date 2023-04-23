@@ -98,6 +98,15 @@ gitNeedsCommit()
 	fi
 }
 
+chkGitCommitted() 
+# exit with an error if there are uncommited items in this repo.
+{
+	if gitNeedsCommit; then 
+		errecho "git commit required before using: $(script) (branch: $(gitCurrentBranch))"
+		exiterr 1;
+	fi
+}
+
 gitStatus()
 # prints a message if the git repo which contains the cwd requires a git commit.
 {
