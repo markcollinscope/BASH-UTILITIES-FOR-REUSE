@@ -314,7 +314,7 @@ rmSafely() # <file/dir>
 	setvar TARGET "$1";
 	local _TMP=$(tmpFile).$TARGET;
 
-	mv $TARGET $_TMP
+	ne mv $TARGET $_TMP
 }
 
 # END CONTENT
