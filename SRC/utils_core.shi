@@ -268,13 +268,13 @@ fnname() # [-l <call-fn-level>]
 ne() # <bash command ... >
 # run command without those irritating error messages! (ne: No Error) e.g. $ ne errecho hello; - no output
 { 
-	2>/dev/null $*; 
+	2>/dev/null "$@"; 
 }	
 
 no() # <bash command ...>
 # run command without std output! (no: No Output) - e.g. $ no echo hello; - no output
 { 
-	>/dev/null $*; 
+	>/dev/null "$@"; 
 }		
 
 checkNotEmptyString() # <msg> [ <bash var name> ] - deprecated.
