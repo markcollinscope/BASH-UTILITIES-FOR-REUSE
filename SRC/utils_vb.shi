@@ -24,7 +24,7 @@ setVerbose()
 	export UTS_VERBOSE_PASSTHRU="$UTS_VERBOSEFLAG";
 }
 
-getVerbose()	
+getVerbose() # TBD: Deprecate.
 # return true (0) if verbose flag set to on.
 { 
 	if $UTS_VERBOSE; then return 0; else return 1; fi; 
