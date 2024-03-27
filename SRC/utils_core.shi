@@ -234,7 +234,7 @@ scrClear() # no args.
 errecho() # [-s] <...args>
 # print message to stderr. -s: precede message with including script name
 {  
-	setcol $RED; 
+	setcol $LIGHTRED; 
 	if test "$1" = "-s"; then
 		>&2 echo "$(script): "
 		shift;
