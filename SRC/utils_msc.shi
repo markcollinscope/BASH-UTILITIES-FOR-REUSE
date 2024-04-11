@@ -311,10 +311,12 @@ isDefault() # <var-name>
 rmSafely() # <file/dir>
 # 'safely' rm a file by moving to a /tmp
 {
-	setvar TARGET "$1";
-	local _TMP=$(tmpFile).$TARGET;
+	setvar __TARGET "$1";
+    local _TMP=$(tmpFile).$(basename $__TARGET);
 
-	ne mv $TARGET $_TMP
+    vbfnecho "<$__TARGET>: moved (mv) to <$_TMP>"
+
+	ne mv $__TARGET $_TMP
 }
 
 # END CONTENT
