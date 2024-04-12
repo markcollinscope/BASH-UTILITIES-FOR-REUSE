@@ -1,9 +1,34 @@
+ORGANISE THIS FILE => PLAN FOR FIRST OFFICIAL RELEASE
+-	must have changes.
+-	auto-release process.
+-	docco update - minor upgrades to how done.
+-	if easy - autoname - autoalias.
+-	use alias - for fns. Upgrade ffn, fndef.
+
+INIT IDEAS FOR PLAN (ABOVE):
+x.	Use: Reltodo for mandatory check list stuff.
+x.	Must: -d|--define ...
+x.  Must: works with all not.
+x.	Should: autoalias... utsAutoAlias - utsNaming.
+x.	Should: use tdd ... autobash ... <move sh-unit to uts>
+x.	Could: first ds? using jq? experiment? set: --init|--set --get (default) --list (bash loop format). --pp (pretty print). --vbpp - if verbose.
+x.	Could: typedata? dynamic dispatch? 2nd pass!
+x.	Wont: opts --strict <enforce naming> ...
+
+-	boolopt, etc, valopt allow --noset? for boolopt -> leave as null value not false?
+-	opt NAME => T/F
+
 GLOBAL RENAME LIST:
 -	utsPrivate =>
 -	verbose => utsVerbose() --get --set - 
 -	UTS_VERBOSE => private.
 -	check other private names.
 -	utils_globals => uts_devtools.
+
+============================
+
+**** here or scr.
+fnAsScript scriptAsFn ?
 
 *****************
 uts_env
