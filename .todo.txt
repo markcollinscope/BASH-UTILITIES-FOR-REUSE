@@ -1,13 +1,49 @@
-*******************
-Extend gitrootif function with '--dir' option as alternative to '.' default.
+GLOBAL RENAME LIST:
+-	utsPrivate =>
+-	verbose => utsVerbose() --get --set - 
+-	UTS_VERBOSE => private.
+-	check other private names.
+-	utils_globals => uts_devtools.
 
+*****************
+uts_env
+- evar NAME -d / --default <DEFAULT> / do vb stuff in it.
+- --vb - --vbs 
+
+**** ???
+valopt -u - is used? valopt --isused xxx_opt
+
+
+******************
+convert uts to use function fn { } style of definition for public functions.
 *******************
+extend gitrootif function with '--dir' option as alternative to '.' default.
+*******************
+
 o _vb ...
-vbPush, vbPop ...
+vbpusht vbpushf vbpop
+
+********************
+default values --hh --ff - what was wrong with -h, -f.
 
 ********************
 o OPTS:
 vb-show-ops ... or print values on verbose flag. verbose is better - I think.
+something like:
+--hh: default shows all the auto-processed args in UTS. 
+
+*********************
+__LIB_XXX__ - std lib var name.
+utsPrivate xxx
+utsPrivate NAME - get, set based on args. Adds __XXX__ to ensure safety.a
+	--get (default).
+	--set (optional arg takes value).
+
+*****
+getExludes, etc...  utsExcludes (arg sets, no arg gets)... 
+
+utsAutoArgs - autoprocessed values ...
+utsAutoArgs --add
 
 ********************
 Options:
@@ -26,6 +62,11 @@ o Sort out docco -bash script.
 *******************
 UTS_SCRIPTROOT -- helper functions use. Not good, I think as not really a UTS_ thing...
 *******************
+
+NEW-
+-	uts_ds (data structures).
+-	uts_props (properties, initially files/directories) prop --declare , prop --has prop --val (default t/f - other if arg given).
+-	prop --edit.
 
 NEW-
 substWithNull $1 $2 - substitutes $1 to null ("") in $2
