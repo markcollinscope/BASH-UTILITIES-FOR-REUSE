@@ -1,0 +1,52 @@
+
+. utils.shi
+
+JQ=jq;
+softwareRequired $JQ
+
+sq() { echo \'"$@"\'; }
+dq() { echo \""$@"\"; }
+
+readonly SBRA=[]
+
+# readonly TYPE_SUBST='s/type/'"type"/g'
+# readonly VAL_SUBST='s/val/'""val""/g'
+
+readonly TYPE="type"
+readonly TYPEQ=\"$TYPE\";
+
+readonly VAL=value
+readonly VALQ=$(dq $VAL);
+readonly VALD=$(concat '.' $VAL);
+readonly VALA=$(concat $VAL '[]');
+
+readonly SET=SET
+readonly SETQ=$(dq $SET);
+readonly NULL_ARR=[];
+
+readonly SET_EMPTY=$(sq $( concat '{' $TYPEQ:$SETQ , $VALQ:$NULL_ARR '}' ) );
+echo $SET_EMPTY
+
+# eval $(valopt  --rem "<filename> - use the filename given instead of the default value" --file FILE_NAME_OPT "$@");
+# errifopt "$@"; 
+
+ds_set()
+{
+    local IN="$@"
+    local OUT_AS_JQ=$SET_EMPTY
+
+    if ! null $IN; then OUT_AS_JQ=$IN; fi
+
+    # default option - return in iterable format (for i in ...)
+    local JQ_OP=$( concat "-r " \' $VALD '[]' \' )
+    echo $JQ_OP
+
+    echo $JQ_OP
+
+    echo \{\"value\":\[\"hello\",\"world\"\]\} | jq -r '.value[]' 
+
+    # | jq $JQ_OP
+}
+
+ds_set;
+
