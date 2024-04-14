@@ -1,0 +1,63 @@
+
+. utils.shi
+
+fnecho() { for i in "$@"; do echo -n $i; done; echo; }
+QUOTE=\'
+
+echo \'
+# => '
+echo $QUOTE
+# same
+
+echo \'a\'
+echo ${QUOTE}a$QUOTE  
+# same
+
+# R1: \' is a single special character. It is not ' at all. Acts as if different char completely.
+
+eval echo \'a\' # no '
+# => a
+eval echo ${QUOTE}a$QUOTE  
+# same
+e# but no QUOTE printed. EQUOTE has lost any special meaning.
+
+echo $(concat \' a \')
+fnecho \' a \'
+echo
+
+# testing how evalution and substitution affects using single, double quotes.
+
+echo 1:
+echo 'abc[]'                    # => abc[]        # 1a
+echo \'abc[]\'                  # => 'abc[]'
+echo $(echo \'abc[]\')          # => 'abc[]'
+# notes:
+# inner echo returns 'string'
+# outer echo then operates on inlined return
+# expected <abd[]> but got <'abc[]'> - need to add subst order and intermediate values ...
+# requires investigation of $(inline subst)
+
+echo 2:
+eval echo \'abc[]\'             # => abc[]
+# (a) sh-parse line giving:     eval echo 'abc[]'
+# (b) sh-runs:                  eval
+# (c) eval-runs:                echo 'abc[]' => abc[]       # see 1a
+# (d) dislplayed:               abc[]                       # see 1a
+  
+echo 3:
+echo $(eval echo \'abc[]\')     # => abc[]
+# (a) sh-parse line giving:     eval echo 'abc[]'
+# (b) sh-run:                   eval
+# (c) eval-run:                 echo 'abc[]' => abc[]
+# (d) dislplayed:               abc[]
+
+
+echo 4:
+fnpwd() { pwd; }; 
+
+pwd;                            # dir-path # pwd => <pwd-output> to stdout.   # 4a
+fnpwd;                          # dir-path # fnpwd calls pwd => <pwd-output>  # as per 4a
+echo $(fnpwd);                  # dir-path 
+# (a) sh-parse line
+# (b) sh-run fnpwd gets stdout  # see 4a
+# (c) sh-parse line giving      echo <pwd-res> => dir-path

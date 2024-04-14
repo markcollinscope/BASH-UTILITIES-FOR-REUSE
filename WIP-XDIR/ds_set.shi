@@ -1,4 +1,3 @@
-
 . utils.shi
 
 JQ=jq;
@@ -7,7 +6,7 @@ softwareRequired $JQ
 sq() { echo \'"$@"\'; }
 dq() { echo \""$@"\"; }
 
-readonly SBRA=[]
+# readonly SBRA=[]
 
 # readonly TYPE_SUBST='s/type/'"type"/g'
 # readonly VAL_SUBST='s/val/'""val""/g'
@@ -24,7 +23,7 @@ readonly SET=SET
 readonly SETQ=$(dq $SET);
 readonly NULL_ARR=[];
 
-readonly SET_EMPTY=$(sq $( concat '{' $TYPEQ:$SETQ , $VALQ:$NULL_ARR '}' ) );
+readonly SET_EMPTY=$( concat '{' $TYPEQ:$SETQ , $VALQ:$NULL_ARR '}' );
 echo $SET_EMPTY
 
 # eval $(valopt  --rem "<filename> - use the filename given instead of the default value" --file FILE_NAME_OPT "$@");
@@ -37,13 +36,25 @@ ds_set()
 
     if ! null $IN; then OUT_AS_JQ=$IN; fi
 
+    vbvar OUT_AS_JQ
+
     # default option - return in iterable format (for i in ...)
     local JQ_OP=$( concat "-r " \' $VALD '[]' \' )
-    echo $JQ_OP
 
-    echo $JQ_OP
 
-    echo \{\"value\":\[\"hello\",\"world\"\]\} | jq -r '.value[]' 
+    local EGVAL=\{\"value\":\[\"hello\",\"world\"\]\} 
+    vbvar EGVAL
+
+    vbvar JQ_OP
+
+cat<<EOF
+    CAT:
+    $(echo $EGVAL | jq $JQ_OP)
+    ENDCAT:
+EOF
+    echo "EGVAL: " $EGVAL | jq \'$JS_OP\'
+    echo "EGVAL: " $EGVAL | jq -r '.value[]'
+    echo "OUT: " $OUT_AS_JQ | jq $JQ_OP
 
     # | jq $JQ_OP
 }
