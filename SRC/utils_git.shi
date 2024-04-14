@@ -41,10 +41,13 @@ gitrootns()
 	gitroot | sed 's?/?_?g'
 }
 
-gitrootif() # [--dir <path/to/director>]
-# echo-return the root git directory given the cwd. 
-# if not in a git root directory, echo-return '.' (full stop) i.e. current directory - or <path/to/directory> 
-# if --dir used. Enables things like: $ cd $(gitrootif) - change to git root dir if there is not, else stay where you are.
+gitrootif() # [--dir <dir>]
+# echo-return the root git directory given the current dir (cwd).
+# if not under git control, echo-return '.' (full stop) i.e. current directory, unless
+# --dir option is used, in which case echo-return <dir>.
+# e.g. usage: $ cd $(gitrootif); - change to git root dir if there is not, else stay where you are.
+# e.g. usage: $ FILE_LOCATION=$(gitrootif --dir $HOME); - file is either in git root dir, or home dir 
+# if not under git control.
 {
 	DIR=.;
 	eval $(valopt --dir DIR "$@");
@@ -57,7 +60,7 @@ gitrootif() # [--dir <path/to/director>]
 }
 
 gitCurrentBranch() 
-# return the current git branch
+# echo-return the current git branch
 {
 	V=$(git branch 2>/dev/null | grep '*' | sed 's/*//')
 	V=${V:="No-Git-Branch-Available"}
@@ -65,7 +68,7 @@ gitCurrentBranch()
 }
 
 checkIsGitDir() 
-# error and exit if cwd is not within a git repo.
+# error and exit if current dir is not within under git control.
 {
 	if ! $(isGitDir); then
 		errecho "$0: Error <$(pwd)> is not under Git source control - cannot continue. Bye!"
@@ -78,10 +81,12 @@ xfindgitdirs()
 {
 	for i in $(xfinddirs); do
 	(
-		cd $i;
-		if isGitRootDir; then 
-			echo $i
-		fi
+		if isdir $i; then 
+            cd $i;
+		    if isGitRootDir; then 
+			    echo $i
+		    fi
+        fi
 	)
 	done
 }
