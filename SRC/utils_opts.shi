@@ -127,7 +127,7 @@ binopt() # [ --rem <documentation...> ] <flag> <bash var> <default-value> <value
 
 boolopt() # [ --rem <documentation...> ] <flag> <bash var> "$@"
 # called in the form:
-# eval $(boolopt --rem <documentation...' -a AVARIABLE "$@"
+# eval $(boolopt --rem <documentation...'> -a AVARIABLE "$@")
 # where: 	<flag> (-a) is the flag to be processed on the including script.
 #			<bash-var> (AVARIABLE) - the bash var to set set to either 'true' or 'false'
 # --rem is optional. If given <documentation...> will be added to Usage of containing script.
