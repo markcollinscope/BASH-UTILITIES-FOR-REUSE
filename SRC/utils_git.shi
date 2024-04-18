@@ -19,10 +19,18 @@ isGitRootDir()
 	if test -a ".git"; then return 0; else return 1; fi
 }
 
-isGitDir() 
+isGitDir() # [--dir <dir>]
 # returns T/F [0/1] depending whether the cwd is in a git repo.
+# --dir option returns whethere <dir> is under git control.
 {
-	no ne git rev-parse --is-inside-work-tree
+    eval $(valopt --dir DIR_OPT "$@")
+    (
+        if ! null $DIR_OPT; then
+            checkdirexists $DIR_OPT;
+            cd $DIR_OPT;
+        fi
+    	no ne git rev-parse --is-inside-work-tree
+    )
 }
 
 
