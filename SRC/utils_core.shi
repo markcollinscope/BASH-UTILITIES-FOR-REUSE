@@ -305,5 +305,38 @@ xfind() # <... standard find args>
 	find "$@" | grep -v -E "$(getExcludes)"; 
 }
 
+___PRIVAR_ENCODING___=$$; # this global var is the only one that can't be encoded!
+_mkpv()
+{
+	local PV=___PRIVAR_ENCODING___; # todo - consider options to enable multiple sourced files (currently possible clashes could occur).
+	local VAR=$1 
+
+	VAR=$VAR$PV
+	echo $VAR
+}
+
+privar() # <var-name> [<value>] - get/set a privar - a name encoded 'private variable' 
+# if <value> is given, privar <var-name> is set. otherwise echo-returns the value.
+# e.g. usage: (1) privar AA 100; (2) echo $(privar AA); # output 100
+{
+	# nb: a privar is a variable with an encoded name, mostly used in 'library' (re-usable fnality) 
+	# bash scripts - i.e. those 'included' (using the ./source directive). to avoid name clashes.
+	local VAR=$1;
+	local VAL="$2";
+    
+	vbvar VAR
+	vbvar VAL
+
+	local PVARNAME=$(_mkpv $VAR);
+	vbvar PVARNAME
+
+	if null $VAL; then 
+		echo ${!PVARNAME}
+	else
+		evalvb $PVARNAME=$VAL
+    	fi
+}
+
+
 # END
 fi
