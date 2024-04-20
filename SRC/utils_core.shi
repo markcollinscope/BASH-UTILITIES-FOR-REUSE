@@ -337,6 +337,17 @@ privar() # <var-name> [<value>] - get/set a privar - a name encoded 'private var
     	fi
 }
 
+append() # [-s] <var> <appendage> - append <appendage> to <var> - changes <var>.
+# -s: add a space before the <appendage>. e.g. usage:
+# A=hello; append -s A world; echo "A: $A"; 	# A: hello world
+# B='one'; append B two; echo !B: $B"; 		# B: onetwo
+{
+    if test "$1" = "-s"; then CONCATOPT="-s"; shift; fi
+    V=$1 
+    RES=$(concat $CONCATOPT ${!V} "$2");
+    eval $V=\"$RES\";
+}
+
 
 # END
 fi
