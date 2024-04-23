@@ -63,7 +63,7 @@ script()
     if ! null $0; then
 	    echo $(basename $0);
     else 
-        echo "terminal";
+        echo "";
     fi
 }; 	
 
@@ -92,6 +92,16 @@ errfnecho() # <...args>
 	errecho -s "[${FUNCNAME[1]} ()]: $*"; 
 }
 
+errifnull() # [ -m <msg> ] "$@"
+# report error and exit if "$@" is null. nb: options removed before 'null' evaluation.
+{
+	eval $(valopt -m MESSAGE "$@");
+	if null "$@"; then 
+		local MSG="($script) $MESSAGE (null value found)"
+		errfnecho "$MSG"
+		exiterr -k;
+	fi
+}
 
 callFnIfExists() # <name> <...args>
 # if <name> is a function, call it with <...args>, otherwise do nothing.
