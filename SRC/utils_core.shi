@@ -60,14 +60,38 @@ isFile() # <name>
 script() 
 # echo name (no path) of current (containing) bash script file.
 { 
-	echo $(basename $0); 
+    if ! null $0; then
+	    echo $(basename $0);
+    else 
+        echo "terminal";
+    fi
 }; 	
 
-scriptName() 
+scriptName() # deprecated
 # print base of current bash script *file* name (duplicate function)
 { 
 	script; 
 };
+
+errecho() # [-s] <...args>
+# print message to stderr. -s: precede message with including script name
+{  
+	setcol $LIGHTRED; 
+	if test "$1" = "-s"; then
+		>&2 echo "$(script): "
+		shift;
+	fi
+	>&2 echo "$*" 
+	resetcol; 
+}
+
+errfnecho() # <...args>
+# always precedes error with script and bash function name.
+# print message to stderr.
+{ 
+	errecho -s "[${FUNCNAME[1]} ()]: $*"; 
+}
+
 
 callFnIfExists() # <name> <...args>
 # if <name> is a function, call it with <...args>, otherwise do nothing.
@@ -229,25 +253,6 @@ scrClear() # no args.
 # clear the screen.
 {
 	echo -ne "\e[2J"
-}
-
-errecho() # [-s] <...args>
-# print message to stderr. -s: precede message with including script name
-{  
-	setcol $LIGHTRED; 
-	if test "$1" = "-s"; then
-		>&2 echo "$(script): "
-		shift;
-	fi
-	>&2 echo "$*" 
-	resetcol; 
-}
-
-errfnecho() # <...args>
-# always precedes error with script and bash function name.
-# print message to stderr.
-{ 
-	errecho -s "[${FUNCNAME[1]} ()]: $*"; 
 }
 
 fnname() # [-l <call-fn-level>] 

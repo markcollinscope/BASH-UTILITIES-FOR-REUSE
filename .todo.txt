@@ -1,3 +1,48 @@
+FUNCTION & VARIABLE RENAME LIST inc ENV VARS.
+<old> [<old...>] -> <new> [<alt-new...>] | dep/del + # notes.
+scriptName -> dep
+getGlobBackupDir -> utsVar -B -b |--backup-dir  # for all exported UTS_ values.
+
+UTS_BACKUPDIR export?
+UTS_BASHINCLUDE - rename - is .shi?
+UTS_EXCLUDE - grep.
+UTS_FORCE - ok.
+UTS_FORCEFLAG - ok.
+UTS_HELPFLAG - ok.
+UTS_LOGDIR - export?
+UTS_NOAUTOARGS - ok.
+UTS_NOCOLOR - ok.
+UTS_PVARDIR export.
+UTS_SCRIPTDIR - ??? review.
+UTS_SCRIPTTPL - .tpl ?
+UTS_SUNIT - .sht?
+UTS_VERBOSE - internal only.
+UTS_VERBOSEFLAG - ok? or export?
+
+GLOBAL RENAME LIST:
+-	utsPrivate =>
+-	verbose => utsVerbose() --get --set - 
+-	UTS_VERBOSE => private.
+-	check other private names.
+-	utils_globals => uts_devtools.
+
+PREFIX for Exported Functions.
+
+======================================================
+======================================================
+Standard Dir Search Path Utils:
+0. override path - if given.
+1. gitroot;
+2. home;
+3. local-dir?
+
+StdSearchPath() -d Opt?
+- -d used if given
+- gitroot, then home, then local?
+- grep search to find out how used...
+
+======================================================
+
 ORGANISE THIS FILE => PLAN FOR FIRST OFFICIAL RELEASE
 -	must have changes.
 -	auto-release process.
@@ -18,12 +63,6 @@ x.	Wont: opts --strict <enforce naming> ...
 -	boolopt, etc, valopt allow --noset? for boolopt -> leave as null value not false?
 -	opt NAME => T/F
 
-GLOBAL RENAME LIST:
--	utsPrivate =>
--	verbose => utsVerbose() --get --set - 
--	UTS_VERBOSE => private.
--	check other private names.
--	utils_globals => uts_devtools.
 
 ============================
 
