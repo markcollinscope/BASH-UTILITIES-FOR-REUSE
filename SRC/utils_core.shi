@@ -320,5 +320,25 @@ xfind() # <... standard find args>
 	find "$@" | grep -v -E "$(getExcludes)"; 
 }
 
+doSometimes() # [-d] do the action specified as "$@" - on 'occasion'
+# default option - once per system boot (when /tmp is cleared)
+# -d: force next call to doSomething to 'do something'! 
+# futures: will be extended.
+{
+    local __TMPFILE__="/tmp/__$(basename $0)__$(fnname -l 2)__$(fnname)"
+
+    if test "$1" = "-d"; then shift; if isfile $__TMPFILE__; then rm $__TMPFILE__; return 0; fi; fi
+
+    CMD="$@"
+    if test -z "$CMD"; then CMD="2>&1 echo \"$(fnname): no command given - bye!\""; fi
+
+    if ! isfile $__TMPFILE__; then
+        eval $CMD
+        touch $__TMPFILE__;
+        return 0;
+    fi
+    return 1;
+}
+
 # END
 fi
