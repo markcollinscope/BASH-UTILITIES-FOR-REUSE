@@ -63,7 +63,7 @@ script()
     if ! null $0; then
 	    echo $(basename $0);
     else 
-        echo "";
+        echo "bash-cmd-line";
     fi
 }; 	
 
