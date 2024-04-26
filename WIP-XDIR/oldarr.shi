@@ -1,0 +1,28 @@
+. utils.shi
+
+doNewOpt()
+{
+    echo "$@";
+}
+
+doGetOpt()
+{
+    setvar __INDEX $1;
+    shift;
+
+    echo $__INDEX;
+    echo "$@"
+}
+
+arr() 
+{
+    eval $(boolopt --new NEW_OPT "$@")
+    eval $(valopt  --get GET_OPT "$@")
+    
+    if $NEW_OPT; then doNewOpt "$@"; return 0; fi
+    if ! null $GET_OPT; then doNewOpt $GET_OPT "$@"; return 0; fi
+}
+
+ARR=$(arr --new a b c d);
+arr ARR --get 3;
+

@@ -1,28 +1,115 @@
+
 . utils.shi
 
-doNewOpt()
+arrlist.init()
 {
     echo "$@";
 }
 
-doGetOpt()
+arrlist.upto()
 {
-    setvar __INDEX $1;
-    shift;
+    local index=$1; shift;
 
-    echo $__INDEX;
+    local retval=
+    for i in $(seq 1 $index); do 
+        retval=$(concat -s $retval $(getarg $i "$@"));
+    done
+    echo $retval
+}
+
+arrlist.from()
+{
+    local index=$1; shift;
+
+    local retval=
+    for i in $(seq $index $#); do 
+        retval=$(concat -s $retval $(getarg $i "$@"));
+    done
+    echo $retval
+}
+
+
+arrlist.push()
+{
     echo "$@"
 }
 
-arr() 
+arrlist.popv()
 {
-    eval $(boolopt --new NEW_OPT "$@")
-    eval $(valopt  --get GET_OPT "$@")
-    
-    if $NEW_OPT; then doNewOpt "$@"; return 0; fi
-    if ! null $GET_OPT; then doNewOpt $GET_OPT "$@"; return 0; fi
+    getarg $# $@
 }
 
-ARR=$(arr --new a b c d);
-arr ARR --get 3;
+arrlist.pop()
+{
+    arrlist.upto $(($# - 1)) "$@"
+}
 
+arrlist.add()
+{
+    echo "$@"
+}
+
+arrlist.rem()
+{
+    arrlist.from 2 "$@";
+}
+
+arrlist()
+{
+    echo "arrlist: $@"
+    local index=$1; shift;
+    local value=$2
+
+    local retval=
+    if null $value; then
+        getarg $index "$@"
+    else
+        shift;
+        retval=$(arrlist.upto $((index - 1)) "$@") ;
+        retval=$(arrlist.push $value $retval);
+        retval=$(arrlist.from $((index + 1)) "$@")
+        echo $retval;
+    fi
+}
+
+echo "INIT: $X"
+X=$(arrlist.init a b c d e f);
+echo $X
+echo
+
+echo "UPTO 3: $X"
+echo $(arrlist.upto 3 $X);
+echo
+
+echo "FROM 4: $X"
+echo $(arrlist.from 4 $X);
+echo
+
+echo "PUSH g h i: $X"
+X=$(arrlist.push $X g h i)
+echo $X
+echo
+
+echo "POPV: $X"
+echo "VALUE: $(arrlist.popv $X)"
+echo
+
+echo "POP: $X"
+X=$(arrlist.pop $X)
+echo $X
+echo
+
+echo "ADD A: $X"
+X=$(arrlist.add A $X) # ins/del
+echo $X
+echo
+
+echo "REM: $X"
+X=$(arrlist.rem $X)
+echo $X
+echo
+
+echo "INDEX 4 to ZZZ: $X"
+X=$(arrlist 4 ZZZ $X)
+echo $X
+echo
