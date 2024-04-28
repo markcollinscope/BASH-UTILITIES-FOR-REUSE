@@ -1,14 +1,50 @@
-
 . utils.shi
+
+arg() # -n: is a valid number (int) - forall numbers passed.
+{
+    eval $(boolopt -n NUM_OPT "$@")
+
+    if null "$@"; then errecho "$(fnname -l 2): null value fails test in $(fnname)"; exiterr -k; fi
+
+    if $NUM_OPT; then
+        for i in "$@"; do
+            if ! isNum $i; then errecho "$(fnname -l 2): number fails test in $(fnname) args: <$@>"; exiterr -k; fi
+        done
+    fi
+
+    echo "$@"
+}
 
 arrlist.init()
 {
     echo "$@";
 }
 
-arrlist.upto()
+arrlist.get()
 {
-    local index=$1; shift;
+    local index=$(arg -n $1); shift;
+    echo $(getarg $index "$@");
+}
+
+arrlist.set()
+{
+    local index=$(arg $1);
+    local value=$2; 
+    shift 2;
+
+    local a=$(arrlist.init "$@")
+    local retval=
+
+    retval=$(arrlist.to $((index - 1)) $a);
+    retval=$(arrlist.push $value $retval);            # push as append?
+    retval=$(arrlist.from $((index + 1)) $a);
+
+    echo $retval;
+}
+
+arrlist.to()
+{
+    local index=$(arg -n $1); shift;
 
     local retval=
     for i in $(seq 1 $index); do 
@@ -19,7 +55,7 @@ arrlist.upto()
 
 arrlist.from()
 {
-    local index=$1; shift;
+    local index=$(arg -n $1); shift;
 
     local retval=
     for i in $(seq $index $#); do 
@@ -28,20 +64,30 @@ arrlist.from()
     echo $retval
 }
 
+arrlist.range()
+{
+    local from=$(arg -n $1); local to=$(arg -n $2); shift 2;
+    local num=$((to - from));
+
+    local retval=$(arrlist.from $from);
+    retval=$(arrlist.to $to $retval);
+
+    echo $retval
+}
 
 arrlist.push()
 {
     echo "$@"
 }
 
-arrlist.popv()
+arrlist.popval()
 {
     getarg $# $@
 }
 
 arrlist.pop()
 {
-    arrlist.upto $(($# - 1)) "$@"
+    arrlist.to $(($# - 1)) "$@"
 }
 
 arrlist.add()
@@ -54,31 +100,14 @@ arrlist.rem()
     arrlist.from 2 "$@";
 }
 
-arrlist()
-{
-    echo "arrlist: $@"
-    local index=$1; shift;
-    local value=$2
-
-    local retval=
-    if null $value; then
-        getarg $index "$@"
-    else
-        shift;
-        retval=$(arrlist.upto $((index - 1)) "$@") ;
-        retval=$(arrlist.push $value $retval);
-        retval=$(arrlist.from $((index + 1)) "$@")
-        echo $retval;
-    fi
-}
 
 echo "INIT: $X"
 X=$(arrlist.init a b c d e f);
 echo $X
 echo
 
-echo "UPTO 3: $X"
-echo $(arrlist.upto 3 $X);
+echo "to 3: $"
+echo $(arrlist.to 3 $X);
 echo
 
 echo "FROM 4: $X"
@@ -90,8 +119,8 @@ X=$(arrlist.push $X g h i)
 echo $X
 echo
 
-echo "POPV: $X"
-echo "VALUE: $(arrlist.popv $X)"
+echo "popval: $X"
+echo "VALUE: $(arrlist.popval $X)"
 echo
 
 echo "POP: $X"
@@ -110,6 +139,11 @@ echo $X
 echo
 
 echo "INDEX 4 to ZZZ: $X"
-X=$(arrlist 4 ZZZ $X)
+X=$(arrlist.set 4 ZZZ $X)
 echo $X
+echo
+
+echo "GET 5"
+echo $X
+echo $(arrlist.get 5)
 echo
