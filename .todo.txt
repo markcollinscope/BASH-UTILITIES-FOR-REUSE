@@ -1,6 +1,41 @@
+date -d @1609459200 "+%Y-%m-%d %H:%M:%S" - date Unix epoch to std format.
+
+--------
+whitespace [[:space:]] or \s using grep -P.
+
+; | & ' " \ $ ` ( ) [ ] [[ ]] { } * ? ! ~ < > %
+
+----------------
+
+Semicolon (;): Used to separate multiple commands written on a single line.
+Pipe (|): Used for piping the output of one command as input to another.
+Ampersand (&): Used to run a command in the background.
+Single Quote ('): Used for strong quoting; everything inside the single quotes is treated as literal text.
+Double Quote ("): Used for weak quoting; allows for variable expansion and command substitution.
+Backslash (\): Used as an escape character.
+Dollar Sign ($): Used for variable expansion and command substitution.
+Backtick (`): Used for command substitution (though $(...) is preferred).
+Parentheses (( and )): Used for grouping commands and command substitution.
+Brackets ([ and ]): Used for test conditions; also, [[ and ]] for enhanced test conditions.
+Braces ({ and }): Used for parameter expansion, brace expansion, and code blocks.
+Asterisk (*): Used as a wildcard for filename expansion.
+Question Mark (?): Used as a single character wildcard for filename expansion.
+Exclamation Mark (!): Used for event designators in history expansion and logical negation in conditions.
+Tilde (~): Represents the home directory.
+Angle Brackets (< and >): Used for input and output redirection.
+Percent (%): Used in job control.
+
+========================
 date functions...
+
 date1="2024-04-23"
+
 date2="2024-04-24"
+
+# eval bash-cmds-to-end-of-line => just run bash on: bash-cmds-to-end-of-line
+# but pre-eval:
+#	- \$ expressions are evaluated and substituted in.
+#	- as per any other cmd/fn... eval is just another cmd/fn.
 
 # Convert dates to seconds since Unix epoch
 date1_seconds=$(date -d "$date1" +%s)
@@ -21,16 +56,14 @@ new_datetime=$(date -d "+2 hours 30 minutes" +"%Y-%m-%d %H:%M")
 specific_datetime="2024-04-23 14:30"
 new_datetime=$(date -d "$specific_datetime + 1 hour 15 minutes" +"%Y-%m-%d %H:%M")
 
-
-ubtract 1 hour and 45 minutes from the current date and time
+subtract 1 hour and 45 minutes from the current date and time
 new_datetime=$(date -d "-1 hour 45 minutes" +"%Y-%m-%d %H:%M")
 
 # Subtract 2 hours and 10 minutes from a specific date and time
 specific_datetime="2024-04-23 14:30"
 new_datetime=$(date -d "$specific_datetime - 2 hours 10 minutes" +"%Y-%m-%d %H:%M")
 
-
-ubtract 1 day from the current date
+subtract 1 day from the current date
 new_date=$(date -d "1 day ago" +"%Y-%m-%d")
 
 # Subtract 1 month from the current date
@@ -58,10 +91,10 @@ FUNCTION & VARIABLE RENAME LIST inc ENV VARS.
 scriptName -> dep
 getGlobBackupDir -> utsVar -B -b |--backup-dir  # for all exported UTS_ values.
 
-UTS_BACKUPDIR export?
+sSUTS_BACKUPDIR export?
 UTS_BASHINCLUDE - rename - is .shi?
 UTS_EXCLUDE - grep.
-UTS_FORCE - ok.
+TS_FORCE - ok.
 UTS_FORCEFLAG - ok.
 UTS_HELPFLAG - ok.
 UTS_LOGDIR - export?
