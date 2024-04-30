@@ -1,4 +1,5 @@
 . utils.shi
+. sh-unit.shi
 
 arg() # -n: is a valid number (int) - forall numbers passed.
 {
@@ -15,34 +16,45 @@ arg() # -n: is a valid number (int) - forall numbers passed.
     echo "$@"
 }
 
-arrlist.init()
+list.init()
 {
     echo "$@";
 }
 
-arrlist.get()
+_init_shtest()
+{
+	local args='A B C D EFG HIJ'
+	local res=$(list.init $args)
+	assertSame $args $res
+}
+
+runTests
+
+exit;
+
+list.get()
 {
     local index=$(arg -n $1); shift;
     echo $(getarg $index "$@");
 }
 
-arrlist.set()
+list.set()
 {
     local index=$(arg $1);
     local value=$2; 
     shift 2;
 
-    local a=$(arrlist.init "$@")
+    local a=$(list.init "$@")
     local retval=
 
-    retval=$(arrlist.to $((index - 1)) $a);
-    retval=$(arrlist.push $value $retval);            # push as append?
-    retval=$(arrlist.from $((index + 1)) $a);
+    retval=$(list.to $((index - 1)) $a);
+    retval=$(list.push $value $retval);            # push as append?
+    retval=$(list.from $((index + 1)) $a);
 
     echo $retval;
 }
 
-arrlist.to()
+list.to()
 {
     local index=$(arg -n $1); shift;
 
@@ -53,7 +65,7 @@ arrlist.to()
     echo $retval
 }
 
-arrlist.from()
+list.from()
 {
     local index=$(arg -n $1); shift;
 
@@ -64,86 +76,86 @@ arrlist.from()
     echo $retval
 }
 
-arrlist.range()
+list.range()
 {
     local from=$(arg -n $1); local to=$(arg -n $2); shift 2;
     local num=$((to - from));
 
-    local retval=$(arrlist.from $from);
-    retval=$(arrlist.to $to $retval);
+    local retval=$(list.from $from);
+    retval=$(list.to $to $retval);
 
     echo $retval
 }
 
-arrlist.push()
+list.push()
 {
     echo "$@"
 }
 
-arrlist.popval()
+list.popval()
 {
     getarg $# $@
 }
 
-arrlist.pop()
+list.pop()
 {
-    arrlist.to $(($# - 1)) "$@"
+    list.to $(($# - 1)) "$@"
 }
 
-arrlist.add()
+list.add()
 {
     echo "$@"
 }
 
-arrlist.rem()
+list.rem()
 {
-    arrlist.from 2 "$@";
+    list.from 2 "$@";
 }
 
 
 echo "INIT: $X"
-X=$(arrlist.init a b c d e f);
+X=$(list.init a b c d e f);
 echo $X
 echo
 
 echo "to 3: $"
-echo $(arrlist.to 3 $X);
+echo $(list.to 3 $X);
 echo
 
 echo "FROM 4: $X"
-echo $(arrlist.from 4 $X);
+echo $(list.from 4 $X);
 echo
 
 echo "PUSH g h i: $X"
-X=$(arrlist.push $X g h i)
+X=$(list.push $X g h i)
 echo $X
 echo
 
 echo "popval: $X"
-echo "VALUE: $(arrlist.popval $X)"
+echo "VALUE: $(list.popval $X)"
 echo
 
 echo "POP: $X"
-X=$(arrlist.pop $X)
+X=$(list.pop $X)
 echo $X
 echo
 
 echo "ADD A: $X"
-X=$(arrlist.add A $X) # ins/del
+X=$(list.add A $X) # ins/del
 echo $X
 echo
 
 echo "REM: $X"
-X=$(arrlist.rem $X)
+X=$(list.rem $X)
 echo $X
 echo
 
 echo "INDEX 4 to ZZZ: $X"
-X=$(arrlist.set 4 ZZZ $X)
+X=$(list.set 4 ZZZ $X)
 echo $X
 echo
 
 echo "GET 5"
 echo $X
-echo $(arrlist.get 5)
+echo $(list.get 5)
 echo
