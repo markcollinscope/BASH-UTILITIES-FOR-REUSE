@@ -1,3 +1,139 @@
+date -d @1609459200 "+%Y-%m-%d %H:%M:%S" - date Unix epoch to std format.
+
+--------
+whitespace [[:space:]] or \s using grep -P.
+
+; | & ' " \ $ ` ( ) [ ] [[ ]] { } * ? ! ~ < > %
+
+----------------
+
+Semicolon (;): Used to separate multiple commands written on a single line.
+Pipe (|): Used for piping the output of one command as input to another.
+Ampersand (&): Used to run a command in the background.
+Single Quote ('): Used for strong quoting; everything inside the single quotes is treated as literal text.
+Double Quote ("): Used for weak quoting; allows for variable expansion and command substitution.
+Backslash (\): Used as an escape character.
+Dollar Sign ($): Used for variable expansion and command substitution.
+Backtick (`): Used for command substitution (though $(...) is preferred).
+Parentheses (( and )): Used for grouping commands and command substitution.
+Brackets ([ and ]): Used for test conditions; also, [[ and ]] for enhanced test conditions.
+Braces ({ and }): Used for parameter expansion, brace expansion, and code blocks.
+Asterisk (*): Used as a wildcard for filename expansion.
+Question Mark (?): Used as a single character wildcard for filename expansion.
+Exclamation Mark (!): Used for event designators in history expansion and logical negation in conditions.
+Tilde (~): Represents the home directory.
+Angle Brackets (< and >): Used for input and output redirection.
+Percent (%): Used in job control.
+
+========================
+date functions...
+
+date1="2024-04-23"
+
+date2="2024-04-24"
+
+# eval bash-cmds-to-end-of-line => just run bash on: bash-cmds-to-end-of-line
+# but pre-eval:
+#	- \$ expressions are evaluated and substituted in.
+#	- as per any other cmd/fn... eval is just another cmd/fn.
+
+# Convert dates to seconds since Unix epoch
+date1_seconds=$(date -d "$date1" +%s)
+date2_seconds=$(date -d "$date2" +%s)
+
+if [ $date1_seconds -eq $date2_seconds ]; then
+    echo "Dates are equal"
+elif [ $date1_seconds -gt $date2_seconds ]; then
+    echo "$date1 is later than $date2"
+else
+    echo "$date1 is earlier than $date2"
+fi
+
+# Add 2 hours and 30 minutes to the current date and time
+new_datetime=$(date -d "+2 hours 30 minutes" +"%Y-%m-%d %H:%M")
+
+# Add 1 hour and 15 minutes to a specific date and time
+specific_datetime="2024-04-23 14:30"
+new_datetime=$(date -d "$specific_datetime + 1 hour 15 minutes" +"%Y-%m-%d %H:%M")
+
+subtract 1 hour and 45 minutes from the current date and time
+new_datetime=$(date -d "-1 hour 45 minutes" +"%Y-%m-%d %H:%M")
+
+# Subtract 2 hours and 10 minutes from a specific date and time
+specific_datetime="2024-04-23 14:30"
+new_datetime=$(date -d "$specific_datetime - 2 hours 10 minutes" +"%Y-%m-%d %H:%M")
+
+subtract 1 day from the current date
+new_date=$(date -d "1 day ago" +"%Y-%m-%d")
+
+# Subtract 1 month from the current date
+new_date=$(date -d "1 month ago" +"%Y-%m-%d")
+
+# Subtract 1 year from the current date
+new_date=$(date -d "1 year ago" +"%Y-%m-%d")
+
+
+# Add 1 day to the current date
+new_date=$(date -d "1 day" +"%Y-%m-%d")
+
+# Add 1 month to the current date
+new_date=$(date -d "1 month" +"%Y-%m-%d")
+
+# Add 1 year to the current date
+new_date=$(date -d "1 year" +"%Y-%m-%d")
+
+
+=================================
+
+
+FUNCTION & VARIABLE RENAME LIST inc ENV VARS.
+<old> [<old...>] -> <new> [<alt-new...>] | dep/del + # notes.
+scriptName -> dep
+getGlobBackupDir -> utsVar -B -b |--backup-dir  # for all exported UTS_ values.
+
+sSUTS_BACKUPDIR export?
+UTS_BASHINCLUDE - rename - is .shi?
+UTS_EXCLUDE - grep.
+TS_FORCE - ok.
+UTS_FORCEFLAG - ok.
+UTS_HELPFLAG - ok.
+UTS_LOGDIR - export?
+UTS_NOAUTOARGS - ok.
+UTS_NOCOLOR - ok.
+UTS_PVARDIR export.
+UTS_SCRIPTDIR - ??? review.
+UTS_SCRIPTTPL - .tpl ?
+UTS_SUNIT - .sht?
+UTS_VERBOSE - internal only.
+UTS_VERBOSEFLAG - ok? or export?
+
+GLOBAL RENAME LIST:
+-	utsPrivate =>
+-	verbose => utsVerbose() --get --set - 
+-	UTS_VERBOSE => private.
+-	check other private names.
+-	utils_globals => uts_devtools.
+
+PREFIX for Exported Functions.
+
+===
+$(script) - QUICK - realpath/fullpath option.
+
+======================================================
+======================================================
+Standard Dir Search Path Utils:
+0. override path - if given.
+1. gitroot;
+2. home;
+3. local-dir?
+
+StdSearchPath() -d Opt?
+- -d used if given
+- gitroot, then home, then local?
+- grep search to find out how used...
+
+======================================================
+
 ORGANISE THIS FILE => PLAN FOR FIRST OFFICIAL RELEASE
 -	must have changes.
 -	auto-release process.
@@ -18,12 +154,6 @@ x.	Wont: opts --strict <enforce naming> ...
 -	boolopt, etc, valopt allow --noset? for boolopt -> leave as null value not false?
 -	opt NAME => T/F
 
-GLOBAL RENAME LIST:
--	utsPrivate =>
--	verbose => utsVerbose() --get --set - 
--	UTS_VERBOSE => private.
--	check other private names.
--	utils_globals => uts_devtools.
 
 ============================
 

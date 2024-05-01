@@ -24,6 +24,15 @@ _pvardir()
 	echo "$__PVARDIR"
 }
 
+pvar_setdir() 
+{
+    errecho "oh,before I tell you about me: $(fnname) - don't forget - this should all be converted to privars - combined even"
+    errecho "and don't for get the local variable option"
+
+    errecho 'unimplimented - ask for your money back... bye!'
+    exiterr -k;
+}
+
 _pvarsuffix()
 {
 	echo $__PVARSUFFIX

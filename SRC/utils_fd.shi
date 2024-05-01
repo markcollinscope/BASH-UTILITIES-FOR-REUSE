@@ -217,7 +217,7 @@ xforeachdir()
 
 	for i in $(xfinddirs); do
 	(
-		Cd $i;
+		cd $i;
 		eval $CMD;
 	)
 	done

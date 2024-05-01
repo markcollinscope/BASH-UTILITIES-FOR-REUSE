@@ -60,14 +60,48 @@ isFile() # <name>
 script() 
 # echo name (no path) of current (containing) bash script file.
 { 
-	echo $(basename $0); 
+    if ! null $0; then
+	    echo $(basename $0);
+    else 
+        echo "bash-cmd-line";
+    fi
 }; 	
 
-scriptName() 
+scriptName() # deprecated
 # print base of current bash script *file* name (duplicate function)
 { 
 	script; 
 };
+
+errecho() # [-s] <...args>
+# print message to stderr. -s: precede message with including script name
+{  
+	setcol $LIGHTRED; 
+	if test "$1" = "-s"; then
+		>&2 echo "$(script): "
+		shift;
+	fi
+	>&2 echo "$*" 
+	resetcol; 
+}
+
+errfnecho() # <...args>
+# always precedes error with script and bash function name.
+# print message to stderr.
+{ 
+	errecho -s "[${FUNCNAME[1]} ()]: $*"; 
+}
+
+errifnull() # [ -m <msg> ] "$@"
+# report error and exit if "$@" is null. nb: options removed before 'null' evaluation.
+{
+	eval $(valopt -m MESSAGE "$@");
+	if null "$@"; then 
+		local MSG="($script) $MESSAGE (null value found)"
+		errfnecho "$MSG"
+		exiterr -k;
+	fi
+}
 
 callFnIfExists() # <name> <...args>
 # if <name> is a function, call it with <...args>, otherwise do nothing.
@@ -231,25 +265,6 @@ scrClear() # no args.
 	echo -ne "\e[2J"
 }
 
-errecho() # [-s] <...args>
-# print message to stderr. -s: precede message with including script name
-{  
-	setcol $LIGHTRED; 
-	if test "$1" = "-s"; then
-		>&2 echo "$(script): "
-		shift;
-	fi
-	>&2 echo "$*" 
-	resetcol; 
-}
-
-errfnecho() # <...args>
-# always precedes error with script and bash function name.
-# print message to stderr.
-{ 
-	errecho -s "[${FUNCNAME[1]} ()]: $*"; 
-}
-
 fnname() # [-l <call-fn-level>] 
 # echo the current function name (the function calling this one)
 # -l:  e.g. "fnname -l 2"  echo name of function  calling function calling this function.
@@ -348,6 +363,26 @@ append() # [-s] <var> <appendage> - append <appendage> to <var> - changes <var>.
     eval $V=\"$RES\";
 }
 
+
+doSometimes() # [-d] do the action specified as "$@" - on 'occasion'
+# default option - once per system boot (when /tmp is cleared)
+# -d: force next call to doSomething to 'do something'! 
+# futures: will be extended.
+{
+    local __TMPFILE__="/tmp/__$(basename $0)__$(fnname -l 2)__$(fnname)"
+
+    if test "$1" = "-d"; then shift; if isfile $__TMPFILE__; then rm $__TMPFILE__; return 0; fi; fi
+
+    CMD="$@"
+    if test -z "$CMD"; then CMD="2>&1 echo \"$(fnname): no command given - bye!\""; fi
+
+    if ! isfile $__TMPFILE__; then
+        eval $CMD
+        touch $__TMPFILE__;
+        return 0;
+    fi
+    return 1;
+}
 
 # END
 fi
