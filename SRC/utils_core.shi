@@ -384,5 +384,12 @@ doSometimes() # [-d] do the action specified as "$@" - on 'occasion'
     return 1;
 }
 
+evalerr() # do eval of "$@" - print message saying what is done to stederr.
+{
+    CMD="$@"
+    errecho "do (eval):  <$CMD>"
+    eval $CMD
+}
+
 # END
 fi

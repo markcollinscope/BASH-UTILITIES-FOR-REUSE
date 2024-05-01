@@ -19,7 +19,7 @@ END_OPTS
 ## nb: at present this is focused on git-autocompletion - e.g. optautocomplete "_git_customcommand() { _git_checkout; }" would set-up a
 ## 'git customcommand' script to automatically present the same bash autocomplete options as 'git checkout'.
 
-__USEAUTOCOMPLETE=false;
+__USEAUTOCOMPLETE=true
 __AUTOCOMPLETEOPTION="--autocomplete" 
 
 optautocomplete() # <auto complete command>
