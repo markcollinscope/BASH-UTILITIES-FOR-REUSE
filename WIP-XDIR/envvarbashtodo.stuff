@@ -1,4 +1,7 @@
+. utils.shi
 
+
+# is this 'arg' or something else ...
 envVar() # <var> [-d <default>] [-v <local-var>]
 {
     eval $(valopt -d DEFAULT_OPT "$@");
