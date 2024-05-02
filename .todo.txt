@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 vbstack() ...
+=======
+>>>>>>> f7be09d664c4dd6166ff6499931d3b95de811bda
 
 date -d @1609459200 "+%Y-%m-%d %H:%M:%S" - date Unix epoch to std format.
 
@@ -7,7 +10,8 @@ whitespace [[:space:]] or \s using grep -P.
 
 ; | & ' " \ $ ` ( ) [ ] [[ ]] { } * ? ! ~ < > %
 
-----------------
+---------------- things that bash is sensitive to ---------------------
+see also summary above.
 
 Semicolon (;): Used to separate multiple commands written on a single line.
 Pipe (|): Used for piping the output of one command as input to another.

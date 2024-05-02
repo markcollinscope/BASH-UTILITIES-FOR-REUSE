@@ -321,21 +321,65 @@ xfind() # <... standard find args>
 	find "$@" | grep -v -E "$(getExcludes)"; 
 }
 
+___PRIVAR_ENCODING___=$$; # this global var is the only one that can't be encoded!
+_mkpv()
+{
+	local PV=___PRIVAR_ENCODING___; # todo - consider options to enable multiple sourced files (currently possible clashes could occur).
+	local VAR=$1 
+
+	VAR=$VAR$PV
+	echo $VAR
+}
+
+privar() # <var-name> [<value>] - get/set a privar - a name encoded 'private variable' 
+# if <value> is given, privar <var-name> is set. otherwise echo-returns the value.
+# e.g. usage: (1) privar AA 100; (2) echo $(privar AA); # output 100
+{
+	# nb: a privar is a variable with an encoded name, mostly used in 'library' (re-usable fnality) 
+	# bash scripts - i.e. those 'included' (using the ./source directive). to avoid name clashes.
+	local VAR=$1;
+	local VAL="$2";
+    
+	vbvar VAR
+	vbvar VAL
+
+	local PVARNAME=$(_mkpv $VAR);
+	vbvar PVARNAME
+
+	if null $VAL; then 
+		echo ${!PVARNAME}
+	else
+		evalvb $PVARNAME=$VAL
+    	fi
+}
+
+append() # [-s] <var> <appendage> - append <appendage> to <var> - changes <var>.
+# -s: add a space before the <appendage>. e.g. usage:
+# A=hello; append -s A world; echo "A: $A"; 	# A: hello world
+# B='one'; append B two; echo !B: $B"; 		# B: onetwo
+{
+    if test "$1" = "-s"; then CONCATOPT="-s"; shift; fi
+    V=$1 
+    RES=$(concat $CONCATOPT ${!V} "$2");
+    eval $V=\"$RES\";
+}
+
+
 doSometimes() # [-d] do the action specified as "$@" - on 'occasion'
 # default option - once per system boot (when /tmp is cleared)
 # -d: force next call to doSomething to 'do something'! 
 # futures: will be extended.
 {
-    local __TMPFILE__="/tmp/__$(basename $0)__$(fnname -l 2)__$(fnname)"
+    local TMPFILE="/tmp/__$(basename $0)__$(fnname -l 2)__$(fnname)"
 
-    if test "$1" = "-d"; then shift; if isfile $__TMPFILE__; then rm $__TMPFILE__; return 0; fi; fi
+    if test "$1" = "-d"; then shift; if isfile $TMPFILE; then rm $TMPFILE; return 0; fi; fi
 
     CMD="$@"
     if test -z "$CMD"; then CMD="2>&1 echo \"$(fnname): no command given - bye!\""; fi
 
-    if ! isfile $__TMPFILE__; then
+    if ! isfile $TMPFILE; then
         eval $CMD
-        touch $__TMPFILE__;
+        touch $TMPFILE;
         return 0;
     fi
     return 1;
@@ -363,7 +407,7 @@ isfd()
     isfile $FD || isdir $FD
 }
 
-checkIsFileOrDir() # TODO - To Utils. Or at least check it.
+checkIsFileOrDir() 
 {
 	local FD=$(arg $1)
 
@@ -373,6 +417,12 @@ checkIsFileOrDir() # TODO - To Utils. Or at least check it.
     fi
 }
 
+evalerr() # do eval of "$@" - print message saying what is done to stederr.
+{
+    CMD="$@"
+    errecho "do (eval):  <$CMD>"
+    eval $CMD
+}
 
 # END
 fi
