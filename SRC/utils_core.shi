@@ -178,6 +178,7 @@ chkenvvar() # as chkarg - overloaded to show intent.
 	chkarg "$@"; 
 }
 
+
 setvar() # <bash var name> <value>
 # set <bash var name> to <value> - if <value> is undefined - error and exit.
 # use to check parameters passed to functions correctly.
@@ -339,6 +340,39 @@ doSometimes() # [-d] do the action specified as "$@" - on 'occasion'
     fi
     return 1;
 }
+
+arg()
+{
+	eval $(valopt -m __MSG "$@");
+
+	local ARG=$1
+	local CALLER=$(fnname -l 1);
+
+	if null $ARG; then 
+		if ! null $__MSG; then __MSG=$(concat " : " "$__MSG"); fi
+		errfnecho "arg undefined in <$CALLER>: $__MSG";
+		exiterr -k; 
+	fi
+
+	echo $ARG;
+}
+
+isfd()
+{
+    local FD=$(arg $1);
+    isfile $FD || isdir $FD
+}
+
+checkIsFileOrDir() # TODO - To Utils. Or at least check it.
+{
+	local FD=$(arg $1)
+
+    if ! isfd $FD; then
+        errfnecho "no such file or directory: <$FD>";
+        exiterr -k;
+    fi
+}
+
 
 # END
 fi

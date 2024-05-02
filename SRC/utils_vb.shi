@@ -66,6 +66,15 @@ vbfnecho() # <string>
 	vbecho "$(basename $0) [${FUNCNAME[1]}()]: $*"; 
 }
 
+vbstack() # print call stack if $(verbose) - if verbose output selected.
+{
+	CNT=1;
+	while ! null $(fnname -l $CNT) ;  do
+		vbfnecho $(fnname -l $CNT);
+		CNT=$((CNT+1))
+	done
+}
+
 vbsleep() # <seconds>
 # sleep for <seconds> if $(verbose) (verbose output flag) is true.
 { 
