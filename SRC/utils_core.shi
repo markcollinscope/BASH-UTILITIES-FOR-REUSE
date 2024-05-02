@@ -385,13 +385,33 @@ doSometimes() # [-d] do the action specified as "$@" - on 'occasion'
     return 1;
 }
 
+arg.env() # <var> [-d <default>] [-v <var-name>]
+# check if <var> is null. if so error unless
+# -d <default> set - in which case use <default>
+# -c <var-name> if used, set <var-name> to <var>/<default> as appropriate.
+{
+    eval $(valopt -d DEFAULT_OPT "$@");
+    eval $(valopt -v ALTVAR_OPT "$@");
+
+    local VAR=$1
+
+    local VARNULL=false; if null ${!VAR}; then VARNULL=true; fi
+    local DEFAULTNULL=false; if null $DEFAULT_OPT; then DEFAULTNULL=true; fi
+    local ALTVARNULL=false; if null $ALTVAR_OPT; then ALTVARNULL=true; fi
+
+	if $VARNULL && $DEFAULTNULL; then errecho "$(fnname -l 2): $VAR is not set, and no default provided" ; exiterr -k; fi
+    if $VARNULL && ! $DEFAULTNULL; then eval $VAR=$DEFAULT_OPT; fi
+    if ! $ALTVARNULL; then eval $ALTVAR_OPT=${!VAR}; fi
+}
+
 arg()
 {
 	eval $(valopt -m __MSG "$@");
-
 	local ARG=$1
-	local CALLER=$(fnname -l 1);
 
+	if test $ARG = 'env'; then shift; arg.env "$@"; return 0; fi
+
+	local CALLER=$(fnname -l 1);
 	if null $ARG; then 
 		if ! null $__MSG; then __MSG=$(concat " : " "$__MSG"); fi
 		errfnecho "arg undefined in <$CALLER>: $__MSG";
