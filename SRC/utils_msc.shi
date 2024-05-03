@@ -320,5 +320,13 @@ rmSafely() # <file/dir>
 	ne mv $__TARGET $_TMP
 }
 
+nbtodo() # [ <msg>]
+# print a todo message for calling fn - appends <msg> if given.
+{ 
+	local msg=$1
+	if ! null $msg; then msg=": $msg"; fi
+	errecho -s "$(fnname -l 2) - todo item $msg"; 
+};
+
 # END CONTENT
 fi
