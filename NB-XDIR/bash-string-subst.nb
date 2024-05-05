@@ -1,0 +1,44 @@
+Substring Extraction:
+${string:position:length}: Extracts substring starting at position with a length of length.
+${string:position}: Extracts substring starting at position to the end of the string.
+Length of String:
+${#string}: Returns the length of the string.
+Substring Removal:
+${string#substring}: Removes the shortest match of substring from the beginning of string.
+${string##substring}: Removes the longest match of substring from the beginning of string.
+${string%substring}: Removes the shortest match of substring from the end of string.
+${string%%substring}: Removes the longest match of substring from the end of string.
+Substring Replacement:
+${string/pattern/replacement}: Replace the first occurrence of pattern with replacement.
+${string//pattern/replacement}: Replace all occurrences of pattern with replacement.
+Substring Testing:
+${string/pattern}: Tests if pattern exists in string.
+Upper and Lower Case Conversion:
+${string^}: Converts the first character of string to uppercase.
+${string^^}: Converts all characters of string to uppercase.
+${string,}: Converts the first character of string to lowercase.
+${string,,}: Converts all characters of string to lowercase.
+Substring Indexing:
+${string:offset}: Extracts substring starting from offset.
+
+----
+Basic String:
+The simplest form of pattern is just a plain string. In this case, Bash performs a literal string replacement.
+Example: ${string//old/new} replaces all occurrences of the string "old" with the string "new".
+Wildcard Characters:
+Bash supports basic pattern matching with the following wildcard characters:
+*: Matches any number of characters (including zero).
+?: Matches any single character.
+Example: ${string//a*b/c} replaces all substrings starting with "a", followed by any characters, and ending with "b" with the string "c".
+Character Classes:
+You can use character classes like [...] to match any character within the brackets.
+Example: ${string//[aeiou]/X} replaces all vowels with the character "X".
+Character Ranges:
+You can specify ranges of characters within character classes using a hyphen -.
+Example: ${string//[a-z]/X} replaces all lowercase letters with the character "X".
+Negation:
+You can negate character classes by placing ! or ^ at the beginning of the class.
+Example: ${string//[^0-9]/X} replaces all non-digit characters with the character "X".
+Escape Sequences:
+You can use escape sequences like \t for tab, \n for newline, etc.
+Example: ${string//\\n/\n} replaces all occurrences of "\n" with a newline character.
