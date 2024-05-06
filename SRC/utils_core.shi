@@ -331,7 +331,7 @@ _mkpv()
 	echo $VAR
 }
 
-privar() # <var-name> [<value>] - get/set a privar - a name encoded 'private variable' 
+privar() # <var-name> [<value>] - get/set a privar - a name encoded 'private variable' # BETA
 # if <value> is given, privar <var-name> is set. otherwise echo-returns the value.
 # e.g. usage: (1) privar AA 100; (2) echo $(privar AA); # output 100
 {
@@ -353,7 +353,7 @@ privar() # <var-name> [<value>] - get/set a privar - a name encoded 'private var
     	fi
 }
 
-append() # [-s] <var> <appendage> - append <appendage> to <var> - changes <var>.
+append() # [-s] <var> <appendage> - append <appendage> to <var> - changes <var>.# BETA
 # -s: add a space before the <appendage>. e.g. usage:
 # A=hello; append -s A world; echo "A: $A"; 	# A: hello world
 # B='one'; append B two; echo !B: $B"; 		# B: onetwo
@@ -365,7 +365,7 @@ append() # [-s] <var> <appendage> - append <appendage> to <var> - changes <var>.
 }
 
 
-doSometimes() # [-d] do the action specified as "$@" - on 'occasion'
+doSometimes() # [-d] do the action specified as "$@" - on 'occasion'# BETA
 # default option - once per system boot (when /tmp is cleared)
 # -d: force next call to doSomething to 'do something'! 
 # futures: will be extended.
@@ -385,15 +385,16 @@ doSometimes() # [-d] do the action specified as "$@" - on 'occasion'
     return 1;
 }
 
-arg.env() # <var> [-d <default>] [-v <var-name>]
+arg.env() # <var> [-d <default>] [-v <var-name>]# BETA
 # check if <var> is null. if so error unless
-# -d <default> set - in which case use <default>
-# -c <var-name> if used, set <var-name> to <var>/<default> as appropriate.
+# -d <default> set - in which case use <default>.
+# if '-v <var-name>' is used, set local script varaible <var-name> to <var> value.
 {
     eval $(valopt -d DEFAULT_OPT "$@");
     eval $(valopt -v ALTVAR_OPT "$@");
 
     local VAR=$1
+	vbvar VAR
 
     local VARNULL=false; if null ${!VAR}; then VARNULL=true; fi
     local DEFAULTNULL=false; if null $DEFAULT_OPT; then DEFAULTNULL=true; fi
@@ -404,14 +405,42 @@ arg.env() # <var> [-d <default>] [-v <var-name>]
     if ! $ALTVARNULL; then eval $ALTVAR_OPT=${!VAR}; fi
 }
 
+getarg() # <num> <...args> # tbd deprecate.
+# echo-return the <num>'th argument in <...args> (i.e. $<num>) nb: uses shift.
+{
+	local n=$(arg $1); 
+	shift $n;
+	echo $1;
+}
+
+arg.at() # <num> <...args> # BETA
+# echo-return the <num>'th argument in <...args> (i.e. $<num>).
+# error if <num> > <number of ...args>
+{
+	local n=$(arg $1);
+	shift;
+	local argcount=$#
+	local args="$@"
+	shift $((n-1));
+
+	if test "$n" -gt "$argcount"; then
+		errfnecho "seeking <$n th> arg in <$args> - sadly there are only <$argcount> elements,so it is adieu, dear friend";
+		exiterr -k;
+	fi 
+	echo $1;
+}
+
 arg()
 {
 	eval $(valopt -m __MSG "$@");
+
 	local ARG=$1
 
 	if test $ARG = 'env'; then shift; arg.env "$@"; return 0; fi
+	if test $ARG = 'at'; then shift; arg.at "$@"; return 0; fi
 
 	local CALLER=$(fnname -l 1);
+
 	if null $ARG; then 
 		if ! null $__MSG; then __MSG=$(concat " : " "$__MSG"); fi
 		errfnecho "arg undefined in <$CALLER>: $__MSG";

@@ -245,23 +245,6 @@ datefmt() # [-l|--long|-s|--iso]: echo-return formatted date.
 	esac
 }
 
-getarg() # <num> <...args>
-# echo-return the <num>'th argument in <...args> (i.e. $<num>)
-{
-	# TODO - try ${${ARG}} - as a quickie way.
-	setvar ARG "$1";
-	shift;
-	
-	local COUNT=1;
-	for i in $*; do
-		if test "$COUNT" = "$ARG"; then
-			echo $i;
-			break;
-		fi
-		COUNT=$((COUNT+1));
-	done
-}
-
 _varDefaultName() # <var-name>
 # hides details of how default values are stored.
 # well, as much as possible!
