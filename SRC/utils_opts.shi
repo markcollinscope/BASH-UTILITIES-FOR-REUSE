@@ -19,7 +19,7 @@ END_OPTS
 ## nb: at present this is focused on git-autocompletion - e.g. optautocomplete "_git_customcommand() { _git_checkout; }" would set-up a
 ## 'git customcommand' script to automatically present the same bash autocomplete options as 'git checkout'.
 
-__USEAUTOCOMPLETE=true
+__USEAUTOCOMPLETE=false;
 __AUTOCOMPLETEOPTION="--autocomplete" 
 
 optautocomplete() # <auto complete command>
@@ -143,12 +143,11 @@ boolopt() # [ --rem <documentation...> ] <flag> <bash var> "$@"
 	binopt "$FLAG" "$VAR" false true "$@"
 }
 
-valopt() # [ --rem <documentation...> ] <flag> <bash var> <value> "$@"
+valopt() # [ --rem <documentation...> ] <flag> <bash var> "$@"
 # called in the form:
-# eval $(valopt --rem 'documentation...' -a AVARIABLE hello "$@")
+# eval $(valopt --rem 'documentation...' -a AVARIABLE "$@")
 # where: 	<flag> (-a) is the flag to be processed on the including script.
 #			<bash-var> (AVARIABLE) - the bash var to set set to either <default-value> or <other-value>
-#			<value> - the value AVARIABLE is set to if <flag> is present. AVARIABLE will undefined if not.
 # --rem is optional. If given <documentation...> will be added to Usage of containing script.
 {
 
