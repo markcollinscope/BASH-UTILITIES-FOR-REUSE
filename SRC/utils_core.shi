@@ -417,16 +417,16 @@ arg.at() # <num> <...args> # BETA
 # echo-return the <num>'th argument in <...args> (i.e. $<num>).
 # error if <num> > <number of ...args>
 {
-	local n=$(arg $1);
-	shift;
-	local argcount=$#
+	local pos=$(arg $1); shift;
 	local args="$@"
-	shift $((n-1));
+	local nelements=$#
 
-	if test "$n" -gt "$argcount"; then
-		errfnecho "seeking <$n th> arg in <$args> - sadly there are only <$argcount> elements,so it is adieu, dear friend";
+	if test "$pos" -gt "$nelements"; then
+		errfnecho "seeking <$pos th> arg in <$args> - sadly there are only <$nelements> elements,so it is adieu, dear friend";
 		exiterr -k;
 	fi 
+
+	shift $((pos-1));
 	echo $1;
 }
 
