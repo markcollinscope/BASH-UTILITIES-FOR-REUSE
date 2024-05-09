@@ -1,5 +1,4 @@
 . utils.shi
-. sh-unit.shi
 
 arg() # -n: is a valid number (int) - forall numbers passed.
 {
@@ -16,21 +15,91 @@ arg() # -n: is a valid number (int) - forall numbers passed.
     echo "$@"
 }
 
-list.init()
+tbd() { errecho "$(fnname -l 2): to be done $*"; if test "$1" = '-x'; then errexit -k; fi; } 
+
+str.append_if() { tbd; }
+
+list.encode() # -a - encode the whole list? including elements...
+{
+	tbd;
+}
+
+list.decode() # allow non-encoded. tag if encoded. # -a ?
+{
+	tbd;
+}
+
+list.nullerr()
+{
+	if test $# = 0; then errecho "$(fnname -l 2) - null list.nullerror"; errexit -k; fi
+}
+
+list.init() # --le (encode)? with --ld (decode) # or always!
 {
     echo "$@";
 }
 
-_init_shtest()
+list.head()
 {
-	local args='A B C D EFG HIJ'
-	local res=$(list.init $args)
-	assertSame $args $res
+	list.nullerr "$@"
+	echo $1;
 }
 
-runTests
+list.tail()
+{
+	list.nullerr "$@"
+	shift;
+    echo "$@";
+}
+
+list.reverse()
+{
+	if ! null "$@"; then
+		local head=$1;
+		shift;
+		local tail="$@"
+		echo $(list.reverse $tail) $head;
+	fi
+}
+
+list.reverse 1 2 3 4 5 6 7 eight nine 'ten eleven';
 
 exit;
+ 
+list.len()
+{
+	echo $#;
+}
+
+list.notfound=-1;
+
+list.find() # <val> 
+{
+	eval $(valopt -m _FND_MSG "$@");
+
+	local val=$1; shift;
+
+	if null $val; then 
+		errecho "$(fnname): no position index given $_FND_MSG";
+		exiterr -k;
+	fi
+
+	local count=1;
+	for i in "$@"; do
+		if test $i = $val; then
+			echo $count;
+			return 0;
+		fi
+		count=$((count+1))
+	done
+	echo $list.notfound;
+	return 1;
+}
+
+list.contains()
+{
+	list.find "$@" > /dev/null;
+}
 
 list.get()
 {
@@ -44,11 +113,11 @@ list.set()
     local value=$2; 
     shift 2;
 
-    local a=$(list.init "$@")
+    local a="$@";
     local retval=
 
     retval=$(list.to $((index - 1)) $a);
-    retval=$(list.push $value $retval);            # push as append?
+    retval=$(list.append $value $retval); 
     retval=$(list.from $((index + 1)) $a);
 
     echo $retval;
@@ -87,29 +156,19 @@ list.range()
     echo $retval
 }
 
-list.push()
+list.push() # <val> <list>
 {
     echo "$@"
 }
 
 list.popval()
 {
-    getarg $# $@
+    getarg $# "$@";
 }
 
 list.pop()
 {
     list.to $(($# - 1)) "$@"
-}
-
-list.add()
-{
-    echo "$@"
-}
-
-list.rem()
-{
-    list.from 2 "$@";
 }
 
 
@@ -127,7 +186,7 @@ echo $(list.from 4 $X);
 echo
 
 echo "PUSH g h i: $X"
-X=$(list.push $X g h i)
+X=$(list.append $X g h i)
 echo $X
 echo
 
@@ -141,7 +200,7 @@ echo $X
 echo
 
 echo "ADD A: $X"
-X=$(list.add A $X) # ins/del
+X=$(list.prepend A $X) # ins/del
 echo $X
 echo
 
