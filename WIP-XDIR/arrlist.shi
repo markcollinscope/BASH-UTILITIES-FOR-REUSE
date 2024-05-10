@@ -15,9 +15,47 @@ arg() # -n: is a valid number (int) - forall numbers passed.
     echo "$@"
 }
 
+fn()
+{
+	if test "$1" = 'defined'; then
+		shift;
+		fn.defined "$@";
+	fi
+}
+
+fn.defined()
+{
+	test $(type -t "$1") = "function"
+}
+
+## ----------------
+
+arg.test() { echo 'arg test'; }
+
+arg.fn()
+{
+	local fn=$(arg $1);
+	shift;
+
+	fn=arg.$fn;
+
+	if fn defined "$fn"; then
+		$fn "$@";
+	fi
+}
+
+arg.fn test;
+exit;
+
 tbd() { errecho "$(fnname -l 2): to be done $*"; if test "$1" = '-x'; then errexit -k; fi; } 
 
-str.append_if() { tbd; }
+str.if() # ???
+{ 
+	if ! null "$@"; then 
+		local fn=$1; shift;
+		eval $fn "$@";
+	fi 
+}
 
 list.encode() # -a - encode the whole list? including elements...
 {
