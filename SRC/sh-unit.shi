@@ -50,22 +50,23 @@ _passFailAssert()
 ### PUBLIC API ###
 assertSame()
 {
-	local ARG1="$1";
-	local ARG2="$2";
-	
-	local HAS_PASSED=false;
-	if test "$ARG1" = "$ARG2"; then HAS_PASSED=true; fi
+	local VAL1="$1";
+	local VAL2="$2";
 
-	_passFailAssert $HAS_PASSED assertSame "$@";
+	local HAS_PASSED=false;
+
+	if test "$VAL1" = "$VAL2"; then HAS_PASSED=true; fi
+
+	_passFailAssert $HAS_PASSED assertSame "<$VAL1>" "<$VAL2>"
 }
 
 assertDiff()
 {
-	local ARG1=$1;
-	local ARG2=$2;
+	local VAL1=$1;
+	local VAL2=$2;
 
 	local HAS_PASSED=false;
-	if ! test "$ARG1" = "$ARG2"; then HAS_PASSED=true; fi
+	if ! test "$VAL1" = "$VAL2"; then HAS_PASSED=true; fi
 
 	_passFailAssert $HAS_PASSED assertDiff "$@";
 }
