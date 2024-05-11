@@ -16,24 +16,6 @@ arg() # int: is a valid number (int) - forall numbers passed.
     echo "$@"
 }
 
-##################### for fn module 
-fn()
-{
-	if test "$1" = 'defined'; then
-		shift;
-		fn.defined "$@";
-	fi
-}
-
-fn.defined()
-{
-	test $(type -t "$1") = "function"
-}
-
-## ----------------
-
-arg.test() { echo 'arg test'; }
-
 arg.fn()
 {
 	local fn=$(arg $1);
@@ -52,8 +34,24 @@ arg.bool()
 	if $? ; then echo true; else echo false; fi
 }
 
+##################### for fn module 
+fn()
+{
+	if test "$1" = 'defined'; then
+		shift;
+		fn.defined "$@";
+	fi
+}
+
+fn.defined()
+{
+	test $(type -t "$1") = "function"
+}
+
+
 tbd() { errecho "$(fnname -l 2): to be done $*"; if test "$1" = '-x'; then errexit -k; fi; } 
 
+#### string module ####
 str.if() # ???
 { 
 	if ! null "$@"; then 
@@ -72,15 +70,25 @@ list.decode() # allow non-encoded. tag if encoded. # -a ?
 	tbd -x;
 }
 
-# err exit <v> <msg> ?
-# err echo  >
-
 list.errnull()
 {
 	if test $# = 0; then errecho "$(fnname -l 2) - null list found"; exiterr -k; fi
 }
 
-list.init() # -E -D
+list.bounds()
+{
+	local lower=1;
+	local value=$(arg $1)
+	local upper=$(arg int $2);
+
+	if test $value -lt $lower || test $value -gt $upper; then
+		local msg="$(fnname -l 2): index out of range (index: $value lower: $lower upper: $upper)";
+		errecho $msg;
+		exiterr -k;
+	fi
+}
+
+list.new() # -E -D
 {
     echo "$@";
 }
@@ -97,10 +105,12 @@ list.reverse()
 
 list.to()
 {
-	local upto=$1;
+	local upto=$(arg int $1);
 	shift;
-
 	local len=$#;
+
+	list.bounds $upto $len
+
 	rev=$(list.reverse "$@");
 	set -- $rev
 
@@ -122,8 +132,11 @@ list.range()
 	local to=$(arg int $2); 
 	shift 2;
 
+	list.bounds $from $#
+	list.bounds $to $#
+
     local num=$((to - from));
-	echo $(list.to $num $(list.from $from "$@"))
+	echo $(list.new $(list.to $num $(list.from $from "$@")))
 }
 
 list.head()
@@ -146,12 +159,12 @@ list.len()
 
 list.null()
 {
-	list.init;
+	list.new;
 }
 
 list.undefined()
 {
-	echo 'undefined';
+	echo -9999
 }
 
 list.find() # <val> 
@@ -173,6 +186,7 @@ list.find() # <val>
 		fi
 		count=$((count+1))
 	done
+
 	list.undefined;
 	return 1;
 }
@@ -182,43 +196,69 @@ list.contains()
 	list.find "$@" > /dev/null;
 }
 
-list.get()
+list.cat()
 {
-    local index=$(arg int $1); shift;
-    echo $(getarg $index "$@");
+	local list1=$(arg $1);
+	local list2=$(arg $2);
+
+	list.new $list1 $list2
 }
 
 list.set()
 {
     local index=$(arg $1);
-    local value=$2; 
+    local value=$(arg $2); 
     shift 2;
 
-    local a="$@";
-    local retval=
+	local testin="$@"
+    local retval;
 
-    retval=$(list.to $((index - 1)) $a);
+    retval=$(list.to $((index - 1)) $testin);
     retval=$(list.append $value $retval); 
-    retval=$(list.from $((index + 1)) $a);
+    retval=$(list.cat $retval $(list.from $index $testin));
 
     echo $retval;
 }
 
-list.push() # <val> <list>
+list.get()
 {
-    echo "$@"
+    local index=$(arg int $1); shift;
+	local value=$1;
+
+	getarg $index "$@";
 }
 
-list.popval()
+list.push() 
 {
-    getarg $# "$@";
+	echo "$@";
+}
+
+list.popv()
+{
+    list.get 1 "$@";
 }
 
 list.pop()
 {
-    list.to $(($# - 1)) "$@"
+    list.from 1 "$@";
 }
 
+list.append()
+{
+	local value=$(arg $1);
+
+	echo $(list.new "$@" $value);
+}
+
+list.foreach()
+{
+	local callfn=$(arg fn $1);
+	shift;
+
+	list.new $(callfn $list.head) $(list.forall $callfn $(list.tail "$@"));
+}
+
+# list.start return iter list.next <iter>
 
 # TEST FUNCTIONS
 
@@ -227,10 +267,10 @@ seqs()
 	seq -s ' ' "$@"
 }
 
-list.init.shtest()
+list.new.shtest()
 {
 	local testin="a b c d e f g"
-	local testout=$(list.init $testin);
+	local testout=$(list.new $testin);
 
 	assertSame "$testin" "$testout"
 }
@@ -240,9 +280,9 @@ list.reverse.shtest()
 	local lower=21
 	local upper=27;
 
-	local testin=$(list.init $(seqs $lower $upper));
+	local testin=$(list.new $(seqs $lower $upper));
 	local testout=$(list.reverse $testin);
-	local xtestout=$(list.init $(seqs $upper -1 $lower ));
+	local xtestout=$(list.new $(seqs $upper -1 $lower ));
 
 	assertSame "$testout" "$xtestout" 
 }
@@ -252,7 +292,7 @@ list.to.shtest()
 	local upper=100;
 	local upto=9;
 
-	local testin=$(list.init $(seqs 1 $upper));
+	local testin=$(list.new $(seqs 1 $upper));
 
 	local testout=$(list.to $upto $testin);
 	local xtestout=$(seqs 1 $upto);
@@ -265,7 +305,7 @@ list.from.shtest()
 	local upper=100;
 	local from=44;
 
-	local testin=$(list.init $(seqs 1 $upper));
+	local testin=$(list.new $(seqs 1 $upper));
 
 	local testout=$(list.from $from $testin);
 	local xtestout=$(seqs $((from+1)) $upper);
@@ -279,9 +319,9 @@ list.range.shtest()
 	local to=11;
 	local upper=12;
 
-	local testin=$(list.init $(seqs 1 $upper));
+	local testin=$(list.new $(seqs 1 $upper));
 	local testout=$(list.range $from $to $testin);
-	local xtestout=$(list.init $(seqs $((from+1)) $to));
+	local xtestout=$(list.new $(seqs $((from+1)) $to));
 
 	assertSame "$testout" "$xtestout" 
 }
@@ -291,14 +331,14 @@ list.head.tail.shtest()
 	local lower=2
 	local upper=14;
 
-	local testin=$(list.init $(seqs $lower $upper));
+	local testin=$(list.new $(seqs $lower $upper));
 	local testhead=$(list.head $testin)
 	local xtesthead=$lower;
 
 	assertSame "$testhead" "$xtesthead";
 
 	local testtail=$(list.tail $testin);
-	local xtesttail=$(list.init $(seqs $((lower+1)) $upper));
+	local xtesttail=$(list.new $(seqs $((lower+1)) $upper));
 
 	assertSame "$testtail" "$xtesttail";
 }
@@ -307,52 +347,98 @@ list.len.shtest()
 {
 	local upper=44
 
-	local testin=$(list.init $(seqs 1 $upper));
+	local testin=$(list.new $(seqs 1 $upper));
 	local testout=$(list.len $testin);
 	local xtestout=$upper;
 
 	assertSame "$testout" "$xtestout" 
 }
 
+# bool module. tbd.
+bool.status()
+{
+	local status=$(arg $1);
+	if test $status = 0; then echo true; else echo false; fi
+}
+# end.
+
 list.contains.shtest()
 {
 	local upper=22;
+	local isContained=11;
+	local isNotContained=100;
+
+	local testin=$(list.new $(seqs 1 $upper));
+
+	list.contains $isContained $testin;
+	local res=$(bool.status $?);
+	assertSame $res true;
+
+	list.contains $isNotContained $testin;
+	res=$(bool.status $?);
+	assertSame $res false;
 }
 
-runTests
+list.find.shtest()
+{
+	local upper=22;
+	local itemIsFound=18
+	local itemIsNotFound=88;
+
+	local testin=$(list.new $(seqs 1 $upper));
+	local pos=$(list.find $itemIsFound $testin);
+	assertSame $pos $itemIsFound;
+
+	pos=$(list.find $itemIsNotFound $testin);
+	assertSame $pos $(list.undefined);
+}
+
+list.get.set.shtest()
+{
+	local lower=1;
+	local upper=17;
+	local index=12;
+	local newval='anewvalue';
+
+	local testin=$(list.new $(seqs $lower $upper));
+	local value=$(list.get $index $testin);
+	assertSame $value $((lower + index -1));
+
+	local testout=$(list.set $index $newval $testin);
+	assertSame $(list.len $testin) $(list.len $testout);
+
+	value=$(list.get $index $testout);
+	assertSame $newval $value;
+}
+
+list.push.pop.popv,shtest()
+{
+	local numpush=15;
+	local testin=$(list.new $(seqs 1 $upper));
+	local newvalue='newvalinfn';
+
+	local len=$(list.len $testin);
+	local newlist=$(list.new $testin);
+	local range=$(seqs 1 $numpush)
+	local i;
+
+	for i in $range; do
+		newlist=$(list.push $newvalue $newlist);
+	done
+	assertSame $(list.len $newlist) $((len + numpush));
+
+	local popvok=true; # tbd assert $value (true) # assertNot $value;
+	for i in $range; do
+		local val=$(list.popv $newlist)
+		if ! test $val = $newvalue; then
+			popvok=false;
+			break;
+		fi
+		newlist=$(list.pop $newlist);
+	done
+	assertSame true $popvok;
+	assertSame $testin $newlist;
+}
+
+runTests # tbd - shtest run
 exit;
-
-
-echo "PUSH g h i: $X"
-X=$(list.append $X g h i)
-echo $X
-echo
-
-echo "popval: $X"
-echo "VALUE: $(list.popval $X)"
-echo
-
-echo "POP: $X"
-X=$(list.pop $X)
-echo $X
-echo
-
-echo "ADD A: $X"
-X=$(list.prepend A $X) # ins/del
-echo $X
-echo
-
-echo "REM: $X"
-X=$(list.rem $X)
-echo $X
-echo
-
-echo "INDEX 4 to ZZZ: $X"
-X=$(list.set 4 ZZZ $X)
-echo $X
-echo
-
-echo "GET 5"
-echo $X
-echo $(list.get 5)
-echo
