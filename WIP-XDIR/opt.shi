@@ -1,21 +1,113 @@
 . utils.shi
 
-tbd() { fn.null; }
+_utsfnalias() { return 0; }
 
-alias global='declare -g'
-alias const=readonly;
-alias utsfn=function
+if _utsfnalias; then
+	echo using alias uts.
+	alias utsfn=function
+else
+	echo not-using-alias
+fi
 
-msg $(arg deprecated function) }
-
-utsfn err.echo()
+utsfn vb.echo.
 {
-	errecho $*;
+	vbecho $*;
 }
 
-utsfn str.white() 
+fn.deprecated()
 {
+	vb.echo "$"
+	eval "$@";
+}
 
+
+_errecho() { fn.deprecated errecho $*; }
+
+fn.error()
+{
+	errecho $*;
+	exiterr -k;
+}
+
+fn.echo() 
+{
+	echo $*
+}
+
+fn()
+{
+	local name=$1;
+
+	if test -z "$name"; then 
+		_errexit 'no argument given to $(fn.name)';
+	fi
+
+	if ! test "$(type -t $1)" = "function" ; then 
+		_errexit "$(fn.name) argument <$1> is not function" 
+	fi
+	fn.echo $1;
+}
+
+
+fn.passthru() 
+{
+	local fnnm=$(arg fn $1);
+	
+}
+fn.pass -v str.cat concat;
+
+static()
+{
+	local prefix="$(fn.name)"
+	declare -g $(concat)
+}
+
+_nerr.flag()
+{
+	
+	echo 
+}
+
+arg()
+{
+	if test -z "$@"; then 
+		err.echo "missing argument value in function: $(fn.name -l 2)"
+	fi
+}
+
+	
+arg.count()
+{
+	echo $#;
+}
+
+_isTF()
+{
+	arg.count 1 1 --err --msg;
+	test $1 = true || test $1 =false
+}
+
+bool.init()
+{
+	arg.count 1
+	local bval=$(arg $1)
+	if _isTF $1; then 
+}
+
+arg.bool()
+{
+	if
+}
+
+_exitiferr()
+{
+	local firstbool=$(arg $1);
+	local secondbool=$(arg $2)
+}
+
+
+_white
+{
 	local input=$1;
 	local output=$(sed 's/ //g'); 
 	if ! test $input = $output; then err.echo
@@ -67,7 +159,7 @@ arg()
 }
 
 fn.name() { 
-	fn.call 
+	fn.deprecated 
 
 
 
@@ -152,7 +244,7 @@ global const opt.flag [-A|--all]
 
 todo -- $(arg str.lower -1 -A  f.*n => Fn FN fN Fn
 
-int.init() { fn.call --old f
+int.init() { fn.deprecated --old f
 int.zero() { test $(arg $1) = 0; }
 
 opt.dash() 
@@ -179,12 +271,6 @@ opt.dd() { echo --$1 }
 
 opt.deprecated() { opt $(opt.dd dep);
 
-fn.call() 
-{
-	local fnnm=$(arg fn $1);
-	eval "$1"
-}
-fn.call str.cat concat;
 
 fn.utsv() { echo $(str.cat v$(arg $1)'; }
 
@@ -286,14 +372,8 @@ opt.okdeprecated()
 }
 
 
-function fn.call()
+function fn.deprecated()
 {
-
-
-	
-
-
-
 
 
 
