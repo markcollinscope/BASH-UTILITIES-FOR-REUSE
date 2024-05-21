@@ -24,12 +24,23 @@ nostderr()
 	exec 2> /dev/null; 
 }
 
+
 null() # <...args>
 # if any args are supplied return true (0), else return false (1); uses test -z
 # e.g. < if null "$@"; then ... fi >
 { 
 	if test -z "$*"; then return 0; else return 1; fi 
 }; 
+
+clone() # oldfn newfn
+{
+	local oldfn=$1, newfn=$2;
+	#	if null $oldfn || null $newfn; then  echo null value to clone; exit 1; fi
+	echo $(declare -f $oldfn | grep -v $oldfn)
+	echo $local;
+}
+
+clone clone newclone
 
 isdir() # <name>
 # return true (0)  if <name> is a directory, false (1) otherwise.
