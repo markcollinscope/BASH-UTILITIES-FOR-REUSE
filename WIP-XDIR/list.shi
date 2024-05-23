@@ -1,22 +1,96 @@
 . utils.shi
 . sh-unit.shi
 
-arg() # int: is a valid number (int) - forall numbers passed.
+uts.doexit() { exit; }
+
+function myfn()
+{ 
+	:; 
+}
+
+uts.doexit;
+
+uts.tbd() 
+{ 
+    errecho "$(fnname -l 2): to be done $*";
+	if arg.is $1 -x; then
+		shift;
+        uts errexit -k;
+    fi
+}
+
+# check for sure no $@ returned by echo, no option to do so.
+uts.echoreturn() { echo $*; return 0; }
+
+uts()
 {
-    eval $(boolopt int NUM_OPT "$@")
+	eval "$@"
+}
 
-    if null "$@"; then errecho "$(fnname -l 2): null value fails test in $(fnname)"; exiterr -k; fi
+arg.isint()
+{
+	test $1 = int
+}
 
-    if $NUM_OPT; then
+arg.isconst()
+{
+	test $1 = const
+}
+
+alias const='function'
+alias bool=function
+alias basharg=function
+
+const arg.null
+{
+	uts.echoreturn "";
+}
+
+bool arg.isnull()
+{
+	test $# = 0 || test $1 = ""
+}
+
+basharg arg() # int: is a valid number (int) - forall numbers passed.
+{
+	local numopt=false;
+
+	if arg.isint $1; then
+		numopt=true;
+		shift;
+	fi
+
+    if arg.isnull $1; then 
+		uts errecho "$(fnname -l 2): null value fails test in $(fnname)"; 
+		uts exiterr -k;
+	fi
+
+    if $numopt; then
         for i in "$@"; do
-            if ! isNum $i; then errecho "$(fnname -l 2): number fails test in $(fnname) args: <$@>"; exiterr -k; fi
+            if ! uts isNum $i; then 
+				uts errecho "$(fnname -l 2): number fails test in $(fnname) args: <$@>"; 
+				uts exiterr -k; 
+			fi
         done
     fi
 
-    echo "$@"
+    uts.echoreturn "$@"
 }
 
-arg.fn()
+bool arg.is()
+{
+	local val=$(arg $1);
+	local opt=$(arg $2)
+	test $val = $opt;
+}
+
+bool arg.iserr()
+{
+	arg.is $1 --err
+}
+
+# return <null> - last exit status.
+bool arg.fn()
 {
 	local fn=$(arg $1);
 	shift;
@@ -25,19 +99,27 @@ arg.fn()
 
 	if fn defined "$fn"; then
 		$fn "$@";
+		return
 	fi
+	return 1;
 }
 
-arg.bool()
+alias nb=
+
+alias boolval=function
+
+boolval arg.toboolval()
 {
-	eval "$@"
+	nb eval "$@"
 	if $? ; then echo true; else echo false; fi
 }
+
+uts.doexit;
 
 ##################### for fn module 
 fn()
 {
-	if test "$1" = 'defined'; then
+	if arg.is $1 defined; then
 		shift;
 		fn.defined "$@";
 	fi
@@ -45,14 +127,12 @@ fn()
 
 fn.defined()
 {
-	test $(type -t "$1") = "function"
+	test $(type -t $1) = function
 }
 
 
-tbd() { errecho "$(fnname -l 2): to be done $*"; if test "$1" = '-x'; then errexit -k; fi; } 
-
 #### string module ####
-str.if() # ???
+str.notnull() # ???
 { 
 	if ! null "$@"; then 
 		local fn=$1; shift;
@@ -62,16 +142,19 @@ str.if() # ???
 
 list.encode() # -a - encode the whole list? including elements...
 {
-	tbd -x;
+	uts.tbd -x
 }
 
 list.decode() # allow non-encoded. tag if encoded. # -a ?
 {
-	tbd -x;
+	uts.tbd -x;
 }
 
-list.errnull()
+# const return; const compare; --err
+list.null()
 {
+	if $# = 0; then
+		
 	if test $# = 0; then errecho "$(fnname -l 2) - null list found"; exiterr -k; fi
 }
 
@@ -354,7 +437,7 @@ list.len.shtest()
 	assertSame "$testout" "$xtestout" 
 }
 
-# bool module. tbd.
+# bool module. uts.tbd.
 bool.status()
 {
 	local status=$(arg $1);
@@ -427,7 +510,7 @@ list.push.pop.popv,shtest()
 	done
 	assertSame $(list.len $newlist) $((len + numpush));
 
-	local popvok=true; # tbd assert $value (true) # assertNot $value;
+	local popvok=true; # uts.tbd assert $value (true) # assertNot $value;
 	for i in $range; do
 		local val=$(list.popv $newlist)
 		if ! test $val = $newvalue; then
@@ -440,5 +523,5 @@ list.push.pop.popv,shtest()
 	assertSame $testin $newlist;
 }
 
-runTests # tbd - shtest run
+runTests # uts.tbd - shtest run
 exit;
