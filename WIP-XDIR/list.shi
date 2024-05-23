@@ -1,3 +1,5 @@
+#!/bin/bash
+
 . utils.shi
 . sh-unit.shi
 
@@ -97,7 +99,7 @@ bool arg.fn()
 
 	fn=arg.$fn;
 
-	if fn defined "$fn"; then
+	if fn exists "$fn"; then
 		$fn "$@";
 		return
 	fi
@@ -116,16 +118,15 @@ boolval arg.toboolval()
 
 uts.doexit;
 
-##################### for fn module 
 fn()
 {
-	if arg.is $1 defined; then
+	if test "$1" = 'exists'; then
 		shift;
-		fn.defined "$@";
+		fn.exists "$@";
 	fi
 }
 
-fn.defined()
+fn.exists()
 {
 	test $(type -t $1) = function
 }
@@ -245,7 +246,7 @@ list.null()
 	list.new;
 }
 
-list.undefined()
+list.unexists()
 {
 	echo -9999
 }
@@ -270,7 +271,7 @@ list.find() # <val>
 		count=$((count+1))
 	done
 
-	list.undefined;
+	list.unexists;
 	return 1;
 }
 
@@ -473,7 +474,7 @@ list.find.shtest()
 	assertSame $pos $itemIsFound;
 
 	pos=$(list.find $itemIsNotFound $testin);
-	assertSame $pos $(list.undefined);
+	assertSame $pos $(list.unexists);
 }
 
 list.get.set.shtest()
