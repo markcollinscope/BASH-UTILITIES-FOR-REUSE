@@ -1,11 +1,10 @@
 #!/bin/bash
-#
+
 # See 'Public API' below.
 
 SRC=$0
-
 SHTEST_SUFFIX={SHTEST_SUFFIX:-"sht"}
-GREPFOR=${GREPFOR:-"^function.*test.*()"}	# how to find tests (using grep). can be modified.
+SHTESTREGEX=${SHTESTREGEX:-"^function.*test.*()"}	# how to find tests (using grep). can be modified.
 
 GLOBALSETUP=${GLOBALSETUP:-"tst.init"}
 setup=${setup:-"tst.setup"}
@@ -23,35 +22,23 @@ if test "$1" = "-t" || test "$1" = "--selftest"; then
 fi
 
 __SHUNIT_TESTFLAG__="--test";
-__SHUNIT_TEST__=1;
+__SHUNIT_TEST_ACTIVE__=1;
 if test "$1" = "$__SHUNIT_TESTFLAG__"; then
-	__SHUNIT_TEST__=0;
+	__SHUNIT_TEST_ACTIVE__=0;
+	shift;
 fi 
 
-# finding and running unit tests.
-_callifdefined() { if test "$(type -t $1)" = "function" ; then "$@"; fi }
 
-_findTests()
+__SHUNIT_VERBOSEFLAG__="-v"
+__SHUNIT_VERBOSE__=0;
+if test "$1" = __SHUNIT_VERBOSEFLAG__; then
+	__SHUNIT_VERBOSE__=0;
+	shift
+fi
+
+_verbose()
 {
-	local TESTS=$(grep "$GREPFOR" $SRC | sed 's/()//' | sed 's/function//'; );
-    echo $TESTS
-}
-
-_passFailAssert()
-{
-	local ASSERTION_SUCCESS=$1;
-	shift;
-
-	_ASSERT_COUNT=$((_ASSERT_COUNT+1))
-
-	if $ASSERTION_SUCCESS; then
-		echo "${FUNCNAME[2]} -- Assertion Passed ("$@")";
-		_ASSERT_PASSES=$((_ASSERT_PASSES+1))
-	else 
-		echo "${FUNCNAME[2]} -- Assertion Failed("$@")";
-		_ASSERT_FAILS=$((_ASSERT_FAILS+1))
-		_THIS_TEST_PASSES=false;
-	fi
+	return 1; # $__SHUNIT_VERBOSE__;
 }
 
 _red()
@@ -69,10 +56,40 @@ _green()
 	echo -ne "\e[32m"
 }
 
+# finding and running unit tests.
+_callifdefined() { if test "$(type -t $1)" = "function" ; then "$@"; fi }
+
+_findTests()
+{
+	local TESTS=$(grep "$SHTESTREGEX" $SRC | sed 's/()//' | sed 's/function//'; );
+    echo $TESTS
+}
+
+_passFailAssert()
+{
+	local ASSERTION_SUCCESS=$1;
+	shift;
+
+	_ASSERT_COUNT=$((_ASSERT_COUNT+1))
+
+	if $ASSERTION_SUCCESS && _verbose; then
+		_green
+		echo "${FUNCNAME[2]} -- Assertion Passed ("$@")";
+		_ASSERT_PASSES=$((_ASSERT_PASSES+1))
+		_white
+	else 
+		_red
+		echo "${FUNCNAME[2]} -- Assertion Failed("$@")";
+		_ASSERT_FAILS=$((_ASSERT_FAILS+1))
+		_THIS_TEST_PASSES=false;
+		_white
+	fi
+}
+
 ### PUBLIC API ###
 function tst.active()
 {
-	return $__SHUNIT_TEST__;
+	return $__SHUNIT_TEST_ACTIVE__;
 }
 
 function tst.assertSame()
@@ -201,6 +218,8 @@ _chkResult()
 
 _doSelfTest()
 {
+	__SHUNIT_VERBOSE__=0;
+	
 	tst.run
 	tst.report
 
