@@ -1,14 +1,15 @@
 #!/bin/bash
+#
+# See 'Public API' below.
 
 SRC=$0
 
-SHTEST=${SHTEST:-"shtest"}
 SHTEST_SUFFIX={SHTEST_SUFFIX:-"sht"}
-GREPFOR=${GREPFOR:-"^\S*$SHTEST\S*()$"}	# looks for ^.*shtest.*()$ - can change.
+GREPFOR=${GREPFOR:-"^function.*test.*()"}	# how to find tests (using grep). can be modified.
 
-GLOBALSETUP=${GLOBALSETUP:-"globalTestSetup"}
-FNSETUP=${FNSETUP:-"fnTestSetup"}
-FNTEARDOWN=${FNTEARDOWN:-"fnTestTeardown"}
+GLOBALSETUP=${GLOBALSETUP:-"tst.init"}
+FNSETUP=${FNSETUP:-"tst.fnSetup"}
+FNTEARDOWN=${FNTEARDOWN:-"tst.fnTeardown"}
 
 SELFTESTMODE=false;
 
@@ -16,17 +17,23 @@ SELFTESTMODE=false;
 _setSelfTestMode() { SELFTESTMODE=true; }
 _inSelfTestMode() { if $SELFTESTMODE; then return 0; else return 1; fi }
 
-if test "$1" = "-t" || test "$1" = "--test"; then
+if test "$1" = "-t" || test "$1" = "--selftest"; then
 	_setSelfTestMode;
 	shift;
 fi
+
+__SHUNIT_TESTFLAG__="--test";
+__SHUNIT_TEST__= 1;
+if test "$1" = "$__SHUNIT_TESTFLAG"; then
+	__SHUNIT_TEST__= 0;
+fi 
 
 # finding and running unit tests.
 _callifdefined() { if test "$(type -t $1)" = "function" ; then "$@"; fi }
 
 _findTests()
 {
-    local TESTS=$(grep "$GREPFOR" $SRC | sed 's/()//');
+	local TESTS=$(grep "$GREPFOR" $SRC | sed 's/()//' | sed 's/function//'; );
     echo $TESTS
 }
 
@@ -38,17 +45,22 @@ _passFailAssert()
 	_ASSERT_COUNT=$((_ASSERT_COUNT+1))
 
 	if $ASSERTION_SUCCESS; then
-		>&2 echo "${FUNCNAME[2]} -- Assertion Passed ("$@")";
+		echo "${FUNCNAME[2]} -- Assertion Passed ("$@")";
 		_ASSERT_PASSES=$((_ASSERT_PASSES+1))
 	else 
-		>&2 echo "${FUNCNAME[2]} -- Assertion Failed("$@")";
+		echo "${FUNCNAME[2]} -- Assertion Failed("$@")";
 		_ASSERT_FAILS=$((_ASSERT_FAILS+1))
 		_THIS_TEST_PASSES=false;
 	fi
 }
 
 ### PUBLIC API ###
-assertSame()
+function tst.active()
+{
+	return $__SHUNIT_TEST__;
+}
+
+function tst.assertSame()
 {
 	local VAL1="$1";
 	local VAL2="$2";
@@ -57,10 +69,10 @@ assertSame()
 
 	if test "$VAL1" = "$VAL2"; then HAS_PASSED=true; fi
 
-	_passFailAssert $HAS_PASSED assertSame "<$VAL1>" "<$VAL2>"
+	_passFailAssert $HAS_PASSED tst.assertSame "<$VAL1>" "<$VAL2>"
 }
 
-assertDiff()
+function tst.assertDiff()
 {
 	local VAL1=$1;
 	local VAL2=$2;
@@ -68,10 +80,10 @@ assertDiff()
 	local HAS_PASSED=false;
 	if ! test "$VAL1" = "$VAL2"; then HAS_PASSED=true; fi
 
-	_passFailAssert $HAS_PASSED assertDiff "$@";
+	_passFailAssert $HAS_PASSED tst.assertDiff "$@";
 }
 
-reportTotals()
+function tst.report()
 {
 	local STATUS_MESSAGE="TEST FAILURE(S)FOUND";
 	if test "$_ASSERT_FAILS" = "0"; then STATUS_MESSAGE="ALL TESTS PASSED"; fi
@@ -102,7 +114,7 @@ _TEST_PASSES=0;
 _TEST_FAILS=0;
 _TEST_CNT=0;
 
-runTests()
+function tst.run()
 {
 	local TESTS=$(_findTests);
 
@@ -130,7 +142,7 @@ runTests()
 		fi
 	done
 
-	if ! _inSelfTestMode; then reportTotals; fi
+	if ! _inSelfTestMode; then tst.report; fi
 }
 
 
@@ -139,17 +151,17 @@ if _inSelfTestMode; then
 # no indent.
 
 # "Mock setup and tear down to check they are running correctly"
-globalTestSetup() 	{ assertSame 1 1; }
-fnTestSetup() 		{ assertDiff 222 999; }
-fnTestTeardown() 	{ assertSame 100 100; }
+tst.init() 	{ tst.assertSame 1 1; }
+tst.fnSetup() 		{ tst.assertDiff 222 999; }
+tst.fnTeardown() 	{ tst.assertSame 100 100; }
 
 # check this runs.
-mock_shtest_1()
-{ assertSame "1" "1"; assertDiff "1" "0"; }
+function test.mock_1()
+{ tst.assertSame "1" "1"; tst.assertDiff "1" "0"; }
 
 # check this runs.
-mock_shtest_2()
-{ assertSame "1" "0"; assertDiff "0" "0"; }
+function test.mock_2()
+{ tst.assertSame "1" "0"; tst.assertDiff "0" "0"; }
 
 echo "BASIC SELF TEST ON: $SRC"
 _SELFTESTOK=true;
@@ -164,8 +176,8 @@ _chkResult()
 
 _doSelfTest()
 {
-	runTests # > $TMP
-	reportTotals
+	tst.run
+	tst.report
 
 	_chkResult $_TEST_CNT 2      "-- Number Of Tests is 2";
 	_chkResult $_TEST_PASSES 1   "-- Number of Test Passes is 2";
@@ -175,9 +187,13 @@ _doSelfTest()
 
 	if $_SELFTESTOK; then 
 		echo "nb: it is expected that some tests reported above will fail - this is part of the self-test"
+		echo -ne "\e[32m"
 		echo "*** SELF TEST PASSED *** *** SELF TEST PASSED *** *** SELF TEST PASSED ***"
+		echo -ne "\e[37m"
 	else
+		echo -ne "\e[31m"
 		echo "!!!! FAILURE OF SELF TEST !!!";
+		echo -ne "\e[37m"
 	fi
 }
 
