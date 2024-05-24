@@ -8,8 +8,8 @@ SHTEST_SUFFIX={SHTEST_SUFFIX:-"sht"}
 GREPFOR=${GREPFOR:-"^function.*test.*()"}	# how to find tests (using grep). can be modified.
 
 GLOBALSETUP=${GLOBALSETUP:-"tst.init"}
-FNSETUP=${FNSETUP:-"tst.fnSetup"}
-FNTEARDOWN=${FNTEARDOWN:-"tst.fnTeardown"}
+setup=${setup:-"tst.setup"}
+teardown=${teardown:-"tst.teardown"}
 
 SELFTESTMODE=false;
 
@@ -23,9 +23,9 @@ if test "$1" = "-t" || test "$1" = "--selftest"; then
 fi
 
 __SHUNIT_TESTFLAG__="--test";
-__SHUNIT_TEST__= 1;
+__SHUNIT_TEST__=1;
 if test "$1" = "$__SHUNIT_TESTFLAG"; then
-	__SHUNIT_TEST__= 0;
+	__SHUNIT_TEST__=0;
 fi 
 
 # finding and running unit tests.
@@ -127,9 +127,9 @@ function tst.run()
 		_TEST_CNT=$((_TEST_CNT+1));
 		_THIS_TEST_PASSES=true;
 
-		_callifdefined $FNSETUP;
+		_callifdefined $setup;
 		_callifdefined $test;
-		_callifdefined $FNTEARDOWN
+		_callifdefined $teardown
 
 		if $_THIS_TEST_PASSES; then
 			>&2 echo -e "**** $test -- Test Passed ****";
@@ -152,8 +152,8 @@ if _inSelfTestMode; then
 
 # "Mock setup and tear down to check they are running correctly"
 tst.init() 	{ tst.assertSame 1 1; }
-tst.fnSetup() 		{ tst.assertDiff 222 999; }
-tst.fnTeardown() 	{ tst.assertSame 100 100; }
+tst.setup() 		{ tst.assertDiff 222 999; }
+tst.teardown() 	{ tst.assertSame 100 100; }
 
 # check this runs.
 function test.mock_1()
@@ -187,11 +187,15 @@ _doSelfTest()
 
 	if $_SELFTESTOK; then 
 		echo "nb: it is expected that some tests reported above will fail - this is part of the self-test"
+		echo
 		echo -ne "\e[32m"
+		echo
 		echo "*** SELF TEST PASSED *** *** SELF TEST PASSED *** *** SELF TEST PASSED ***"
 		echo -ne "\e[37m"
 	else
+		echo
 		echo -ne "\e[31m"
+		echo
 		echo "!!!! FAILURE OF SELF TEST !!!";
 		echo -ne "\e[37m"
 	fi
