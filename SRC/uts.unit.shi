@@ -24,7 +24,7 @@ fi
 
 __SHUNIT_TESTFLAG__="--test";
 __SHUNIT_TEST__=1;
-if test "$1" = "$__SHUNIT_TESTFLAG"; then
+if test "$1" = "$__SHUNIT_TESTFLAG__"; then
 	__SHUNIT_TEST__=0;
 fi 
 
@@ -52,6 +52,21 @@ _passFailAssert()
 		_ASSERT_FAILS=$((_ASSERT_FAILS+1))
 		_THIS_TEST_PASSES=false;
 	fi
+}
+
+_red()
+{
+	echo -ne "\e[31m"
+}
+
+_white()
+{
+	echo -ne "\e[37m"
+}
+
+_green()
+{
+	echo -ne "\e[32m"
 }
 
 ### PUBLIC API ###
@@ -86,7 +101,13 @@ function tst.assertDiff()
 function tst.report()
 {
 	local STATUS_MESSAGE="TEST FAILURE(S)FOUND";
-	if test "$_ASSERT_FAILS" = "0"; then STATUS_MESSAGE="ALL TESTS PASSED"; fi
+	local pass=false;
+	
+	if test "$_ASSERT_FAILS" = "0"; 
+		then 
+		STATUS_MESSAGE="ALL TESTS PASSED"; 
+		pass=true;	
+	fi
 
 	cat <<ENDCAT
 
@@ -100,10 +121,14 @@ function tst.report()
 	TEST PASSES:                   $_TEST_PASSES
 	TEST FAILURES:                 $_TEST_FAILS
 	-----------
-	($STATUS_MESSAGE)
-
 ENDCAT
 
+	if $pass; then _green; else _red; fi
+
+cat <<ENDCAT
+	($STATUS_MESSAGE)
+ENDCAT
+	_white;
 }
 
 _ASSERT_COUNT=0
@@ -151,8 +176,8 @@ if _inSelfTestMode; then
 # no indent.
 
 # "Mock setup and tear down to check they are running correctly"
-tst.init() 	{ tst.assertSame 1 1; }
-tst.setup() 		{ tst.assertDiff 222 999; }
+tst.init() 		{ tst.assertSame 1 1; }
+tst.setup() 	{ tst.assertDiff 222 999; }
 tst.teardown() 	{ tst.assertSame 100 100; }
 
 # check this runs.
@@ -187,17 +212,15 @@ _doSelfTest()
 
 	if $_SELFTESTOK; then 
 		echo "nb: it is expected that some tests reported above will fail - this is part of the self-test"
-		echo
-		echo -ne "\e[32m"
-		echo
+		_green
 		echo "*** SELF TEST PASSED *** *** SELF TEST PASSED *** *** SELF TEST PASSED ***"
-		echo -ne "\e[37m"
+		_white
 	else
 		echo
-		echo -ne "\e[31m"
+		_red
 		echo
 		echo "!!!! FAILURE OF SELF TEST !!!";
-		echo -ne "\e[37m"
+		_white
 	fi
 }
 

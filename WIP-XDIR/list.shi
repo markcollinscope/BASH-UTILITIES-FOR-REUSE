@@ -1,7 +1,7 @@
 #!/bin/bash
 
 . utils.shi
-. sh-unit.shi
+. uts.unit.shi 
 
 uts.doexit() { exit; }
 
@@ -10,9 +10,9 @@ function myfn()
 	:; 
 }
 
-uts.doexit;
+# uts.doexit;
 
-uts.tbd() 
+function uts.tbd() 
 { 
     errecho "$(fnname -l 2): to be done $*";
 	if arg.is $1 -x; then
@@ -22,38 +22,34 @@ uts.tbd()
 }
 
 # check for sure no $@ returned by echo, no option to do so.
-uts.echoreturn() { echo $*; return 0; }
+function uts.echoreturn() { echo $*; return 0; }
 
-uts()
+function uts()
 {
 	eval "$@"
 }
 
-arg.isint()
+function arg.isint()
 {
-	test $1 = int
+	test "$1" = "int"
 }
 
-arg.isconst()
+function arg.isconst()
 {
 	test $1 = const
 }
 
-alias const='function'
-alias bool=function
-alias basharg=function
-
-const arg.null
+function arg.null
 {
 	uts.echoreturn "";
 }
 
-bool arg.isnull()
+function arg.isnull()
 {
 	test $# = 0 || test $1 = ""
 }
 
-basharg arg() # int: is a valid number (int) - forall numbers passed.
+function arg() # int: is a valid number (int) - forall numbers passed.
 {
 	local numopt=false;
 
@@ -79,20 +75,20 @@ basharg arg() # int: is a valid number (int) - forall numbers passed.
     uts.echoreturn "$@"
 }
 
-bool arg.is()
+function arg.is()
 {
 	local val=$(arg $1);
 	local opt=$(arg $2)
 	test $val = $opt;
 }
 
-bool arg.iserr()
+function arg.iserr()
 {
 	arg.is $1 --err
 }
 
 # return <null> - last exit status.
-bool arg.fn()
+function arg.fn()
 {
 	local fn=$(arg $1);
 	shift;
@@ -106,19 +102,13 @@ bool arg.fn()
 	return 1;
 }
 
-alias nb=
-
-alias boolval=function
-
-boolval arg.toboolval()
+function arg.toboolval()
 {
 	nb eval "$@"
 	if $? ; then echo true; else echo false; fi
 }
 
-uts.doexit;
-
-fn()
+function fn()
 {
 	if test "$1" = 'exists'; then
 		shift;
@@ -126,14 +116,14 @@ fn()
 	fi
 }
 
-fn.exists()
+function fn.exists()
 {
 	test $(type -t $1) = function
 }
 
 
 #### string module ####
-str.notnull() # ???
+function str.notnull() # ???
 { 
 	if ! null "$@"; then 
 		local fn=$1; shift;
@@ -141,25 +131,23 @@ str.notnull() # ???
 	fi 
 }
 
-list.encode() # -a - encode the whole list? including elements...
+function list.encode() # -a - encode the whole list? including elements...
 {
 	uts.tbd -x
 }
 
-list.decode() # allow non-encoded. tag if encoded. # -a ?
+function list.decode() # allow non-encoded. tag if encoded. # -a ?
 {
 	uts.tbd -x;
 }
 
 # const return; const compare; --err
-list.null()
+function list.null()
 {
-	if $# = 0; then
-		
 	if test $# = 0; then errecho "$(fnname -l 2) - null list found"; exiterr -k; fi
 }
 
-list.bounds()
+function list.bounds()
 {
 	local lower=1;
 	local value=$(arg $1)
@@ -172,12 +160,12 @@ list.bounds()
 	fi
 }
 
-list.new() # -E -D
+function list.new() # -E -D
 {
     echo "$@";
 }
 
-list.reverse()
+function list.reverse()
 {
 	if ! null "$@"; then
 		local head=$1;
@@ -187,7 +175,7 @@ list.reverse()
 	fi
 }
 
-list.to()
+function list.to()
 {
 	local upto=$(arg int $1);
 	shift;
@@ -203,14 +191,14 @@ list.to()
 	echo $(list.reverse "$@");
 }
 
-list.from()
+function list.from()
 {
     local from=$(arg int $1);
 	shift $((from+1));
     echo "$@";
 }
 
-list.range()
+function list.range()
 {
     local from=$(arg int $1); 
 	local to=$(arg int $2); 
@@ -223,38 +211,49 @@ list.range()
 	echo $(list.new $(list.to $num $(list.from $from "$@")))
 }
 
-list.head()
+function list.head()
 {
-	list.errnull "$@"
+	list.null --err "$@"
 	echo $1;
 }
 
-list.tail()
+function list.tail()
 {
-	list.errnull "$@"
+	list.null --err "$@"
 	shift;
     echo "$@";
 }
 
-list.len()
+function list.len()
 {
 	echo $#;
 }
 
-list.null()
+function list.null()
 {
-	list.new;
+	eval $(boolopt --err ERR_OPT "$@");
+	
+	if $ERR_OPT; then
+		local value=$(arg $1);
+		if test $value = ""; then
+			errecho "$(fnname -l 2) - null list error - bye!)";
+			uts.exit;
+		else
+			return 0;
+		fi
+	else
+		list.new;
+	fi
 }
 
-list.unexists()
+function list.na()
 {
 	echo -9999
 }
 
-list.find() # <val> 
+function list.find() # <val> 
 {
 	eval $(valopt -m _FND_MSG "$@");
-
 	local val=$1; shift;
 
 	if null $val; then 
@@ -271,16 +270,16 @@ list.find() # <val>
 		count=$((count+1))
 	done
 
-	list.unexists;
+	list.na;
 	return 1;
 }
 
-list.contains()
+function list.contains()
 {
-	list.find "$@" > /dev/null;
+	no list.find "$@"
 }
 
-list.cat()
+function list.cat()
 {
 	local list1=$(arg $1);
 	local list2=$(arg $2);
@@ -288,7 +287,7 @@ list.cat()
 	list.new $list1 $list2
 }
 
-list.set()
+function list.set()
 {
     local index=$(arg $1);
     local value=$(arg $2); 
@@ -304,7 +303,7 @@ list.set()
     echo $retval;
 }
 
-list.get()
+function list.get()
 {
     local index=$(arg int $1); shift;
 	local value=$1;
@@ -312,29 +311,29 @@ list.get()
 	getarg $index "$@";
 }
 
-list.push() 
+function list.push() 
 {
 	echo "$@";
 }
 
-list.popv()
+function list.popv()
 {
     list.get 1 "$@";
 }
 
-list.pop()
+function list.pop()
 {
     list.from 1 "$@";
 }
 
-list.append()
+function list.append()
 {
 	local value=$(arg $1);
 
 	echo $(list.new "$@" $value);
 }
 
-list.foreach()
+function list.foreach()
 {
 	local callfn=$(arg fn $1);
 	shift;
@@ -346,96 +345,99 @@ list.foreach()
 
 # TEST FUNCTIONS
 
-seqs()
+if tst.active; then
+# no indent.
+
+_seqs()
 {
 	seq -s ' ' "$@"
 }
 
-list.new.shtest()
+function test.list.new()
 {
 	local testin="a b c d e f g"
 	local testout=$(list.new $testin);
 
-	assertSame "$testin" "$testout"
+	tst.assertSame "$testin" "$testout"
 }
 
-list.reverse.shtest()
+function test.list.reverse()
 {
 	local lower=21
 	local upper=27;
 
-	local testin=$(list.new $(seqs $lower $upper));
+	local testin=$(list.new $(_seqs $lower $upper));
 	local testout=$(list.reverse $testin);
-	local xtestout=$(list.new $(seqs $upper -1 $lower ));
+	local xtestout=$(list.new $(_seqs $upper -1 $lower ));
 
-	assertSame "$testout" "$xtestout" 
+	tst.assertSame "$testout" "$xtestout" 
 }
 
-list.to.shtest()
+function test.list.to()
 {
 	local upper=100;
 	local upto=9;
 
-	local testin=$(list.new $(seqs 1 $upper));
+	local testin=$(list.new $(_seqs 1 $upper));
 
 	local testout=$(list.to $upto $testin);
-	local xtestout=$(seqs 1 $upto);
+	local xtestout=$(_seqs 1 $upto);
 
-	assertSame "$testout" "$xtestout" 
+	tst.assertSame "$testout" "$xtestout" 
 }
 
-list.from.shtest()
+function test.list.from()
 {
 	local upper=100;
 	local from=44;
 
-	local testin=$(list.new $(seqs 1 $upper));
+	local testin=$(list.new $(_seqs 1 $upper));
 
 	local testout=$(list.from $from $testin);
-	local xtestout=$(seqs $((from+1)) $upper);
+	local xtestout=$(_seqs $((from+1)) $upper);
 
-	assertSame "$testout" "$xtestout" 
+	tst.assertSame "$testout" "$xtestout" 
 }
 
-list.range.shtest()
+function test.list.range()
 {
 	local from=3;
 	local to=11;
 	local upper=12;
 
-	local testin=$(list.new $(seqs 1 $upper));
+	local testin=$(list.new $(_seqs 1 $upper));
 	local testout=$(list.range $from $to $testin);
-	local xtestout=$(list.new $(seqs $((from+1)) $to));
+	local xtestout=$(list.new $(_seqs $((from+1)) $to));
 
-	assertSame "$testout" "$xtestout" 
+	tst.assertSame "$testout" "$xtestout" 
 }
 
-list.head.tail.shtest()
+function test.list.head.tail()
 {
 	local lower=2
 	local upper=14;
 
-	local testin=$(list.new $(seqs $lower $upper));
+	local testin=$(list.new $(_seqs $lower $upper));
 	local testhead=$(list.head $testin)
 	local xtesthead=$lower;
 
-	assertSame "$testhead" "$xtesthead";
+	tst.assertSame "$testhead" "$xtesthead";
 
 	local testtail=$(list.tail $testin);
-	local xtesttail=$(list.new $(seqs $((lower+1)) $upper));
+	local xtesttail=$(list.new $(_seqs $((lower+1)) $upper));
 
-	assertSame "$testtail" "$xtesttail";
+	tst.assertSame "$testtail" "$xtesttail";
 }
 
-list.len.shtest()
+function test.list.len()
 {
 	local upper=44
 
-	local testin=$(list.new $(seqs 1 $upper));
+	local testin=$(list.new $(_seqs 1 $upper));
 	local testout=$(list.len $testin);
 	local xtestout=$upper;
 
-	assertSame "$testout" "$xtestout" 
+	tst.assertSame "$testout" "$xtestout" 
 }
 
 # bool module. uts.tbd.
@@ -446,70 +448,70 @@ bool.status()
 }
 # end.
 
-list.contains.shtest()
+function test.list.contains()
 {
 	local upper=22;
 	local isContained=11;
 	local isNotContained=100;
 
-	local testin=$(list.new $(seqs 1 $upper));
+	local testin=$(list.new $(_seqs 1 $upper));
 
 	list.contains $isContained $testin;
 	local res=$(bool.status $?);
-	assertSame $res true;
+	tst.assertSame $res true;
 
 	list.contains $isNotContained $testin;
 	res=$(bool.status $?);
-	assertSame $res false;
+	tst.assertSame $res false;
 }
 
-list.find.shtest()
+function test.list.find()
 {
 	local upper=22;
 	local itemIsFound=18
 	local itemIsNotFound=88;
 
-	local testin=$(list.new $(seqs 1 $upper));
+	local testin=$(list.new $(_seqs 1 $upper));
 	local pos=$(list.find $itemIsFound $testin);
-	assertSame $pos $itemIsFound;
+	tst.assertSame $pos $itemIsFound;
 
 	pos=$(list.find $itemIsNotFound $testin);
-	assertSame $pos $(list.unexists);
+	tst.assertSame $pos $(list.na);
 }
 
-list.get.set.shtest()
+function test.list.get.set()
 {
 	local lower=1;
 	local upper=17;
 	local index=12;
 	local newval='anewvalue';
 
-	local testin=$(list.new $(seqs $lower $upper));
+	local testin=$(list.new $(_seqs $lower $upper));
 	local value=$(list.get $index $testin);
-	assertSame $value $((lower + index -1));
+	tst.assertSame $value $((lower + index -1));
 
 	local testout=$(list.set $index $newval $testin);
-	assertSame $(list.len $testin) $(list.len $testout);
+	tst.assertSame $(list.len $testin) $(list.len $testout);
 
 	value=$(list.get $index $testout);
-	assertSame $newval $value;
+	tst.assertSame $newval $value;
 }
 
-list.push.pop.popv,shtest()
+function test.list.push.pop.popv()
 {
 	local numpush=15;
-	local testin=$(list.new $(seqs 1 $upper));
+	local testin=$(list.new $(_seqs 1 $upper));
 	local newvalue='newvalinfn';
 
 	local len=$(list.len $testin);
 	local newlist=$(list.new $testin);
-	local range=$(seqs 1 $numpush)
+	local range=$(_seqs 1 $numpush)
 	local i;
 
 	for i in $range; do
 		newlist=$(list.push $newvalue $newlist);
 	done
-	assertSame $(list.len $newlist) $((len + numpush));
+	tst.assertSame $(list.len $newlist) $((len + numpush));
 
 	local popvok=true; # uts.tbd assert $value (true) # assertNot $value;
 	for i in $range; do
@@ -520,9 +522,11 @@ list.push.pop.popv,shtest()
 		fi
 		newlist=$(list.pop $newlist);
 	done
-	assertSame true $popvok;
-	assertSame $testin $newlist;
+	tst.assertSame true $popvok;
+	tst.assertSame $testin $newlist;
 }
 
-runTests # uts.tbd - shtest run
+tst.run;
 exit;
+
+fi # test section.
