@@ -115,6 +115,35 @@ function tst.assertDiff()
 	_passFailAssert $HAS_PASSED tst.assertDiff "$@";
 }
 
+function tst.assert()
+{
+	if test "$1" = "--same"; then
+		shift;
+		tst.assertSame "$@"
+	
+	elif test "$1" = "--diff"; then
+		shift;
+		tst.assertDiff "$@"
+	
+	elif test "$1" = "--true"; then
+		shift;
+		tst.assertSame true "$@"
+	
+	elif test "$1" = "--false"; then
+		shift;
+		tst.assertSame false "$@"
+	
+	elif test "$1" = "--ok"; then
+		shift;
+		tst.assertSame 0 "$@";
+
+	elif test "$1" = "--err"; then
+		shift;
+		tst.assertDiff 0 "$@";
+	
+	fi
+}
+
 function tst.report()
 {
 	local STATUS_MESSAGE="TEST FAILURE(S)FOUND";
