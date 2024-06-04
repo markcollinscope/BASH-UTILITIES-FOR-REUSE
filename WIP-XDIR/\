@@ -1,0 +1,34 @@
+. utils.shi
+. sh-unit.shi
+. uts_msc.shi
+
+function fn.exists()
+{
+	test $(type -t $1) = function
+}
+
+function fn.exists.shtest()
+{
+	local fnname='nonexistantfn'
+	fn.exists $fnnamme
+	assertSame $? 1;
+
+	local otherfn='fn.exists';
+	fn.exists $otherfn;
+	assertSame $? 0;
+}
+
+function fn()
+{
+	local subfn=$1;
+	local fn=$(concat 'fn' '.' $subfn);
+	
+	if fn.exists $fn; then
+		shift;
+		$fn "$@";
+	else
+		uts.err "No such function: <fn $subfn>;
+	fi
+}
+
+

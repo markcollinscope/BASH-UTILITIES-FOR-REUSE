@@ -16,7 +16,7 @@ SELFTESTMODE=false;
 _setSelfTestMode() { SELFTESTMODE=true; }
 _inSelfTestMode() { if $SELFTESTMODE; then return 0; else return 1; fi }
 
-if test "$1" = "-t" || test "$1" = "--test"; then
+if test "$1" = "--selftest"; then
 	_setSelfTestMode;
 	shift;
 fi

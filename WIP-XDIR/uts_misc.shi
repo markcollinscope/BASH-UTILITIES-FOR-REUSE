@@ -1,0 +1,16 @@
+
+function uts.tbd() 
+{ 
+    errecho "$(fnname -l 2): to be done $*";
+	if arg.is $1 -x; then
+		shift;
+        uts errexit -k;
+    fi
+}
+
+function uts.abort()
+{
+	local fn=$(fnname -l 2);
+	errecho "$fn: error - exiting... $@"
+	errexit -k;
+}
