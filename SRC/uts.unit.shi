@@ -2,9 +2,11 @@
 
 # See 'Public API' below.
 
+echo $0: $*
+
 SRC=$0
 SHTEST_SUFFIX={SHTEST_SUFFIX:-"sht"}
-SHTESTREGEX=${SHTESTREGEX:-"^function.*test.*()"}	# how to find tests (using grep). can be modified.
+SHTESTREGEX=${SHTESTREGEX:-"^.*function.*test.*()"}	# how to find tests (using grep). can be modified.
 
 GLOBALSETUP=${GLOBALSETUP:-"tst.init"}
 setup=${setup:-"tst.setup"}
@@ -21,25 +23,32 @@ if test "$1" = "--selftest"; then
 	shift;
 fi
 
-__SHUNIT_TESTFLAG__="--test";
-__SHUNIT_TEST_ACTIVE__=1;
-if test "$1" = "$__SHUNIT_TESTFLAG__"; then
-	__SHUNIT_TEST_ACTIVE__=0;
-	shift;
-fi 
+declare -g __SHUNIT_VERBOSE_FLAG__="-v"
+declare -g __SHUNIT_VERBOSE__=1;
 
+echo "if test $1 = $__SHUNIT_VERBOSE_FLAG__; then"
 
-__SHUNIT_VERBOSEFLAG__="-v"
-__SHUNIT_VERBOSE__=0;
-if test "$1" = __SHUNIT_VERBOSEFLAG__; then
+if test "$1" = $__SHUNIT_VERBOSE_FLAG__; then
+	>&2 echo 'verbose option selected'
 	__SHUNIT_VERBOSE__=0;
 	shift
 fi
 
 _verbose()
 {
-	return 1; # $__SHUNIT_VERBOSE__;
+	return $__SHUNIT_VERBOSE__; 
 }
+
+
+__SHUNIT_TEST_FLAG__="--test";
+__SHUNIT_TEST_ACTIVE__=1;
+
+if test "$1" = "$__SHUNIT_TEST_FLAG__"; then
+	if _verbose; then >&2 echo 'testing activated'; fi
+	__SHUNIT_TEST_ACTIVE__=0;
+	shift;
+fi 
+
 
 _red()
 {
@@ -59,9 +68,13 @@ _green()
 # finding and running unit tests.
 _callifdefined() { if test "$(type -t $1)" = "function" ; then "$@"; fi }
 
+_vb() { if _verbose; then >&2 echo "$@"; fi }
+
 _findTests()
 {
+	_vb "regex: $SHTESTREGEX, src: $SRC"
 	local TESTS=$(grep "$SHTESTREGEX" $SRC | sed 's/()//' | sed 's/function//'; );
+	_vb "tests: $TESTS"
     echo $TESTS
 }
 
@@ -146,6 +159,9 @@ function tst.assert()
 		shift;
 		tst.assertDiff 0 "$@";
 	
+	else
+		>&2 echo "$0: no such option: $1 - testing fully aborted";
+		exit 1;
 	fi
 }
 

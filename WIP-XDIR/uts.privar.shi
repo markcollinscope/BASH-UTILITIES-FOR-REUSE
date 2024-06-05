@@ -1,0 +1,72 @@
+#!/bin/bash
+
+_pv.suffix() { echo $$; }
+
+_pv.fnname()
+{
+	local fnlevel=3;
+
+	if ! test $# = 0; then
+		fnlevel=$1;
+		shift;
+	fi
+
+    echo "${FUNCNAME[$fnlevel]}"
+}
+
+_pv.name()
+{
+	local pvs=$(_pv.suffix);
+	local var=$(_pv.fnname);
+	echo $var$pvs	
+}
+
+privar()
+{
+	local pvarname=$(_pv.name)
+	echo $pvarname
+}
+
+. uts.unit.shi
+
+if tst.active; then
+
+	tst.null() { echo ; } # tbd ###
+
+	function test.privar.name()
+	{
+		a_private_test_var() { privar; }
+		local testinname=$(a_private_test_var);
+		local xtestout_prefix='a_private_test_var'
+		local xtestout_suffix=$$
+		local xtestout=$xtestout_prefix$xtestout_suffix;
+
+		tst.assert --same $testinname $xtestout
+	}
+
+	function test.privar.null()
+	{
+		a_private_test_var() { privar; }
+		local -n testvar1=$(a_private_test_var);
+
+		local val1=$testvar1;
+		tst.assert --same $val1 $(tst.null);
+	}
+
+
+	function test.privar.assignment()
+	{
+		a_private_test_var() { privar; }
+
+		local -n testvar1=$(a_private_test_var);
+
+		testin='test input value'
+		testvar1=$testin;
+
+		tst.assert --same "$testvar1" "$testin"
+	}
+
+
+	tst.run;
+fi
+
