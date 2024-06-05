@@ -1,3 +1,121 @@
+opt wish list:
+
+fn.default --name <name> --val <value> ? sets the value (based on name).  deafult 'fn.std'. 
+fn.default --fn <fnname> -- args...
+- no --fn means current fn.
+- no --name means 'current function name as name - consistent, but only one'
+- no --value --err
+
+all defaults. some generated functionally? dynamically.
+
+opt --default cool. yep.
+
+opt.bool (defaults to false, unless already set!)
+
+fn.default 
+
+variable type: fn.static?  -- a 'ref type'?
+arg --fn?
+
+list.null() { :; } - is that okay?
+list.null --err (autoparse option).
+
+uts or fn 'storage'?
+
+uts.const could be global?
+opt.const subselect from set of values?
+fn.const ...
+
+fn.const --all --except <set> --only <set> --none (no point) - or perhaps to force an error?
+
+fn.const()
+{\
+
+
+fn.const --name <n>
+uts.const -n name
+
+
+opt.bool --nd (no dash needed). otherwise could be dangerous.
+opt.bool --nd
+
+opt.const all (--all)
+opt.const except (--except).
+opt.const only (--only).
+opt.const none --none.
+opt.const bool null --null?
+opt.const val name <v> --val? -- why would we want that?
+opt.const err --err?
+
+Are they local? or 'static fn options'?
+Possible to tell if 'mutually recursive or recursive call?.
+
+PRIORITISE!
+
+opt.const -o|--option --name <n> - 
+	-o - return the option string - e.g. opt.type --rem ... --rem ...
+opt.const -f|--flag <name> - return the 'normalised' form of the flag (s).
+		-s -single char value or err.
+		-a or --all 
+
+
+- if poss, no eval. or option to do either?
+- opt flags - allow - -- or no - at all. default to -- for long, - for short.
+- _opt.flag => $1 <$flag> => convert a -, -- or no -s flag to 'standard' format. => ? 'opt:value' ? (type opt?)
+- opt -v|--value multiple possible values for flag.
+- opt.set <flag> - flag - is it used? bool - its set. val - have to check for value.
+- opt.value <flag> - return value of flag. bool opts - return 0/1 or true/false. val opts - error if not set --noerr option (const).
+
+	- multi-value flags - opt.set/opt.value uses 'core' one. which is first one, perhaps. have to keep a map.
+	o if opt.set delete; then ...;  fi
+	o if opt.set filename; then ...; fi
+
+opt.const --flag? 
+opt.const parse?
+opt.const return standard values of whatever.
+
+opt.const arg => return const arg.
+
+use:
+	- opt.const.fn - auto delegate (here fn is arg).
+
+
+str.predot -n (default 1)
+str.postdot -n (default 1)
+str.lastdot post the final dot. 
+str.lastdot -n 3 the n'th from last values.
+str.between -l v1 -u v2 or str.between v1 v2 <string>
+str.substr - look at bash standard stuff again.
+
+
+better str.pre  post last --match _
+default - dot? str.pre means
+enable reset of defaults?
+
+
+fn.delegate -- set value1 value2 value3 value4 .. etc 
+	- default fn delegation
+
+(parse numbers?) --auto?
+opt.arg -1
+
+opt.auto - parse a std list of flags. --except (not that one) - but then, don't have to use.
+
+opt. --nodash ? allow non-dash flags? e.g. set all; set none; ? set --all; set --none;
+opt.arg -f 
+
+- opt.passthru --all --only '1 2 3 4' - std.format. --except 'a b c d' ...
+	- bool can just be passed if set? (only)?
+	- vals - can be passed thru if value set? auto-all?
+	- --ifset (only pass if set? on values?
+
+- when using passthru - would want 'descriptions' of opts from lower level.
+	- if script - perhaps 'get opts/descriptions as super-flag on script?
+	- if fn - perhaps similar?
+
+- opt --const ? save a 'const option'? (low-p)
+
+----------------
 vbstack() ...
 
 date -d @1609459200 "+%Y-%m-%d %H:%M:%S" - date Unix epoch to std format.
