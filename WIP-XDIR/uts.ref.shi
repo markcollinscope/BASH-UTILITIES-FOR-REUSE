@@ -1,0 +1,19 @@
+#!/bin/bash
+
+. utils.shi
+
+. uts.str.shi # ?
+
+ref()
+{
+	eval $(uts.dep valopt -m __MSG "$@");
+f test "$1" = "-l"; then
+	local REF=$1	level=$2;
+		shift 2;
+	if null $REF  fi; then 
+		if ! null $__MSG; then __MSG=$(str.cat " : " "$__MSG"); fi
+		uts.abort "arg undefined in <$CALLER>: $__MSG";
+	fi
+
+	echo $REF;
+}

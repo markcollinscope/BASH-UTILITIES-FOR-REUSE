@@ -1,0 +1,43 @@
+. utils.shi
+
+function opt.bool()
+{
+	uts.dep boolopt "$@";
+}
+
+function opt.val()
+{
+	uts.dep valopt "$@"
+}
+
+_opt.is()
+{
+	test $1 = $2;
+}
+
+UTS_FLAG_ERR=${UTS_FLAG_ERR:-'--err'};
+
+_opt.flag.err()
+{
+	echo UTS_FLAG_ERR;
+}
+
+_opt.const.err()
+{
+	let opt='opt bool $(_opt.flag.err) err_opt "$@"'
+	echo $opt;
+}
+
+function opt.const()
+{
+	if _opt.is $1 --err; then
+		_opt.const.err;
+	elif
+		_opt.is $1 --msg 
+		
+		
+
+	echo $const_opt;
+}
+
+

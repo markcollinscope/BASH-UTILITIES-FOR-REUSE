@@ -36,7 +36,7 @@ clone() # oldfn newfn
 {
 	local oldfn=$1, newfn=$2;
 	#	if null $oldfn || null $newfn; then  echo null value to clone; exit 1; fi
-	echo $(declare -f $oldfn | grep -v $oldfn)
+$(declare -f $oldfn | grep -v $oldfn)
 	echo $local;
 }
 

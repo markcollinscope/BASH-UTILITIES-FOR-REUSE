@@ -1,0 +1,48 @@
+#!/bin/bash
+
+what are we trying to do?
+- allow inclusion of files - uts - individually and easy switch of versions? or just single number change?
+- default wuold be in this file - but how does uts.init.shi (old globals) fit into this?
+- uts.init.shi - is not versioned. must be fully back compat at all times. or is it?
+
+uts.version <N> - sets the version number. default 1. can be overridden with 2, etc. - default?
+uts.xxx.shi - is a 'mock' include for uts.xxx "version" .shi
+
+readonly file=$1;
+readonly version=$2;
+
+if test -z "$file"; then
+	>&2 echo 'uts include (no file tag given)'
+	exit 1;
+fi
+
+__uts_vcode="";
+if ! test -z "$version"; then
+	__uts_vcode=".$version";
+fi
+
+_suffix() { echo '.shi'; }
+
+
+__uts_sourcefile="uts.$1$__uts_vcode.$(suffix)";
+if test -z "$(which $__uts_sourcefile)"; then
+	>&2 echo "uts include - file <$__uts_sourcefile> - not found";
+	exit 1;
+fi
+
+uts.all
+{
+	local files="uts 
+
+}
+
+bool.shi
+ideas.shi
+list.shi
+notsure.shi
+uts.arg.shi
+uts.fn.shi
+uts.ref.shi
+uts.str.shi
+uts.uts.shi
+uts.version

@@ -28,11 +28,13 @@ _uts.fn.name()
 	echo ${FUNCNAME[$level]}	
 }
 
+
 _uts.byebye()
 {
 	echo 'self destruct initaliated...'
 	local i;
-	for i in $(seq 10 1); do
+
+	for ((i=10; i>0; i--)); do
 		echo $i;
 		sleep 1;
 	done
@@ -50,12 +52,22 @@ function uts.abort()
 	exit 1
 }
 
-_uts.abort.null()
+_uts.assert()
+{
+	local fn=$(_uts.fn.name 3); 
+
+	if ! $1; then 
+		uts.abort "$fn - assetion failure"
+	fi
+	return 0;
+}
+
+_uts.abort.on.null()
 {
 	local val=$1;
 
 	if test -z $val; then
-		uts.abort null value in ${FUNCNAME[1]};
+		uts.abort "null value when shouldn't have been - $(_uts.fn.name 1)";
 	fi
 }
 

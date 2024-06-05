@@ -1,14 +1,14 @@
 #!/bin/bash
 
+# See 'Public API' below.
+
 SRC=$0
-
-SHTEST=${SHTEST:-"shtest"}
 SHTEST_SUFFIX={SHTEST_SUFFIX:-"sht"}
-GREPFOR=${GREPFOR:-"^\S*$SHTEST\S*()$"}	# looks for ^.*shtest.*()$ - can change.
+SHTESTREGEX=${SHTESTREGEX:-"^function.*test.*()"}	# how to find tests (using grep). can be modified.
 
-GLOBALSETUP=${GLOBALSETUP:-"globalTestSetup"}
-FNSETUP=${FNSETUP:-"fnTestSetup"}
-FNTEARDOWN=${FNTEARDOWN:-"fnTestTeardown"}
+GLOBALSETUP=${GLOBALSETUP:-"tst.init"}
+setup=${setup:-"tst.setup"}
+teardown=${teardown:-"tst.teardown"}
 
 SELFTESTMODE=false;
 
@@ -21,12 +21,47 @@ if test "$1" = "--selftest"; then
 	shift;
 fi
 
+__SHUNIT_TESTFLAG__="--test";
+__SHUNIT_TEST_ACTIVE__=1;
+if test "$1" = "$__SHUNIT_TESTFLAG__"; then
+	__SHUNIT_TEST_ACTIVE__=0;
+	shift;
+fi 
+
+
+__SHUNIT_VERBOSEFLAG__="-v"
+__SHUNIT_VERBOSE__=0;
+if test "$1" = __SHUNIT_VERBOSEFLAG__; then
+	__SHUNIT_VERBOSE__=0;
+	shift
+fi
+
+_verbose()
+{
+	return 1; # $__SHUNIT_VERBOSE__;
+}
+
+_red()
+{
+	echo -ne "\e[31m"
+}
+
+_white()
+{
+	echo -ne "\e[37m"
+}
+
+_green()
+{
+	echo -ne "\e[32m"
+}
+
 # finding and running unit tests.
 _callifdefined() { if test "$(type -t $1)" = "function" ; then "$@"; fi }
 
 _findTests()
 {
-    local TESTS=$(grep "$GREPFOR" $SRC | sed 's/()//');
+	local TESTS=$(grep "$SHTESTREGEX" $SRC | sed 's/()//' | sed 's/function//'; );
     echo $TESTS
 }
 
@@ -38,29 +73,43 @@ _passFailAssert()
 	_ASSERT_COUNT=$((_ASSERT_COUNT+1))
 
 	if $ASSERTION_SUCCESS; then
-		>&2 echo "${FUNCNAME[2]} -- Assertion Passed ("$@")";
+		_green
+		if _verbose; then
+			echo "${FUNCNAME[2]} -- Assertion Passed ("$@")";
+		fi
 		_ASSERT_PASSES=$((_ASSERT_PASSES+1))
+		_white
 	else 
-		>&2 echo "${FUNCNAME[2]} -- Assertion Failed("$@")";
+		_red
+		echo "${FUNCNAME[2]} -- Assertion Failed("$@")";
 		_ASSERT_FAILS=$((_ASSERT_FAILS+1))
 		_THIS_TEST_PASSES=false;
+		_white
 	fi
 }
 
 ### PUBLIC API ###
-assertSame()
+function tst.active()
+{
+	return $__SHUNIT_TEST_ACTIVE__;
+}
+
+function tst.assertSame()
 {
 	local VAL1="$1";
 	local VAL2="$2";
 
+	echo "VAL1: $VAL1, VAL2: $VAL2" >&2
+
 	local HAS_PASSED=false;
 
 	if test "$VAL1" = "$VAL2"; then HAS_PASSED=true; fi
+	echo "PASS: $HAS_PASSED"
 
-	_passFailAssert $HAS_PASSED assertSame "<$VAL1>" "<$VAL2>"
+	_passFailAssert $HAS_PASSED tst.assertSame "<$VAL1>" "<$VAL2>"
 }
 
-assertDiff()
+function tst.assertDiff()
 {
 	local VAL1=$1;
 	local VAL2=$2;
@@ -68,13 +117,48 @@ assertDiff()
 	local HAS_PASSED=false;
 	if ! test "$VAL1" = "$VAL2"; then HAS_PASSED=true; fi
 
-	_passFailAssert $HAS_PASSED assertDiff "$@";
+	_passFailAssert $HAS_PASSED tst.assertDiff "$@";
 }
 
-reportTotals()
+function tst.assert()
+{
+	if test "$1" = "--same"; then
+		shift;
+		tst.assertSame "$@"
+	
+	elif test "$1" = "--diff"; then
+		shift;
+		tst.assertDiff "$@"
+	
+	elif test "$1" = "--true"; then
+		shift;
+		tst.assertSame true "$@"
+	
+	elif test "$1" = "--false"; then
+		shift;
+		tst.assertSame false "$@"
+	
+	elif test "$1" = "--ok"; then
+		shift;
+		tst.assertSame 0 "$@";
+
+	elif test "$1" = "--err"; then
+		shift;
+		tst.assertDiff 0 "$@";
+	
+	fi
+}
+
+function tst.report()
 {
 	local STATUS_MESSAGE="TEST FAILURE(S)FOUND";
-	if test "$_ASSERT_FAILS" = "0"; then STATUS_MESSAGE="ALL TESTS PASSED"; fi
+	local pass=false;
+	
+	if test "$_ASSERT_FAILS" = "0"; 
+		then 
+		STATUS_MESSAGE="ALL TESTS PASSED"; 
+		pass=true;	
+	fi
 
 	cat <<ENDCAT
 
@@ -88,10 +172,14 @@ reportTotals()
 	TEST PASSES:                   $_TEST_PASSES
 	TEST FAILURES:                 $_TEST_FAILS
 	-----------
-	($STATUS_MESSAGE)
-
 ENDCAT
 
+	if $pass; then _green; else _red; fi
+
+cat <<ENDCAT
+	($STATUS_MESSAGE)
+ENDCAT
+	_white;
 }
 
 _ASSERT_COUNT=0
@@ -102,7 +190,7 @@ _TEST_PASSES=0;
 _TEST_FAILS=0;
 _TEST_CNT=0;
 
-runTests()
+function tst.run()
 {
 	local TESTS=$(_findTests);
 
@@ -115,9 +203,9 @@ runTests()
 		_TEST_CNT=$((_TEST_CNT+1));
 		_THIS_TEST_PASSES=true;
 
-		_callifdefined $FNSETUP;
+		_callifdefined $setup;
 		_callifdefined $test;
-		_callifdefined $FNTEARDOWN
+		_callifdefined $teardown
 
 		if $_THIS_TEST_PASSES; then
 			>&2 echo -e "**** $test -- Test Passed ****";
@@ -130,7 +218,7 @@ runTests()
 		fi
 	done
 
-	if ! _inSelfTestMode; then reportTotals; fi
+	if ! _inSelfTestMode; then tst.report; fi
 }
 
 
@@ -139,17 +227,17 @@ if _inSelfTestMode; then
 # no indent.
 
 # "Mock setup and tear down to check they are running correctly"
-globalTestSetup() 	{ assertSame 1 1; }
-fnTestSetup() 		{ assertDiff 222 999; }
-fnTestTeardown() 	{ assertSame 100 100; }
+tst.init() 		{ tst.assertSame 1 1; }
+tst.setup() 	{ tst.assertDiff 222 999; }
+tst.teardown() 	{ tst.assertSame 100 100; }
 
 # check this runs.
-mock_shtest_1()
-{ assertSame "1" "1"; assertDiff "1" "0"; }
+function test.mock_1()
+{ tst.assertSame "1" "1"; tst.assertDiff "1" "0"; }
 
 # check this runs.
-mock_shtest_2()
-{ assertSame "1" "0"; assertDiff "0" "0"; }
+function test.mock_2()
+{ tst.assertSame "1" "0"; tst.assertDiff "0" "0"; }
 
 echo "BASIC SELF TEST ON: $SRC"
 _SELFTESTOK=true;
@@ -164,8 +252,10 @@ _chkResult()
 
 _doSelfTest()
 {
-	runTests # > $TMP
-	reportTotals
+	__SHUNIT_VERBOSE__=0;
+	
+	tst.run
+	tst.report
 
 	_chkResult $_TEST_CNT 2      "-- Number Of Tests is 2";
 	_chkResult $_TEST_PASSES 1   "-- Number of Test Passes is 2";
@@ -175,9 +265,15 @@ _doSelfTest()
 
 	if $_SELFTESTOK; then 
 		echo "nb: it is expected that some tests reported above will fail - this is part of the self-test"
+		_green
 		echo "*** SELF TEST PASSED *** *** SELF TEST PASSED *** *** SELF TEST PASSED ***"
+		_white
 	else
+		echo
+		_red
+		echo
 		echo "!!!! FAILURE OF SELF TEST !!!";
+		_white
 	fi
 }
 

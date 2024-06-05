@@ -1,0 +1,23 @@
+#!/bin/bash
+
+. utils.shi
+
+function uts.version()
+{
+	local -n version=ref_uts_version;
+
+	if test $# = 0; then
+		if ! test -z $version; then
+			echo $version;
+		else
+			>&2 echo "uts.version: request for version - no value set - aborting"
+		fi
+	else
+		local v=$1;
+
+		if ! uts.old isNum $v; then
+			
+			version=$1;
+		else
+	fi
+}

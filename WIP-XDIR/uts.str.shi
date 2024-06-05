@@ -8,8 +8,7 @@ str.notnull() # ???
 	fi 
 }
 
-
-function str.has.white()
+function str.whitespace()
 {
 
 	local input=$1;
@@ -21,6 +20,11 @@ function str.match()
 {
 	# idea, add error option. --err means exit if true.
 	test "$1" = "$2";
+}
+
+function str.cat()
+{
+	concat "$@"
 }
 
 str.if.error.exit()
