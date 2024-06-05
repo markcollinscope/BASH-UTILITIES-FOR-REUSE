@@ -1,3 +1,73 @@
+ideas:
+
+fn.call() { eval "$@"; }
+
+arg.check() { echo value; }
+arg.chk() { echo value; }
+
+alias ALL="$@"
+
+arg()
+{
+	local err=true;
+	local default=helloworld!
+
+	if null "$@" ; then
+	
+		if $err ; then echo error $(fnname); exit 1; fi
+	fi
+	echo "$@";
+}
+
+alias fn=function
+
+function str.rm()
+{
+	todo rm nout default ' '
+	local rm=' ';
+	echo "$@" | sed "s/$rm//g" 
+}
+
+echo hello
+str.rm $(arg 1 2 3	    4	5);
+arg
+
+exit;
+
+str.encode
+{
+}
+
+str.cat()
+{
+	$(fn.call concat "$@");
+}
+
+
+opt.value()
+{
+	tbd --rem;
+
+	local flag=$1
+
+	if test $1 = '--name'; then
+		name=$2;
+		shift 2;
+	fi
+	$(concat $(fnname) flag=$3
+}
+
+fn.define() # <name> 
+{
+
+}
+
+fn.define clone 
+{
+
+}
+
+
 . utils.shi
 . sh-unit.shi
 
@@ -233,3 +303,10 @@ _fncallif()
 }
 
 runTests;
+
+
+	function test.privar.null()
+	{
+		private() { privar; }
+		local -n testvar1=$(private);
+
