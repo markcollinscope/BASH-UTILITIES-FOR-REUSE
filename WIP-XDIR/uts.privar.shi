@@ -53,7 +53,6 @@ if tst.active; then
 		tst.assert --same $val1 $(tst.null);
 	}
 
-
 	function test.privar.assignment()
 	{
 		a_private_test_var() { privar; }
@@ -66,6 +65,20 @@ if tst.active; then
 		tst.assert --same "$testvar1" "$testin"
 	}
 
+	function test.privar.ref()
+	{
+		refvar() { privar; }
+		local -n rv1=$(refvar);
+		local -n rv2=$(refvar);
+
+		anyvalue='any old value';
+		testin='test value of some kind.';
+
+		rv2=$anyvalue;
+		rv1=$testin;
+
+		tst.assert --same "$testin" "$rv2";
+	}
 
 	tst.run;
 fi

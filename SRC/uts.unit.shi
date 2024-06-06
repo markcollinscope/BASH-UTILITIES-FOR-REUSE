@@ -26,10 +26,9 @@ fi
 declare -g __SHUNIT_VERBOSE_FLAG__="-v"
 declare -g __SHUNIT_VERBOSE__=1;
 
-echo "if test $1 = $__SHUNIT_VERBOSE_FLAG__; then"
 
 if test "$1" = $__SHUNIT_VERBOSE_FLAG__; then
-	>&2 echo 'verbose option selected'
+	>&2 echo "$0: verbose option selected"
 	__SHUNIT_VERBOSE__=0;
 	shift
 fi
@@ -72,9 +71,7 @@ _vb() { if _verbose; then >&2 echo "$@"; fi }
 
 _findTests()
 {
-	_vb "regex: $SHTESTREGEX, src: $SRC"
 	local TESTS=$(grep "$SHTESTREGEX" $SRC | sed 's/()//' | sed 's/function//'; );
-	_vb "tests: $TESTS"
     echo $TESTS
 }
 
@@ -112,12 +109,12 @@ function tst.assertSame()
 	local VAL1="$1";
 	local VAL2="$2";
 
-	echo "VAL1: $VAL1, VAL2: $VAL2" >&2
+	_vb "VAL1: $VAL1, VAL2: $VAL2" >&2
 
 	local HAS_PASSED=false;
 
 	if test "$VAL1" = "$VAL2"; then HAS_PASSED=true; fi
-	echo "PASS: $HAS_PASSED"
+	_vb "PASS: $HAS_PASSED"
 
 	_passFailAssert $HAS_PASSED tst.assertSame "<$VAL1>" "<$VAL2>"
 }
