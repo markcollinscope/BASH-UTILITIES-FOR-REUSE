@@ -23,9 +23,8 @@ if test "$1" = "--selftest"; then
 	shift;
 fi
 
-declare -g __SHUNIT_VERBOSE_FLAG__="-v"
+readonly __SHUNIT_VERBOSE_FLAG__="-v"
 declare -g __SHUNIT_VERBOSE__=1;
-
 
 if test "$1" = $__SHUNIT_VERBOSE_FLAG__; then
 	>&2 echo "$0: verbose option selected"
