@@ -1,4 +1,87 @@
+fn.start()
+fn.end()
+
+_fn.Null();
+or:
+
+fn.private --name <ddd>
+fn
+
+_fn.Echo();
+
+fn.clone --null name - create a null function plachoder. return 0;
+fn.clone --echo name - create a reflecting fn. return 0;
+
+tst.ignore() - any function unit test would expect. call it, it'll return.
+
+ignore a test.
+- call in fn?
+- 
+
 opt wish list:
+
+x.name.x.x - module file 
+	.shi at end.
+
+set global value.
+
+mod.begin --name <override>
+mod.end
+
+mod.fn --declare name or <name>
+--attr1  <val> \
+--attr2  <val> ...
+
+mod.fn.blah - then passthru.
+
+basic: 
+
+doc-fn?
+
+mod.opt --bool <name> 'description' ;
+mod.opt --true (is true).
+mod.opt --args - remaining args?
+
+- or --
+name
+if mod.opt --set name; then ...
+
+opt.end -- options processed here.
+$(arg --opt $n)
+arg.end ? validate? return in 'doc' mode.
+
+constsbyname.
+
+
+test.fn.name() 
+tst.ignore() ignore current fn. first thing? 
+fn.name - current fn.name.
+fn.const err - echo $err;
+
+err() { echo 
+
+
+fn.call --
+fn.call fn - fn.cascade
+fn.call --
+fn.call --err
+
+fn.begin 				// starts body, does autoprocessing.
+fn.return <xxx>			// echo return.
+
+fn.wrap intercept-fn base-fn;
+fn.wrap --intercepted|-i call old function>
+
+fn.clone new-fn base-fn - both exist.
+
+args:
+- arg.cnt
+
+fn.Null - does nothing.  vb perhaps.
+fn.return - echo return. code 0. --err code 1; 
+fn.Return - const?
+
+const; function fn.return;
 
 fn.default --name <name> --val <value> ? sets the value (based on name).  deafult 'fn.std'. 
 fn.default --fn <fnname> -- args...
