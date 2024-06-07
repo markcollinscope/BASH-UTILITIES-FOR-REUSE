@@ -1,18 +1,146 @@
 #!/bin/bash
 
-_pv.suffix() { echo $$; }
+uts.pid() { echo $$; }
+uts.noargs() { test -z $*; }
+uts.rmwhite() { echo $* | sed 's/ //g' | sed 's/\t//g'; }
 
-_pv.fnname()
+uts.istype()
 {
-	local fnlevel=3;
+	test $(type -t $1) = $2;
+}
+
+uts.isfn()
+{
+	uts.istype $1 'function';
+}
+
+True() { echo 0; }
+False() { echo 1; }
+
+#
+uts.ok() { return 0; }
+uts.err() { return 1; }
+
+uts.callif()
+{
+	local possiblefn=$1;
+	shift;
+
+	if test $(type $possiblefn == 'function)'; then
+		$possiblefn "$@"
+		status.ok;
+	else
+		status.err;
+	fi
+}
+
+uts.argcmp()
+{ 
+	local num=$1; 
+	local value=$2; 
+	shift 2;
+
+	shift $((num-1));
+	echo $1;
+
+	test $1 = $value;
+}
+
+uts.argwhite()
+{
+	local i;
+	for i in "$@"
+		
+}
+
+uts.return()
+{ 
+	local code=0;
+	if uts.argcmp 1 --code $*; then
+		code=$2;
+		shift 2;
+	fi
+
+	echo $*;
+	return $code;
+} 
+
+uts.verbose()
+{
+	local -n vb="verbose-$(uts.pid)"
+
+	if uts.noargs $*; then
+		
+}
+
+uts.vb()
+{
+
+}
+
+uts.error()
+{
+	>&2 echo $*;
+}
+
+uts.exit()
+{
+	local err=1;
+	if ! test -z $1; then
+		err=$1;
+		shift;
+	fi
+
+	local msg=$*;
+		
+	uts.error $msg;
+	exit $err;
+}
+
+uts.abort()
+{
+	local n = $#;
+	local msg='uts.abort: aboring script run - hasta la vista'
+
+	if test $n = 0; then
+		u
+
+
+
+}
+
+uts.arg()
+{
+	local default=$1;
+	if test -z $default; then 
+		>&2 echo 'uts.arg - no default provided';
+		exit 1;
+	
 
 	if ! test $# = 0; then
 		fnlevel=$1;
 		shift;
 	fi
 
+_restricted()
+{
+
+}
+
+uts.fn.name()
+{
+	local fnlevel=1;
+
+
     echo "${FUNCNAME[$fnlevel]}"
 }
+
+uts.resticted()
+{
+
+}
+
+
 
 _pv.name()
 {
