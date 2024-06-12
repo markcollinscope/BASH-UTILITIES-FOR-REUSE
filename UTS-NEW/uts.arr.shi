@@ -1,0 +1,150 @@
+#!/bin/bash
+
+. utils.shi
+
+_errecho() 
+{
+	>&2 echo $*;
+}
+
+_fnname()
+{
+	local level=${1:-0};
+	level=$((level + 1));
+
+	echo "${FUNCNAME[$level]}";
+}
+
+_stack()
+{
+	local i=0;
+	local fnname=$(_fnname $i);
+
+	while test $fnname != main; do
+		i=$((i+1));
+		fnname=$(_fnname $i)
+		echo "stack($i): $fnname"
+	done
+}
+
+fn() { fn2; }
+fn2() { fn3; }
+fn3() { _stack; }
+
+fn;
+
+
+_abort()
+{
+	local i=0;
+	local max=6;
+
+	_errecho "call stack:"
+	_errecho $(_stack);
+	_errecho
+	_errecho "aborting..$*";
+	exit 1;
+}
+
+_progerr()
+{
+	_abort "...programming error detected. function: $(_fnname 1)"
+}
+
+_arg()
+{
+	if test -z "$*"; then
+		_abort "argument error in $(_fnname)"
+	fi
+	_progerr;
+}
+
+_fnbody()
+{
+	local fn=$(_arg $1);
+	local body=$( declare -f $fn | grep -v $fn );
+	echo "$body"
+}
+
+_fnbody _fnbody
+echo hi
+exit
+
+
+_
+_clone concat _cat;
+
+exit;
+
+
+
+declare -f concat;
+
+. uts.unit.shi
+
+_module()
+{
+	:;
+}
+
+_module arr
+
+###
+function arr.echo()
+{
+	local -n arr=$(ref $1);
+	echo ${arr[@]}
+}
+
+function test.arr.echo()
+{
+	local -a in=(one two three);
+	local out=$(arr.echo in);
+	local xout='one two three';
+
+	tst.assert --same $(arg $xout) $(arg $out);
+}
+
+_bs.count() { echo $#; }
+
+###
+function arr.len()
+{
+	local -n arr=$(ref $1);
+	echo ${#arr[@]}
+} 
+
+function test.arr.len()
+{
+	local -a in=(one two three 'four five six but not really 4 5 6 - just fourth element in array');
+	local xout=4;
+	local out=$(arr.len in);
+
+	tst.assert --same $xout $out;
+}
+###
+
+###
+function arr.at()
+{
+	local -n arr=$(ref $1);
+	local pos=$(arg $2);
+
+	echo ${arr[$pos]}
+}
+
+function test.arr.at()
+{
+	local in=(one two three four);
+	local len=$(arr.len in);
+	local i;
+
+	for ((i=0;i<len; i++)); do
+		out=$(arr.at in $i);
+		xout=${in[$i]};
+		tst.assert --same $out $xout;
+	done
+}
+###
+
+tst.run
