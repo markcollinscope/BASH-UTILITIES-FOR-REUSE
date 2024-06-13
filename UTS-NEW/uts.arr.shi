@@ -1,86 +1,33 @@
-#!/bin/bash
 
-. utils.shi
+_.debug() { return 1; }
+_.dbg() { if _.debug; then _errecho $*; fi; }
 
-_errecho() 
+_.pre() { echo uts; }
+_.ext() { echo shi; }
+_.exit() {  exit $1; }
+_.Q() { echo $*; }
+_.null() { test -z "$1"; }
+_.br() { echo "<$*>"; }
+
+
+set -e;
+
+_.use()
 {
-	>&2 echo $*;
-}
-
-_fnname()
-{
-	local level=${1:-0};
-	level=$((level + 1));
-
-	echo "${FUNCNAME[$level]}";
-}
-
-_stack()
-{
-	local i=0;
-	local fnname=$(_fnname $i);
-
-	while test $fnname != main; do
-		i=$((i+1));
-		fnname=$(_fnname $i)
-		echo "stack($i): $fnname"
-	done
-}
-
-fn() { fn2; }
-fn2() { fn3; }
-fn3() { _stack; }
-
-fn;
-
-
-_abort()
-{
-	local i=0;
-	local max=6;
-
-	_errecho "call stack:"
-	_errecho $(_stack);
-	_errecho
-	_errecho "aborting..$*";
-	exit 1;
-}
-
-_progerr()
-{
-	_abort "...programming error detected. function: $(_fnname 1)"
-}
-
-_arg()
-{
-	if test -z "$*"; then
-		_abort "argument error in $(_fnname)"
+	if test -z _.Q($1); then
+		>&2	echo "_.use - no argument given.";
+		_.exit $(_.err);
 	fi
-	_progerr;
+	local import=$(_.pre).$1.$(_.ext);
+	if _.null $(which $import); then
+		>&2 echo "_.use - not such file to import $(_br $import)";
+		_exit 1;
+	fi
+	. $import;
 }
-
-_fnbody()
-{
-	local fn=$(_arg $1);
-	local body=$( declare -f $fn | grep -v $fn );
-	echo "$body"
-}
-
-_fnbody _fnbody
-echo hi
-exit
-
-
-_
-_clone concat _cat;
-
-exit;
-
-
-
-declare -f concat;
 
 . uts.unit.shi
+. uts._.shi
 
 _module()
 {
