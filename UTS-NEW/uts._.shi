@@ -1,3 +1,5 @@
+# _.fns - utility functions to assist in bootstrap of uts.v1 utilities.
+
 _.stack()
 {
 	local i=0;
@@ -23,20 +25,19 @@ _.dbg() { if _.debug; then _.err $*; fi; }
 
 _.pre() { echo uts; }
 _.ext() { echo shi; }
-_.Q() { echo $*; }
 _.isnull() { test -z "$1"; }
 _.br() { echo "<$*>"; }
-_.isfn() { type -t "$1" = 'function'; }
+_.isfn() { test $(type -t "$1") = 'function'; }
 
-_.randstr() { _.rmdot $(_.rmslash $(mktemp) ); };
 _.unreachable() { _.progerr 'error - unreachable code section reached'; }
 
 _.fnname() { local level=${1:-0}; level=$((level + 1)); echo "${FUNCNAME[$level]}"; }
 _.progerr() { _.abort '...programming error detected - function:' $(_.br $(_.fnname 1)) ' ...' $*; }
 
 _.arg() { if test -z "$*"; then _.abort "argument error in $(_.fnname)"; fi; echo $*; }
-_.abort() { 
-	local i=0; local max=6; 
+_.abort() 
+{ 
+	local i=0; 
 	local stackfile=$(_.stack);
 	_.errcat $stackfile;
 	_.err "aborting..$*"; 
@@ -44,84 +45,50 @@ _.abort() {
 	exit 1; 
 }
 
-_.rmchars() { local str=$(_.arg $1); shift; echo $* | sed "s?$str??g"; }
+p() { _.err $*; }
+
+_.rmchars() 
+{ 
+	local str=$(_.arg $1); shift; 
+	p str: $str, $*; 
+
+	local res=$(echo $* | sed "s?$str??g"); 
+	p res: $res
+	echo $res
+}
+
+_.rmdot() { echo $* | sed 's/\.//g'; }
 _.rmslash() { _.rmchars '/' $*; }
-_.rmdot() { _.rmchars '\.' $*; }
+_.randstr() { _.rmdot $(_.rmslash $(mktemp XXXXXXXXXXXXXXXXXXX) ); };
 
 _.fnconst()
 {
 	local name=$1;
 	local val=$2;
-	local fntempate="
+	local fntemplate="
 		$name()
 		{
 			echo $val;
 		}
 	";
-	eval "$fntempate";
+	eval "$fntemplate";
 }
 
-_.fnrandom()
+_.fnrandconst()
 { 
 	local name=$(_.arg $1);
-	echo $name; 
-
 	local value=$(_.randstr);
-
-	echo value: $value
-	echo newfn: $name
+	_.fnconst $name $value
 }
 
-echo here
-_.fnrandom usedvar;
-echo here
-usedvar;
-
-echo TESTING HERE TESTING HERE TESTING HERE
-exit;
-
-_.used() 
-{
-	local -n isused=$(_usedvar);
-	test "$isused" != 0;
-	if $?; then echo isused; else echo notused; fi
-	local used=$?
-
-	isused=0;
-	return $used;
-}
-
-chkused() 
-{	
-	if _.used; then echo used; fi
-}
-
-echo checkingused
-chkused;
-chkused;
-chkused;
-chkused;
-exit;
-
-set -e;
-
-_.use()
-{
-	if test -z $(_.Q $1); then
-		_.abort "$(_.fnname): no argument given.";
-	fi
-	local import=$(_.pre).$1.$(_.ext);
-	if _.isnull $(which $import); then
-		>&2 echo "_.use - not such file to import $(_br $import)";
-		_exit 1;
-	fi
-	. $import;
-}
+#_.fnrandconst rand
+#echo $(rand);
+#echo TESTING END;
 
 _.fnbody()
 {
 	local fn=$(_.arg $1);
-	local body=$( declare -f $fn | grep -v $fn );
+	local body=$( declare -f $fn | grep -v $fn | grep -v '{' | grep -v '}' );
 	echo "$body"
 }
 
@@ -135,11 +102,16 @@ _.fnclone()
 		_.progerr;
 	fi
 
-	local fnbody=$( $(_.fnbody $from) | grep -v $from )
+	p $(_.fnbody $from)
+	local fnbody=$(_.fnbody $from);
+
 	local fntemplate="
-		$to()
-		$fnbody
+		function $to()
+		{
+			$fnbody ;
+		}
 	"
-	eval "$fntempate"
+	eval $fntemplate;
 }
 
+echo 'seemingly working - fn clone and fn rand const ...'
