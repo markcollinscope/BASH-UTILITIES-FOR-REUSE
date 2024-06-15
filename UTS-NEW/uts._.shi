@@ -1,5 +1,9 @@
 # _.fns - utility functions to assist in bootstrap of uts.v1 utilities.
 
+if test -z $___uts___; then
+# no indent.
+___uts___='already-included'
+
 _.stack()
 {
 	local i=0;
@@ -23,18 +27,20 @@ _.errcat() { >&2 cat $1; }
 _.debug() { return 0; }
 _.dbg() { if _.debug; then _.err $*; fi; }
 
-_.pre() { echo uts; }
-_.ext() { echo shi; }
+_.prefix() { echo uts.; }
+_.suffix() { echo .shi; }
 _.isnull() { test -z "$1"; }
 _.br() { echo "<$*>"; }
 _.isfn() { test $(type -t "$1") = 'function'; }
+_.count() { echo $#; }
 
 _.unreachable() { _.progerr 'error - unreachable code section reached'; }
 
 _.fnname() { local level=${1:-0}; level=$((level + 1)); echo "${FUNCNAME[$level]}"; }
 _.progerr() { _.abort '...programming error detected - function:' $(_.br $(_.fnname 1)) ' ...' $*; }
 
-_.arg() { if test -z "$*"; then _.abort "argument error in $(_.fnname)"; fi; echo $*; }
+_.arg() { if test -z "$*"; then _.abort "argument error in $(_.fnname)"; fi; echo "$@"; }
+
 _.abort() 
 { 
 	local i=0; 
@@ -45,26 +51,36 @@ _.abort()
 	exit 1; 
 }
 
-p() { _.err $*; }
-
 _.rmchars() 
 { 
 	local str=$(_.arg $1); shift; 
-	p str: $str, $*; 
 
 	local res=$(echo $* | sed "s?$str??g"); 
-	p res: $res
 	echo $res
 }
 
 _.rmdot() { echo $* | sed 's/\.//g'; }
+_.rmspace() { echo $* | sed 's/ //g'; }
 _.rmslash() { _.rmchars '/' $*; }
 _.randstr() { _.rmdot $(_.rmslash $(mktemp XXXXXXXXXXXXXXXXXXX) ); };
 
+_.cat() { _.rmspace $*; }
+
+_.modname()
+{ 
+	local str=$(basename $(_.arg $1));
+	local pre=$(_.prefix);
+	local suf=$(_.suffix);
+
+	echo $str | sed "s/$pre//g" | sed "s/$suf//g";
+}
+
 _.fnconst()
 {
-	local name=$1;
+	local name=$(_.arg $1);
 	local val=$2;
+	if _.isnull $val; then val=$name; fi
+
 	local fntemplate="
 		$name()
 		{
@@ -80,10 +96,6 @@ _.fnrandconst()
 	local value=$(_.randstr);
 	_.fnconst $name $value
 }
-
-#_.fnrandconst rand
-#echo $(rand);
-#echo TESTING END;
 
 _.fnbody()
 {
@@ -102,7 +114,6 @@ _.fnclone()
 		_.progerr;
 	fi
 
-	p $(_.fnbody $from)
 	local fnbody=$(_.fnbody $from);
 
 	local fntemplate="
@@ -114,4 +125,20 @@ _.fnclone()
 	eval $fntemplate;
 }
 
-echo 'seemingly working - fn clone and fn rand const ...'
+_.contains()
+{
+	local value=$(_.arg $1);
+	shift;
+
+	local i;
+	for i in "$@"; do
+		if test $value = $i; then
+			return 0;
+		fi
+	done
+	return 1;
+}
+
+e() { _.err $*; }
+
+fi

@@ -1,0 +1,37 @@
+#!/bin/bash
+
+. uts.unit.shi
+. uts._.shi
+
+if test -z  ___mod___; then
+# no indent.
+___mod___='already included';
+
+_.fnrandconst mod_current;
+_.fnrandconst mod_list;
+_.fnconst mod_none;
+
+function mod.start()
+{
+	local name=$(_.arg $1);
+	local -n current=$(mod_current) 
+
+	current=$name;
+
+	local -n list=$(mod_list);
+
+	local new=true;
+	if _.contains $name $list; then
+		new=false;
+		list="$list $name";
+	fi
+	return $new;
+}
+
+function mod.end()
+{
+	local -n cur=$(mod_current);
+	cur=$(mod_none);
+}
+
+fi

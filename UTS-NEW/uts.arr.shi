@@ -1,63 +1,30 @@
 
-_.debug() { return 1; }
-_.dbg() { if _.debug; then _errecho $*; fi; }
-
-_.pre() { echo uts; }
-_.ext() { echo shi; }
-_.exit() {  exit $1; }
-_.Q() { echo $*; }
-_.null() { test -z "$1"; }
-_.br() { echo "<$*>"; }
-
-
-set -e;
-
-_.use()
-{
-	if test -z _.Q($1); then
-		>&2	echo "_.use - no argument given.";
-		_.exit $(_.err);
-	fi
-	local import=$(_.pre).$1.$(_.ext);
-	if _.null $(which $import); then
-		>&2 echo "_.use - not such file to import $(_br $import)";
-		_exit 1;
-	fi
-	. $import;
-}
 
 . uts.unit.shi
-. uts._.shi
-
-_module()
-{
-	:;
-}
-
-_module arr
+. uts._.shi;
 
 ###
 function arr.echo()
 {
-	local -n arr=$(ref $1);
+	local -n arr=$(_.ref $1);
 	echo ${arr[@]}
 }
 
 function test.arr.echo()
 {
 	local -a in=(one two three);
-	local out=$(arr.echo in);
+
 	local xout='one two three';
+	local out=$(arr.echo in);
 
-	tst.assert --same $(arg $xout) $(arg $out);
+	tst.assert --same "$xout" "$out"
 }
-
-_bs.count() { echo $#; }
+###
 
 ###
 function arr.len()
 {
-	local -n arr=$(ref $1);
+	local -n arr=$(_.ref $1);
 	echo ${#arr[@]}
 } 
 
@@ -74,8 +41,8 @@ function test.arr.len()
 ###
 function arr.at()
 {
-	local -n arr=$(ref $1);
-	local pos=$(arg $2);
+	local -n arr=$(_.ref $1);
+	local pos=$(_.arg $2);
 
 	echo ${arr[$pos]}
 }
