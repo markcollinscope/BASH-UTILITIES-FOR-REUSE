@@ -62,9 +62,9 @@ _.rmchars()
 _.rmdot() { echo $* | sed 's/\.//g'; }
 _.rmspace() { echo $* | sed 's/ //g'; }
 _.rmslash() { _.rmchars '/' $*; }
-_.randstr() { _.rmdot $(_.rmslash $(mktemp XXXXXXXXXXXXXXXXXXX) ); };
-
 _.cat() { _.rmspace $*; }
+_.randstr() { echo $(_.cat RAND_ $(_.rmdot $(_.rmslash $(mktemp XXXXXXXXXXXXXXXXXXX))) ); };
+
 
 _.modname()
 { 
@@ -125,7 +125,7 @@ _.fnclone()
 	eval $fntemplate;
 }
 
-_.contains()
+_.contained_in()
 {
 	local value=$(_.arg $1);
 	shift;

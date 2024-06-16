@@ -1,31 +1,57 @@
 #!/bin/bash
 
 . uts.unit.shi
-. uts._.shi
 
-if test -z  ___mod___; then
+
+if test -z  $___mod___; then
 # no indent.
 ___mod___='already included';
 
+. uts._.shi
+
 _.fnrandconst mod_current;
+declare -g $(mod_current);
+
 _.fnrandconst mod_list;
+declare -g $(mod_list);
+
 _.fnconst mod_none;
+declare -g $(mod_none);
 
 function mod.start()
 {
 	local name=$(_.arg $1);
 	local -n current=$(mod_current) 
+	local -n list=$(mod_list)
 
 	current=$name;
 
-	local -n list=$(mod_list);
-
-	local new=true;
-	if _.contains $name $list; then
-		new=false;
+	local new=0;
+	if _.contained_in $current $list; then
+		new=1;
+	else
 		list="$list $name";
 	fi
 	return $new;
+}
+
+function test.mod.start()
+{
+	local modname=anyoldmodule;
+	local another=anothername;
+
+	mod.start $modname;
+	local new_module=$?
+	tst.assert --ok $new_module;
+
+	mod.start $modname;
+	local new_module=$?
+	echo tst 2: $new_module;
+	tst.assert --err $new_module;
+
+	mod.start $another
+	local new_module=$?
+	tst.assert --ok $new_module;
 }
 
 function mod.end()
@@ -33,5 +59,19 @@ function mod.end()
 	local -n cur=$(mod_current);
 	cur=$(mod_none);
 }
+
+function test.mod.end()
+{
+	local modname=anothermodule;
+	local -n current=$(mod_current);
+
+	mod.start $modname;
+	tst.assert --same $current $modname
+
+	mod.end
+	tst.assert --same $current $(mod_none);
+}
+
+tst.run
 
 fi
