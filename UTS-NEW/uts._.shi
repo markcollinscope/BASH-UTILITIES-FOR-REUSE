@@ -90,7 +90,7 @@ _.fnconst()
 	eval "$fntemplate";
 }
 
-_.fnrandconst()
+_.fnrefprivate()
 { 
 	local name=$(_.arg $1);
 	local value=$(_.randstr);

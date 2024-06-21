@@ -2,76 +2,122 @@
 
 . uts.unit.shi
 
-
 if test -z  $___mod___; then
 # no indent.
 ___mod___='already included';
 
 . uts._.shi
 
-_.fnrandconst mod_current;
-declare -g $(mod_current);
+_.fnrefprivate _mod.Current;
+declare -g $(_mod.Current);
 
-_.fnrandconst mod_list;
-declare -g $(mod_list);
+_.fnrefprivate _mod.List;
+declare -g $(_mod.List);
 
-_.fnconst mod_none;
-declare -g $(mod_none);
+#
+#name
+#description
+#fns
+#
+
+readonly SUB_WHITE=@@@@
+
+_mod.nowhite()
+{
+	local in=$*;
+	echo $in | sed "s/ /$SUB_WHITE/g";
+}
+
+_mod.withwhite()
+{
+	local in=$*;
+	echo $in | sed "s/$SUB_WHITE/ /g";
+}
+
+_mod.fn()
+{
+	local name=$(_.arg $1);
+}
+
+function _init()
+{
+	local -n mlist=$(_mod.List);
+	mlist="";
+}
 
 function mod.start()
 {
 	local name=$(_.arg $1);
-	local -n current=$(mod_current) 
-	local -n list=$(mod_list)
+	local -n current=$(_mod.Current) 
+	local -n list=$(_mod.List)
 
 	current=$name;
 
 	local new=0;
 	if _.contained_in $current $list; then
 		new=1;
+	elif ! _.isnull $list; then
+		list="$name $list";
 	else
-		list="$list $name";
+		list=$name;
 	fi
 	return $new;
 }
 
-function test.mod.start()
+function mod.all()
 {
-	local modname=anyoldmodule;
-	local another=anothername;
+	local -n mlist=$(_mod.List);
+
+	_.isnull $mlist
+	local res=$?
+
+	echo $mlist;
+	return $res;
+}
+
+
+function test.mod.start.mod.all()
+{
+	local modname='anyvalue';
+	local another='anyothervalue';
+
+	mod.start $modname;
+	local is_new_module=$?
+	tst.assert --ok $is_new_module;
 
 	mod.start $modname;
 	local new_module=$?
-	tst.assert --ok $new_module;
-
-	mod.start $modname;
-	local new_module=$?
-	echo tst 2: $new_module;
 	tst.assert --err $new_module;
 
 	mod.start $another
-	local new_module=$?
-	tst.assert --ok $new_module;
+	local another_new_module=$?
+	tst.assert --ok $another_new_module;
+
+	tst.assert --same "$(mod.all)" "$another $modname"
 }
 
 function mod.end()
 {
-	local -n cur=$(mod_current);
-	cur=$(mod_none);
+	local -n cur=$(_mod.Current);
+	cur=
 }
 
 function test.mod.end()
 {
-	local modname=anothermodule;
-	local -n current=$(mod_current);
+	local modname='anothermodule';
+	local -n current=$(_mod.Current);
 
 	mod.start $modname;
 	tst.assert --same $current $modname
 
 	mod.end
-	tst.assert --same $current $(mod_none);
+	tst.assert --same $current ""
 }
 
+###
+_init
+###
 tst.run
+###
 
 fi
