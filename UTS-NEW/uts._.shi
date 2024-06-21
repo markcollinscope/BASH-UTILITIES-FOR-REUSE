@@ -63,7 +63,7 @@ _.rmdot() { echo $* | sed 's/\.//g'; }
 _.rmspace() { echo $* | sed 's/ //g'; }
 _.rmslash() { _.rmchars '/' $*; }
 _.cat() { _.rmspace $*; }
-_.randstr() { echo $(_.cat RAND_ $(_.rmdot $(_.rmslash $(mktemp /tmp/XXXXXXXXXXXXXXXXXXX))) ); };
+_.randstr() { echo $(_.cat RAND_ $(_.rmdot $(_.rmslash $(mktemp /tmp/candelete_XXXXXXXXXXXXXXXXXXX))) ); };
 
 
 _.modname()
