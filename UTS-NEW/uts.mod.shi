@@ -14,25 +14,50 @@ declare -g $(_mod.Current);
 _.fnrefprivate _mod.List;
 declare -g $(_mod.List);
 
-#
-#name
-#description
-#fns
-#
+_.wscode() # subst whitespace for this value; 
+{ echo '@@@@'; }
 
-readonly SUB_WHITE=@@@@
-
-_mod.nowhite()
+_.ew() # encode.
 {
 	local in=$*;
-	echo $in | sed "s/ /$SUB_WHITE/g";
+	echo $in | sed "s/ /$(_.wscode)/g";
 }
 
-_mod.withwhite()
+_.dw() # decode.
 {
 	local in=$*;
-	echo $in | sed "s/$SUB_WHITE/ /g";
+	echo $in | sed "s/$(_.wscode)/ /g";
 }
+
+_.whitespace()
+{
+	local eflag='--encode';
+	local dflag='--decode';
+	local errmsg="must use option: <$eflag> or <$dflag>"
+
+	local flag=$1; shift;
+		
+	if test -z $flag; then _.progerr $errmsg; fi
+	
+	if test $flag == $eflag; then
+		_.ew $*;
+		return 0;
+	fi
+	if test $flag == $dflag; then
+		_.dw $*;
+		return 0;
+	fi
+
+	_.progerr $errmsg;
+}
+
+local encoded=$(_.whitespace --encode 'hi there how you doing?')
+echo $encoded;
+local decoded=$(_whitespace --decode $encoded)
+echo $decoded;
+exit;q
+
+
 
 _mod.fn()
 {
