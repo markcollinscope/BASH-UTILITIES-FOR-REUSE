@@ -9,8 +9,6 @@ declare -g ___uts___
 if test -z $___uts___; then
 	___uts___='already-included'
 
-	# no indent.
-
 	_.eval() 
 	# tbd - enhance with 'security' of eval stuff.
 	# e.g. - only use 'preconfigured' templates... etc.
@@ -33,7 +31,7 @@ if test -z $___uts___; then
 	_.progerr() { _.abort '...programming error detected - function:' $(_.br $(_.fnname 1)) ' ...' $*; }
 	_.isnull() { test -z "$1"; }
 
-	_.retval() { _.eval "$@"; local result=$?; echo $result; }
+	_.echo_return() { _.eval "$@"; local result=$?; echo $result; }
 	_.noerr.flag() { echo --noerr; }
 
 	_.arg() 
@@ -74,26 +72,25 @@ if test -z $___uts___; then
 
 	### AROUND HERE!
 	
-	_.const.pre.flag() { echo '--pre'; }
-	_.const.suf.flag() { echo '--suf'; }
 	_.pre.default( echo ${UTS_PREFIX_DEFAULT:-uts}; );
 	_.suf.default( echo ${UTS_SUFFIX_DEFAULT:-shi}; );
 
+	_.const.pre.flag() { echo '--pre'; }
+	_.const.suf.flag() { echo '--suf'; }
+	
 	_.default()
 	{
-		local value=$1;
-	
-		if test -z $value; then
-			_.progerr "no value given for $1";
-		fi
-
-		if test $1 == $(_.const.pre.flag); then
+		local value=$(_.arg $1);
+		local pre=$(_.const.pre.flag);
+		local suf=$(_.const.suf.flag);
+		local opts=$(_.cat $pre '|' $suf);
+		
+		if test $1 == $pre; then
 			_.pre.default;		
-		elif test $1 == $(_.const.suf.flag); then
+		elif test $1 == $suf; then
 			_.suf.default;
 		else
-			>&2 echo 'unknown option <$1> must use --pre or --suf'
-			exit 1;
+			_.progerr "unknown option as \$1:<$value> must use: <$opts>"
 		fi
 	}
 
@@ -120,7 +117,7 @@ if test -z $___uts___; then
 	_.debug() { return 0; }
 	_.dbg() { if _.debug; then _.err $*; fi; }
 
-		_.br() { echo "<$*>"; }
+	_.br() { echo "<$*>"; }
 	_.isfn() { test $(type -t "$1") = 'function'; }
 	_.count() { echo $#; }
 
@@ -137,7 +134,9 @@ if test -z $___uts___; then
 	_.rmdot() { echo $* | sed 's/\.//g'; }
 	_.rmspace() { echo $* | sed 's/ //g'; }
 	_.rmslash() { _.rmchars '/' $*; }
+	_.rmdash() { _.rmchars '-' $*; }
 	_.cat() { _.rmspace $*; }
+	
 	_.randstr() { echo $(_.cat RAND_ $(_.rmdot $(_.rmslash $(mktemp /tmp/candelete_XXXXXXXXXXXXXXXXXXX))) ); };
 
 	_.modname()
@@ -148,7 +147,6 @@ if test -z $___uts___; then
 
 		echo $str | sed "s/$pre//g" | sed "s/$suf//g";
 	}
-
 
 	_.fnconst()
 	{
@@ -165,16 +163,14 @@ if test -z $___uts___; then
 		_.eval "$fntemplate";
 	}
 
-	_.fnrefprivate()
-	{ 
-		local name=$(_.arg $1);
-		local value=$(_.randstr);
-		_.fnconst $name $value
-	}
-
 	_.fnbody()
 	{
 		local fn=$(_.arg $1);
+
+		if ! _.isfn $fn; then
+			_.abort "not a function $(_.br $fn)";
+		fi
+
 		local body=$( declare -f $fn | grep -v $fn | grep -v '{' | grep -v '}' );
 		echo "$body"
 	}
@@ -183,11 +179,6 @@ if test -z $___uts___; then
 	{
 		local from=$(_.arg $1);
 		local to=$(_.arg $2);
-
-		if ! _.isfn $from; then
-			_.abort "not a function $(_.br $from)";
-			_.progerr;
-		fi
 
 		local fnbody=$(_.fnbody $from);
 
@@ -200,6 +191,50 @@ if test -z $___uts___; then
 		eval $fntemplate;
 	}
 
+	_.fngetset()
+	{
+		local varname=$(_arg $1);
+		local value=$2;
+
+		local private_global=$(_randstr);
+
+		local fntemplate="
+			$varname()
+			{
+				declare -g $private;
+
+				if test \$# == 0;  then
+					echo $private_global;
+				else
+					$private_global=$value;
+				fi
+			}
+		"
+		_.eval $fntempate
+	}
+
+	_.fnconst flag.getset --getset
+	
+	_.fnrefprivate()
+	{
+		local flag=$(flag.getset);
+		local opt=$(_.arg $1);
+		local dogetset=1;
+
+		if test $opt == $gsflag; then
+			dogetset=0;
+			shift;
+		fi
+
+		local name=$(_arg $1);
+		local value=$(_.randstr);
+
+		if !dogetset; then
+			_.fnconst $name $value
+		else
+
+	}
+
 	_.contained_in()
 	{
 		local value=$(_.arg $1);
@@ -207,13 +242,27 @@ if test -z $___uts___; then
 
 		local i;
 		for i in "$@"; do
-			if test $value = $i; then
+			if test $value == $i; then
 				return 0;
 			fi
 		done
 		return 1;
 	}
 
-	e() { _.err $*; }
+	err() { _.err $*; } # todo: remove.
 
+	_.set() {  set -o | grep $1.*on >/dev/null 2>/dev/null; }
+
+	_fnconst flag.off --off
+	
+	_.strict() 
+	{	
+		if test $1  == $(flag.off); then
+			set +u;
+		else
+			set -u;
+		fi
+	}
+	
+	_.strict;
 fi
