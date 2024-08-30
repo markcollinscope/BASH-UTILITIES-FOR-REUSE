@@ -1,0 +1,101 @@
+function arg.zero()
+{
+	test $# = 0;
+}
+
+# [-l] <lower-limit> <upper-limit> "$@"
+# check argument count in "$@" is between <lower-limit> and <upper-limit> inclusive - if not,  error with exit.
+# [-l] - lower limit only required, no upper limit.
+function arg.nargs
+{
+	local loweronly=false; 
+	if test "$1" = "-l"; then 
+		loweronly=true; 
+		shift; 
+	fi
+	setvar LOWERLIMIT $1;
+	shift;
+
+	if ! $loweronly; then 
+		setvar UPPERLIMIT $1; 
+		shift; 
+	else 
+		UPPERLIMIT=$_MAXARGS; 
+	fi
+	chkarg UPPERLIMIT
+
+	local COUNT=$(count "$@");
+
+	if (( $COUNT < $LOWERLIMIT )) || (( $COUNT > $UPPERLIMIT)); then
+		local MSG="Incorrect number of arguments - "
+		if $loweronly; then 
+			MSG=$(concat "$MSG" "$COUNT arguments given - at least: $LOWERLIMIT are required")
+		elif (( $LOWERLIMIT == $UPPERLIMIT )); then
+			MSG=$(concat "$MSG" "$COUNT arguments given - expected $LOWERLIMIT");
+		else
+			MSG=$(concat "$MSG" "expected (between): $LOWERLIMIT and $UPPERLIMIT - got $COUNT");
+		fi
+		errecho "$MSG"
+
+		callFnIfExists Usage;
+		exiterr -k;
+	fi
+}
+
+fn.join()
+{
+	arg.count.assert 2 2;
+	local fn=$(arg $1)
+	local subfn=$(arg $2)
+
+	local joinchar=".";
+	concat $fn $joinchar $subfn;
+}
+
+function fn.exists()
+{
+	test $(type -t $1) = function
+}
+
+
+if tst.active; then
+	function test.fn.exists()
+	{
+		local fnname='nonexistantfn'
+		fn.exists $fnnamme
+		assertSame $? 1;
+
+		local otherfn='fn.exists';
+		fn.exists $otherfn;
+		assertSame $? 0;
+	}
+fi
+
+
+function fn()  # combine fn.
+{
+	local subfn=$1;
+	local fn=$(concat 'fn' '.' $subfn);
+	
+	if fn.exists $fn; then
+		shift;
+		$fn "$@";
+	else
+		uts.abort "No such function: <fn $subfn>"; # tbd - test mode?
+	fi
+}
+
+if tst.active; then
+	fn._hello()
+	{
+		echo hello;
+	}
+
+	function fn.shtest()
+	{
+		local result=$(fn _hello);
+		assertSame $result hello
+	}
+fi
+
+
