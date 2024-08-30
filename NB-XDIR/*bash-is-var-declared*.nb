@@ -1,0 +1,15 @@
+ local local_var
+
+    # Check if the local variable is declared
+    if declare -p local_var 2>/dev/null | grep -q 'local'; then
+        echo "local_var is declared as local within the function."
+    else
+        echo "local_var is not declared as local within the function."
+    fi
+
+    # Check if the global variable is declared
+    if declare -p global_var 2>/dev/null | grep -q 'declare -- global_var'; then
+        echo "global_var is declared as a global variable using declare -g."
+    else
+        echo "global_var is not declared as a global variable using declare -g."
+    fi
