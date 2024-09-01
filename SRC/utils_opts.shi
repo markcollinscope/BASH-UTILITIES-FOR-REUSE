@@ -238,6 +238,29 @@ _processHelp()
 	fi
 }
 
+flagDashRm() # <flag>
+# echo return the <flag> given without leading '-'s
+# e.g. '--optone' would become 'optone'
+{
+	local flag=$(arg $1)
+	echo "$flag" | sed 's/^-*//g';
+}
+
+flagDashAdd() # <flag> (with or wihout dashes)
+# echo return <flag> with - or -- prefix. 
+# <flag> with existing - or -- returned unchanged.
+{
+	local flag=$(arg $1);
+	flag=$(optDashRm $flag);
+	local len=${#flag};
+
+	if test $len == "1"; then
+		echo $(concat '-' $flag);
+	else
+		echo $(concat '--' $flag);
+	fi
+}
+
 errifopt() # "$@"
 # exit with error if there are options (-*) present (or left after boolopt, valopt processing)  in "$@" 
 # if help has been requested by command line flag (e.g. --hh) it will be shown.

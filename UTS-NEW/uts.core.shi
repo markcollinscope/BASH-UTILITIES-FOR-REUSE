@@ -1,0 +1,111 @@
+if test -z $___uts___; then
+	___uts___='already-included'
+
+uts.fn() 
+{
+    test $(type -t "$1") = 'function'; 
+}
+
+uts.count() { echo $#; }
+uts.err() { >&2 echo $*; }
+
+uts.fnname()
+{
+    local level=${1:-0}; 
+    level=$((level + 1)); 
+    echo "${FUNCNAME[$level]}"; 
+}
+
+uts.stack()
+{
+    local i=1;
+    local fnname=$(uts.fnname $i);
+    local stack=$(
+        while test $fnname != ""; do
+            echo $fnname;
+            i=$((i+1));
+            fnname=$(uts.fnname $i)
+        done
+    )
+    echo $stack;
+}
+
+function uts.abort()
+{
+    local callingFn=$(uts.fnname 1);
+	uts.err "$callingFn: error - aborting.  $@"
+	uts.err "$@"
+	uts.err
+	uts.err "call stack:"
+	uts.err $(uts.stack);
+	exit 1
+}
+
+uts.assert()
+{
+	local fn=$(uts.fnname 1);
+	local value=$1;
+	shift;
+	
+	local msg=$*; 
+	if ! $value; then 
+		uts.abort "$fn - assertion failure. $msg"
+	fi
+	return 0;
+}
+
+declare -g __XERR="--xe"
+uts.null()
+{
+    local xerr=false;
+    if test "$1" == $__XERR; then
+        exitonerr=true;
+        shift;
+    fi
+    
+    local val=$1;
+    if test -z "$val"; then
+        if $xerr; then
+            uts.abort 'null value error';
+        else
+            return 0;
+        fi
+    fi
+    return 1;  
+}
+
+uts.arg()
+{
+    local val="$@"
+    uts.null --xe "$val";
+    echo $val;
+}
+
+uts.env()
+{
+	local varname=$(uts.arg $1);
+	local default=$2;
+	 
+    local varvalue=${!varname};
+
+	if test -z "$varvalue" && test -z "$default"; then
+        uts.abort "env var <$varname> is not set, & no default provided"
+    
+    elif test -z $varvalue; then
+	    varvalue=$default;
+	fi			
+
+	echo $varvalue;
+}
+
+uts.rmregexp() 
+{ 
+    local str=$(uts.arg $1); shift; 
+    local res=$(echo $* | sed "s?$str??g"); 
+    echo $res
+}
+uts.rmdot() { echo $* | sed 's/\.//g'; }
+uts.rmspace() { echo $* | sed 's/ //g'; }
+uts.rmslash() { _.rmchars '/' $*; }
+uts.rmdash() { _.rmchars '-' $*; }
+s

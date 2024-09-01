@@ -1,4 +1,5 @@
 # 'bootstrap assist' module.
+# 'bootstrap assist' module.
 # _.fns - utility functions to assist in bootstrap of uts.v1 utilities.
 # necessary as uts.xxx.shi files (utility function groups) have a strict 
 # dependency order to enable their use in isolation - without other uts.xxx.shi
@@ -16,7 +17,6 @@ if test -z $___uts___; then
 		eval "$@";
 	}
 
-	_.exit() {  exit $1; }
 	_.err() { >&2 echo $*; }
 	_.errcat() 
 	{ 
@@ -121,9 +121,8 @@ if test -z $___uts___; then
 	_.isfn() { test $(type -t "$1") = 'function'; }
 	_.count() { echo $#; }
 
-	_.unreachable() { _.progerr 'error - unreachable code section reached'; }
 
-	_.rmchars() 
+	uts.rmchars() 
 	{ 
 		local str=$(_.arg $1); shift; 
 
