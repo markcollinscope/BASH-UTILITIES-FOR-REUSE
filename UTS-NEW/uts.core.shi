@@ -108,4 +108,5 @@ uts.rmdot() { echo $* | sed 's/\.//g'; }
 uts.rmspace() { echo $* | sed 's/ //g'; }
 uts.rmslash() { _.rmchars '/' $*; }
 uts.rmdash() { _.rmchars '-' $*; }
-s
+
+

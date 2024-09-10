@@ -251,7 +251,7 @@ flagDashAdd() # <flag> (with or wihout dashes)
 # <flag> with existing - or -- returned unchanged.
 {
 	local flag=$(arg $1);
-	flag=$(optDashRm $flag);
+	flag=$(flagDashRm $flag);
 	local len=${#flag};
 
 	if test $len == "1"; then
