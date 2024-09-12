@@ -1,15 +1,15 @@
 if test -z $___uts___; then
 	___uts___='already-included'
 
-uts.fn() 
+uts.isfn() 
 {
     test $(type -t "$1") = 'function'; 
 }
 
 uts.count() { echo $#; }
-uts.err() { >&2 echo $*; }
+uts.emsg() { >&2 echo $*; }
 
-uts.fnname()
+uts.isfnname()
 {
     local level=${1:-0}; 
     level=$((level + 1)); 
@@ -19,12 +19,12 @@ uts.fnname()
 uts.stack()
 {
     local i=1;
-    local fnname=$(uts.fnname $i);
+    local fnname=$(uts.isfnname $i);
     local stack=$(
         while test $fnname != ""; do
             echo $fnname;
             i=$((i+1));
-            fnname=$(uts.fnname $i)
+            fnname=$(uts.isfnname $i)
         done
     )
     echo $stack;
@@ -32,34 +32,86 @@ uts.stack()
 
 function uts.abort()
 {
-    local callingFn=$(uts.fnname 1);
-	uts.err "$callingFn: error - aborting.  $@"
-	uts.err "$@"
-	uts.err
-	uts.err "call stack:"
-	uts.err $(uts.stack);
+    local callingFn=$(uts.isfnname 1);
+	uts.emsg "$callingFn: error - aborting.  $@"
+	uts.emsg
+	uts.emsg "call stack:"
+	uts.emsg $(uts.stack);
+	uts.emsg
 	exit 1
+}
+
+uts.flag.errx()
+{
+	echo "--errabort;
+}
+uts.flag.noerrx()
+{
+	echo "--errok";
+}
+
+uts.flag.match()
+{
+	local match=$1;
+	local flag=$2;
+	local -n ismatch=$3;
+	shift 3;
+	local action="$@";
+
+	local i;
+	for i in match flag retval; do
+		if test -z ${!i}; then uts.abort " no value for ($i)"; fi
+	done
+
+	if test -z "$match"; then uts.abort; fi
+	if test -z "$flag"; then uts.abort; fi
+	if test -z "$retval"; then uts.abort; fi
+
+	ismatch=1;
+	if test $match == $flag; then
+		$action;
+		ismatch=0;
+		return 2;
+	fi
+	return 0;
 }
 
 uts.assert()
 {
+	local noerrx=1;
+	shift $(uts.flag.match $1 $(uts.flag.noerrx) noerrx);
+
 	local fn=$(uts.fnname 1);
 	local value=$1;
 	shift;
 	
 	local msg=$*; 
-	if ! $value; then 
-		uts.abort "$fn - assertion failure. $msg"
+	if ! "$value"; then 
+		if ! $noerrx; then 
+				uts.abort "$fn - assertion failure. $msg"; 
+			else
+				return 1;
+			fi
+		fi
 	fi
 	return 0;
 }
 
-declare -g __XERR="--xe"
+uts.fncallifexists()
+{
+	local fn=$1;
+	shift;
+
+	if ! test -z "$fn" && uts.isfn "$fn"; then
+		$fn "$@";
+	fi
+}
+
 uts.null()
 {
     local xerr=false;
-    if test "$1" == $__XERR; then
-        exitonerr=true;
+    if test "$1" == $(uts.flag.errexit); then
+        xerr=true;
         shift;
     fi
     
@@ -74,10 +126,25 @@ uts.null()
     return 1;  
 }
 
+uts.notnull()
+{
+	uts.assert 
+}
+
+uts.cat()
+{
+	local i;
+	local res=
+	for i in "$@"; do
+		res=$res$i;
+	done
+	echo $res;
+}
+
 uts.arg()
 {
-    local val="$@"
-    uts.null --xe "$val";
+    local val=$(uts.cat "$@");
+    uts.null --assert "$val";
     echo $val;
 }
 
@@ -91,22 +158,31 @@ uts.env()
 	if test -z "$varvalue" && test -z "$default"; then
         uts.abort "env var <$varname> is not set, & no default provided"
     
-    elif test -z $varvalue; then
+    elif test -z "$varvalue"; then
 	    varvalue=$default;
 	fi			
 
 	echo $varvalue;
 }
 
-uts.rmregexp() 
+
+uts.re()
+{
+	if test "$1" == "--white"; then
+		echo "";
+		return 0;
+	fi
+}
+
+uts.rmre() 
 { 
     local str=$(uts.arg $1); shift; 
     local res=$(echo $* | sed "s?$str??g"); 
     echo $res
 }
-uts.rmdot() { echo $* | sed 's/\.//g'; }
-uts.rmspace() { echo $* | sed 's/ //g'; }
-uts.rmslash() { _.rmchars '/' $*; }
-uts.rmdash() { _.rmchars '-' $*; }
+uts.rmdot() { uts.rmre '\\.' $*; };
+uts.rmwhite() { uts.rmre ' ' $*; };
+uts.rmslash() { uts.rmre '/' $*; };
+uts.rmdash() { uts.rmre '-' $*; };
 
 
