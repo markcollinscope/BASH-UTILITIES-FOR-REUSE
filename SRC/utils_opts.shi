@@ -50,7 +50,7 @@ rm -f $__USAGE_FILE;
 __DOCFLAG="--rem"
 __OPTIONS="Options:"
 
-__FLAGSEPS='| \. %'
+__FLAGSEPS="| \. %"
 
 _splitFlag()
 {
@@ -58,7 +58,7 @@ _splitFlag()
 
 	local RES=$FLAG;
 	for i in $__FLAGSEPS; do
-		RES=$(echo $RES | sed "s/$i/ /g";
+		RES=$(echo $RES | sed "s/$i/ /g");
 	done
 	echo $RES;
 }
@@ -66,17 +66,17 @@ _splitFlag()
 _echoFlag()
 {
 	local FLAG=$(arg $1);
-	local SFLAG=$(_splitFlag $FLAG);
-	echo $SFLAG | sed 's/ /|/g'
+	local SPLITFLAG=$(_splitFlag $FLAG);
+	echo $SPLITFLAG | sed 's/ /|/g'
 }
 
 _lastFlag()
 {
 	local FLAG=$(arg $1);
-	local SFLAG=$(_splitFlag $FLAG);
+	local SPLITFLAG=$(_splitFlag $FLAG);
 
 	local LAST=
-	for f in $SFLAG; do
+	for f in $SPLITFLAG; do
 		LAST=$f;
 	done
 	echo $LAST;
@@ -203,7 +203,7 @@ binopt() # [ --rem <documentation...> ] <flag> <bash var> <default-value> <value
 
 boolopt() # [ --rem <documentation...> ] <flag> <bash var> "$@"
 # called in the form:
-# eval $(boolopt --rem <documentation...'> -a AVARIABLE "$@")
+# eval $(boolopt --rem <documentation...> -a AVARIABLE "$@")
 # where: 	<flag> (-a) is the flag to be processed on the including script.
 #			<bash-var> (AVARIABLE) - the bash var to set set to either 'true' or 'false'
 # --rem is optional. If given <documentation...> will be added to Usage of containing script.
@@ -221,7 +221,7 @@ boolopt() # [ --rem <documentation...> ] <flag> <bash var> "$@"
 
 valopt() # [ --rem <documentation...> ] <flag> <bash var> "$@"
 # called in the form:
-# eval $(valopt --rem 'documentation...' -a AVARIABLE "$@")
+# eval $(valopt --rem "documentation..." -a AVARIABLE "$@")
 # where: 	<flag> (-a) is the flag to be processed on the including script.
 #			<bash-var> (AVARIABLE) - the bash var to set set to either <default-value> or <other-value>
 # --rem is optional. If given <documentation...> will be added to Usage of containing script.
