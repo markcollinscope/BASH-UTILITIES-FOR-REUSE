@@ -50,6 +50,61 @@ rm -f $__USAGE_FILE;
 __DOCFLAG="--rem"
 __OPTIONS="Options:"
 
+__FLAGSEPS='| \. %'
+
+_splitFlag()
+{
+	local FLAG=$(arg $1);
+
+	local RES=$FLAG;
+	for i in $__FLAGSEPS; do
+		RES=$(echo $RES | sed "s/$i/ /g";
+	done
+	echo $RES;
+}
+
+_echoFlag()
+{
+	local FLAG=$(arg $1);
+	local SFLAG=$(_splitFlag $FLAG);
+	echo $SFLAG | sed 's/ /|/g'
+}
+
+_lastFlag()
+{
+	local FLAG=$(arg $1);
+	local SFLAG=$(_splitFlag $FLAG);
+
+	local LAST=
+	for f in $SFLAG; do
+		LAST=$f;
+	done
+	echo $LAST;
+}
+
+_flagDashRm() # <flag> # TBD: as var (longest).
+# echo return the <flag> given without leading '-'s
+# e.g. '--optone' would become 'optone'
+{
+	local flag=$(arg $1)
+	echo "$flag" | sed 's/^-*//g';
+}
+
+_flagDashAdd() # <flag> (with or wihout dashes) # as flag (all combined).
+# echo return <flag> with - or -- prefix. 
+# <flag> with existing - or -- returned unchanged.
+{
+	local flag=$(arg $1);
+	flag=$(_flagDashRm $flag);
+	local len=${#flag};
+
+	if test $len == "1"; then
+		echo $(concat '-' $flag);
+	else
+		echo $(concat '--' $flag);
+	fi
+}
+
 _addOptRem()
 {
 	setvar FLG "$1";
@@ -59,7 +114,7 @@ _addOptRem()
 		echo $__OPTIONS > $__USAGE_FILE;
 	fi
 
-	echo "$FLG $TXT" >> $__USAGE_FILE;
+	echo $(_echoFlag "$FLG") $TXT" >> $__USAGE_FILE;
 }
 
 _processRem() 
@@ -92,12 +147,27 @@ getOptUsage() # [-n]
 	fi
 }
 
+_ismatch()
+{
+	local VAL=$(arg $1);
+	shift;
+
+	for match in "$@"; do 
+		errecho "VAL: $VAL, match: $match"
+		if test $match == $VAL; then
+			return 0;
+		fi
+	done
+	return 1;
+}
+
 binopt() # [ --rem <documentation...> ] <flag> <bash var> <default-value> <value-if-flag-given> "$@"
 # called in the form:
-# eval $(binopt --rem <documentation...' -a AVARIABLE 99 101 "$@")
+# eval $(binopt --rem '<documentation...' -a AVARIABLE 99 101 "$@")
 # where: 	<flag> (-a) is the flag to be processed on the including script.
 #			<bash-var> (AVARIABLE) - the bash var to set set to either <default-value> or <other-value>
-#			<defaul-value> - <bash-var> is set to this value if <flag> is not present.
+#			<default-value> - <bash-var> is set to this value if <flag> is not present 
+#			  (nb. a pre-existing value will not be overriden by the <default-value> - only NULL ("") values are replaced.
 #			<value-if-flag-given> - <bash-var> is set to this value if <flag> is present
 # --rem is optional. If given <documentation...> will be added to Usage of containing script.
 {
@@ -110,10 +180,16 @@ binopt() # [ --rem <documentation...> ] <flag> <bash var> <default-value> <value
 	shift 4;
 
 	local ARGS=
+	local FLAGSPLIT=$(_splitFlag $FLAG);
+	errecho "FS: $FLAGSPLIT"
 
-	EVAL="$VAR=\"$DEFAULT_VALUE\""
+	errecho VAR: ${!VAR}
+	if null ${!VAR}; then
+		EVAL="$VAR=\"$DEFAULT_VALUE\""
+	fi
+
 	while ! null "$1"; do
-		if test "$1" = "$FLAG"; then
+		if _ismatch "$1" $FLAGSPLIT; then
 			EVAL="$VAR=\"$OTHER_VALUE\""
 		else
 			ARGS="$ARGS \"$1\"";
@@ -121,9 +197,9 @@ binopt() # [ --rem <documentation...> ] <flag> <bash var> <default-value> <value
 		shift;
 	done
 
-
 	echo "set -- $ARGS; $EVAL"
 }
+
 
 boolopt() # [ --rem <documentation...> ] <flag> <bash var> "$@"
 # called in the form:
@@ -182,38 +258,38 @@ Usage() # no args.
 	>&2 cat<<<$OPTIONS
 }
 
-_MAXARGS=9999 # arbitrary but large - upper limit
+__MAXARGS=9999 # arbitrary but large - upper limit
 
 chkargcount() # [-l] <lower-limit> <upper-limit> "$@"
 # check argument count in "$@" is between <lower-limit> and <upper-limit> inclusive - if not,  error with exit.
 # [-l] - lower limit only required, no upper limit.
 {
-	LOWERONLY=false; 
+	_LOWERONLY=false; 
 	if test "$1" = "-l"; then 
-		LOWERONLY=true; 
+		_LOWERONLY=true; 
 		shift; 
 	fi
-	setvar LOWERLIMIT $1;
+	setvar _LOWERLIMIT $1;
 	shift;
 
-	if ! $LOWERONLY; then 
-		setvar UPPERLIMIT $1; 
+	if ! $_LOWERONLY; then 
+		setvar _UPPERLIMIT $1; 
 		shift; 
 	else 
-		UPPERLIMIT=$_MAXARGS; 
+		_UPPERLIMIT=$__MAXARGS; 
 	fi
-	chkarg UPPERLIMIT
+	chkarg _UPPERLIMIT
 
 	local COUNT=$(count "$@");
 
-	if (( $COUNT < $LOWERLIMIT )) || (( $COUNT > $UPPERLIMIT)); then
+	if (( $COUNT < $_LOWERLIMIT )) || (( $COUNT > $_UPPERLIMIT)); then
 		local MSG="Incorrect number of arguments - "
-		if $LOWERONLY; then 
-			MSG=$(concat "$MSG" "$COUNT arguments given - at least: $LOWERLIMIT are required")
-		elif (( $LOWERLIMIT == $UPPERLIMIT )); then
-			MSG=$(concat "$MSG" "$COUNT arguments given - expected $LOWERLIMIT");
+		if $_LOWERONLY; then 
+			MSG=$(concat "$MSG" "$COUNT arguments given - at least: $_LOWERLIMIT are required")
+		elif (( $_LOWERLIMIT == $_UPPERLIMIT )); then
+			MSG=$(concat "$MSG" "$COUNT arguments given - expected $_LOWERLIMIT");
 		else
-			MSG=$(concat "$MSG" "expected (between): $LOWERLIMIT and $UPPERLIMIT - got $COUNT");
+			MSG=$(concat "$MSG" "expected (between): $_LOWERLIMIT and $_UPPERLIMIT - got $COUNT");
 		fi
 		errecho "$MSG"
 
@@ -238,29 +314,6 @@ _processHelp()
 	fi
 }
 
-flagDashRm() # <flag>
-# echo return the <flag> given without leading '-'s
-# e.g. '--optone' would become 'optone'
-{
-	local flag=$(arg $1)
-	echo "$flag" | sed 's/^-*//g';
-}
-
-flagDashAdd() # <flag> (with or wihout dashes)
-# echo return <flag> with - or -- prefix. 
-# <flag> with existing - or -- returned unchanged.
-{
-	local flag=$(arg $1);
-	flag=$(flagDashRm $flag);
-	local len=${#flag};
-
-	if test $len == "1"; then
-		echo $(concat '-' $flag);
-	else
-		echo $(concat '--' $flag);
-	fi
-}
-
 
 function bopt() # <name>
 # short form boolean opt <name> forms both the flag and the var used to show value if set.
@@ -270,8 +323,8 @@ function bopt() # <name>
 	local varname=$(arg $1);
 	shift;
 
-	varname=$(flagDashRm $varname);
-	local flag=$(flagDashAdd $varname);
+	varname=$(_flagDashRm $varname);
+	local flag=$(_flagDashAdd $varname);
 
 	boolopt $flag $varname "$@";
 }
@@ -284,8 +337,8 @@ function vopt() # <name>
 	local varname=$(arg $1);
 	shift;
 
-	varname=$(flagDashRm $varname);
-	local flag=$(flagDashAdd $varname);
+	varname=$(_flagDashRm $varname);
+	local flag=$(_flagDashAdd $varname);
 
 	valopt $flag $varname "$@";
 }
@@ -294,7 +347,7 @@ optset() # <name>
 # is option <name> set to true (if bool option), or non null (if value option)
 {
 	local opt=$(arg $1);
-	opt=$(flagDashRm $opt);
+	opt=$(_flagDashRm $opt);
 	local val=${!opt};
 
 	if null "$val" ; then return 1; fi
