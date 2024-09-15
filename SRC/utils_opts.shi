@@ -50,16 +50,21 @@ rm -f $__USAGE_FILE;
 __DOCFLAG="--rem"
 __OPTIONS="Options:"
 
-__FLAGSEPS="| \. %"
+__FLAGSEPS="| % :"
 
 _splitFlag()
 {
 	local FLAG=$(arg $1);
+	errecho "$(fnname): FLAG: $FLAG"
 
 	local RES=$FLAG;
+	errecho "$(fnname): RES: $RES"
 	for i in $__FLAGSEPS; do
+		errecho "$(fnname): i: $i"
 		RES=$(echo $RES | sed "s/$i/ /g");
+	errecho "$(fnname): RES: $RES"
 	done
+	errecho "$(fnname): RES: $RES"
 	echo $RES;
 }
 
@@ -114,7 +119,7 @@ _addOptRem()
 		echo $__OPTIONS > $__USAGE_FILE;
 	fi
 
-	echo $(_echoFlag "$FLG") $TXT" >> $__USAGE_FILE;
+	echo $(_echoFlag "$FLG") "$TXT" >> $__USAGE_FILE;
 }
 
 _processRem() 
@@ -152,6 +157,7 @@ _ismatch()
 	local VAL=$(arg $1);
 	shift;
 
+	errecho "$(fnname): $VAL, $@"
 	for match in "$@"; do 
 		errecho "VAL: $VAL, match: $match"
 		if test $match == $VAL; then
