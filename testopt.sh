@@ -6,7 +6,7 @@ _testopt()
 	eval $(binopt "-a|--aaa" _A false true "$@")
 	eval $(boolopt --rem 'hello world, you all ok?' -b _B "$@")
 	eval $(boolopt  -c:--ccc _C "$@")
-	eval $(valopt -v val "$@")
+	eval $(valopt --rem 'val o pt .....' --val val "$@")
 	errecho "$@" 
 }
 
@@ -32,5 +32,5 @@ _testopt 1 2  3 4 5
 errecho C: $_C
 
 errecho 4: $val;
-_testopt  1 -v 999 3
+_testopt  1 --val 999 3
 errecho val: $val
