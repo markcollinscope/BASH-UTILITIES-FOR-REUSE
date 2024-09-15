@@ -47,7 +47,7 @@ fi
 __USAGE_FILE=$(tmpFile);
 rm -f $__USAGE_FILE;
 
-__DOCFLAG="--rem"
+__REMFLAG="--rem"
 __OPTIONS="Options:"
 
 __FLAGSEPS="| % :"
@@ -55,16 +55,11 @@ __FLAGSEPS="| % :"
 _splitFlag()
 {
 	local FLAG=$(arg $1);
-	errecho "$(fnname): FLAG: $FLAG"
 
 	local RES=$FLAG;
-	errecho "$(fnname): RES: $RES"
 	for i in $__FLAGSEPS; do
-		errecho "$(fnname): i: $i"
 		RES=$(echo $RES | sed "s/$i/ /g");
-	errecho "$(fnname): RES: $RES"
 	done
-	errecho "$(fnname): RES: $RES"
 	echo $RES;
 }
 
@@ -84,23 +79,23 @@ _lastFlag()
 	for f in $SPLITFLAG; do
 		LAST=$f;
 	done
-	echo $LAST;
+	_echoFlag $LAST
 }
 
-_flagDashRm() # <flag> # TBD: as var (longest).
+_rmDashes() # <flag> # TBD: as var (longest).
 # echo return the <flag> given without leading '-'s
 # e.g. '--optone' would become 'optone'
 {
 	local flag=$(arg $1)
-	echo "$flag" | sed 's/^-*//g';
+	echo "$flag" | sed 's/-*//g';
 }
 
-_flagDashAdd() # <flag> (with or wihout dashes) # as flag (all combined).
+_addDashes() # <flag> (with or wihout dashes) # as flag (all combined).
 # echo return <flag> with - or -- prefix. 
 # <flag> with existing - or -- returned unchanged.
 {
 	local flag=$(arg $1);
-	flag=$(_flagDashRm $flag);
+	flag=$(_rmDashes $flag);
 	local len=${#flag};
 
 	if test $len == "1"; then
@@ -127,7 +122,7 @@ _processRem()
 	local USEDOC="$1"
 	local RET=
 
-	if test "$USEDOC" = "$__DOCFLAG"; then
+	if test "$USEDOC" = "$__REMFLAG"; then
 		setvar TEXT "$2";
 		setvar FLAG "$3";
 		_addOptRem "$FLAG" "$TEXT";
@@ -157,9 +152,7 @@ _ismatch()
 	local VAL=$(arg $1);
 	shift;
 
-	errecho "$(fnname): $VAL, $@"
 	for match in "$@"; do 
-		errecho "VAL: $VAL, match: $match"
 		if test $match == $VAL; then
 			return 0;
 		fi
@@ -187,9 +180,7 @@ binopt() # [ --rem <documentation...> ] <flag> <bash var> <default-value> <value
 
 	local ARGS=
 	local FLAGSPLIT=$(_splitFlag $FLAG);
-	errecho "FS: $FLAGSPLIT"
 
-	errecho VAR: ${!VAR}
 	if null ${!VAR}; then
 		EVAL="$VAR=\"$DEFAULT_VALUE\""
 	fi
@@ -320,19 +311,40 @@ _processHelp()
 	fi
 }
 
+_svRem()
+{
+	local -n remsave;
+
+	local rem=$(arg $2)
+	if test $rem = $__REMFLAG; then
+		remsave=$(arg $3)
+		return 0;
+	fi
+	return 1;
+}
+
 
 function bopt() # <name>
 # short form boolean opt <name> forms both the flag and the var used to show value if set.
 # see also boolopt.
 # nb: --rem cannot be used - todo.
 {
-	local varname=$(arg $1);
+	local remstring;
+	_svRem remstring "$@";
+	local remused=$?;
+	if $remused; then shift 2; fi
+
+	local flags=$(arg $1);
 	shift;
 
-	varname=$(_flagDashRm $varname);
-	local flag=$(_flagDashAdd $varname);
+	local varname=$(_lastFlag $flags)
+	varname=$(_rmDashes $varname);
 
-	boolopt $flag $varname "$@";
+	if $remused; then
+		boolopt --rem "$remstring" $flags $varname "$@";
+	else
+		boolopt $flags $varname "$@";
+	fi
 }
 
 function vopt() # <name>
@@ -343,8 +355,8 @@ function vopt() # <name>
 	local varname=$(arg $1);
 	shift;
 
-	varname=$(_flagDashRm $varname);
-	local flag=$(_flagDashAdd $varname);
+	varname=$(_rmDashes $varname);
+	local flag=$(_addDashes $varname);
 
 	valopt $flag $varname "$@";
 }
@@ -353,7 +365,7 @@ optset() # <name>
 # is option <name> set to true (if bool option), or non null (if value option)
 {
 	local opt=$(arg $1);
-	opt=$(_flagDashRm $opt);
+	opt=$(_rmDashes $opt);
 	local val=${!opt};
 
 	if null "$val" ; then return 1; fi
