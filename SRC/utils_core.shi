@@ -430,7 +430,9 @@ arg.at() # <num> <...args> # BETA
 # echo-return the <num>'th argument in <...args> (i.e. $<num>).
 # error if <num> > <number of ...args>
 {
-	local pos=$(arg $1); shift;
+	local pos=$1; shift;
+	if test -z "$pos"; then echo "arg.at arg1 null error" >&2; exiterr -k; fi
+
 	local args="$@"
 	local nelements=$#
 
