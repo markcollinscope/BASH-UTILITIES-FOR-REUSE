@@ -1,0 +1,94 @@
+endof()
+{
+	echo END OF PART $1
+	echo
+}
+
+decl()
+{
+	declare -A $1;
+}
+decl themap
+endof 0
+
+vb()
+{
+	echo "$@"
+	eval "$@"
+}
+
+declare -A m
+
+m[a]=aaa
+m[b]=bbb
+m[c]=ccc
+
+echo ${m[a]}
+echo ${!m[@]}
+endof 1
+
+nth() { local n=$1; shift; echo [$n]: ${!n}; }
+nth 3 1 2 3 4
+endof 2
+
+map()
+{
+	if test $1 == --decl; then
+		declare -g -A $1;
+		return 0;
+	fi
+	
+	if test $1 == --init; then
+		local -n amap=$2;
+		shift 2;
+		local i;
+		for ((k=1; k<$#; k=k+2)); do
+			local v=$((k+1));
+			local key=${!k};
+			local value=${!v}
+
+			amap[$key]=$value;
+		done
+		return 0;
+	fi
+
+	if test $1 == --len; then
+		local -n amap=$2;
+		shift 2;
+		local len=${#amap[@]};
+		echo $len;
+		return 0;
+	fi
+
+	if test $1 == --echo; then
+		local mapname=$2;
+		local -n amap=$2;
+		shift 2;
+
+		local i;
+		local keys=${!amap[@]};
+		
+		for i in $keys; do
+			echo "key: $i, value: ${amap[$key}}"
+		done
+		return 0;
+	fi
+}
+
+declare -A tmpmap;
+vb tmpmap[a]=aa;
+vb tmpmap[b]=bb;
+echo length:
+map --len tmpmap;
+endof 3
+
+vb map --init anymp 1 111 2 222
+vb map --len anymp
+
+vb map --init themap 1 111
+vb map --len themap
+endof 4
+
+vb map --init notdeclared 1 111
+vb map --len notdeclared
+
