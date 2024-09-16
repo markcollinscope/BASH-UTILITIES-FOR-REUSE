@@ -1,36 +1,74 @@
 
-. utils.shi
+. utils_core.shi 
+. ./uo.shi
+
+USAGE=usage
+eval $(bopt --rem 'global z opt' -z:--zopt "$@");
+errifopt "$@";
 
 _testopt()
 {
 	eval $(binopt "-a|--aaa" _A false true "$@")
-	eval $(boolopt --rem 'hello world, you all ok?' -b _B "$@")
+	eval $(boolopt --rem 'hello world, you all ok?' -b:--bbb _B "$@")
 	eval $(boolopt  -c:--ccc _C "$@")
 	eval $(valopt --rem 'val o pt .....' --val val "$@")
 	errecho "$@" 
 }
 
+run()
+{
+	local CMD="$@"
+	errecho CMD: $CMD
+	$CMD
+	errecho DONE
+}
+
 _A=hello
 errecho 1A: $_A
-_testopt 1  2 3 4 5
+run _testopt 1  2 3 4 5
 errecho A: $_A
+errecho X: hello
+errecho 
 
 errecho 2A: $_A
-_testopt a b  --aaa c d e f g 
+run _testopt a b  --aaa c d e f g
 errecho A: $_A
+errecho X: true
+errecho 
 
 errecho 3A: $_A
-_testopt -a z y xxx wwwwwww --aaa vvvvvvvvvvvvvvvvvvv -aa uuuuuuuuuuuuuuuuuu t -a
+run _testopt -a z y xxx wwwwwww --aaa vvvvvvvvvvvvvvvvvvv -aa uuuuuuuuuuuuuuuuuu t -a
 errecho A: $_A
+errecho X: true
+errecho 
 
-errecho 3B: $_B
-_testopt -a z y xxx -b wwwwwww --aaa vvvvvvvvvvvvvvvvvvv -aa uuuuuuuuuuuuuuuuuu t -a
+errecho 3B1: $_B
+run _testopt -a z y xxx -b wwwwwww --aaa vvvvvvvvvvvvvvvvvvv -aa uuuuuuuuuuuuuuuuuu t -a
 errecho B: $_B
+errecho X: true
+errecho 
+
+_B=anypresetvalue
+errecho 3B2: $_B
+run _testopt -a z y xxx --bbb wwwwwww --aaa vvvvvvvvvvvvvvvvvvv -aa uuuuuuuuuuuuuuuuuu t -a
+errecho B: $_B
+errecho X: true
+errecho 
 
 errecho 3C: $_C
-_testopt 1 2  3 4 5
+run _testopt 1 2  --ccc 3 4 5
 errecho C: $_C
+errecho X: true
+errecho 
 
-errecho 4: $val;
-_testopt  1 --val 999 3
+errecho 4VAL: $val;
+run _testopt  1 --val 999 2 3 -a -b --aaa --ccc -c 4 5
 errecho val: $val
+errecho X: 999
+errecho 
+
+errecho 5VAL: $val;
+run _testopt  1 -v 999000 2 3 -a -b --aaa --ccc -c 4 5
+errecho val: $val
+errecho X: 999
+errecho 

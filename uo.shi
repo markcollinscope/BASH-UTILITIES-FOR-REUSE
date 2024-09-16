@@ -315,13 +315,21 @@ _processHelp()
 
 _svRem()
 {
-	local -n remsave;
+	errecho "arg3: <$3>"
+	errecho "arg3: <$(arg $3)>"
+	local -n remsave=$(arg $1);
 
 	local rem=$(arg $2)
+	errecho $(fnname)
+	errecho rem: $rem;
+
 	if test $rem = $__REMFLAG; then
 		remsave=$(arg $3)
+	errecho remsave: $remsave
+	errecho end $(fnname)
 		return 0;
 	fi
+
 	return 1;
 }
 
@@ -332,9 +340,19 @@ function bopt() # <name>
 # nb: --rem cannot be used - todo.
 {
 	local remstring;
+	errecho $(fnname)
+	for i in "$@"; do errecho "arg:<$i>"; done
 	_svRem remstring "$@";
 	local remused=$?;
-	if $remused; then shift 2; fi
+	if test $remused; 
+		then 
+			shift 2; 
+			errecho rem is used
+	fi
+
+	errecho $(fnname)
+	errecho remstring: $remstring
+	errecho remused: $remused
 
 	local flags=$(arg $1);
 	shift;
@@ -342,7 +360,7 @@ function bopt() # <name>
 	local varname=$(_lastFlag $flags)
 	varname=$(_rmDashes $varname);
 
-	if $remused; then
+	if test $remused; then
 		boolopt --rem "$remstring" $flags $varname "$@";
 	else
 		boolopt $flags $varname "$@";

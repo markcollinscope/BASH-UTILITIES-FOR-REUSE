@@ -458,7 +458,7 @@ arg()
 		exiterr -k; 
 	fi
 
-	echo $ARG;
+	echo $*;
 }
 
 isfd()
