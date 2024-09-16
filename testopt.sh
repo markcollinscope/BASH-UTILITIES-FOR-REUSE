@@ -1,25 +1,32 @@
 
 . utils_core.shi 
-echo INCLUDE
-errecho INCLUDE
 . ./uo.shi
 
-errecho START
 USAGE=usage
 eval $(bopt --rem 'global z opt' -z:--zopt "$@");
-echo z: $z;
-errecho zopt: $zopt;
+eval $(vopt --rem 'global v opt' -v:--vopt "$@");
 errifopt "$@";
+
+errecho "CMD LINE-Z: <$zopt>"
+if optset --zopt; then
+	errecho zopt set;
+else
+	errecho zopt Not set;
+fi
+
+if optset --vopt; then
+	errecho vopt: $vopt;
+else
+	errecho vopt - not set;
+fi
 
 _testopt()
 {
 	eval $(binopt "-a|--aaa" _A false true "$@")
 	eval $(boolopt --rem 'hello world, you all ok?' -b:--bbb _B "$@")
 	eval $(boolopt  -c:--ccc _C "$@")
-	errecho H1
 	eval $(valopt --rem 'val o pt .....' -v:--val val "$@")
-	errecho H2
-	errecho "$@" 
+	errecho "ARGS NOW: $@" 
 }
 
 run()

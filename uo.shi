@@ -22,8 +22,6 @@ END_OPTS
 __USEAUTOCOMPLETE=false;
 __AUTOCOMPLETEOPTION="--autocomplete" 
 
-errecho WIP $0
-
 optautocomplete() # <auto complete command>
 # e.g. a scripts could contain:
 # optautocomplete "_git_rmb() { _git_checkout; }; export _git_rmb" - see bash and git autocomplete for more details.
@@ -56,15 +54,12 @@ __FLAGSEPS="| % :"
 
 _splitFlag()
 {
-	errecho "SPLIT FLAG"
 	local THEFLAG=$(arg $1);
-	errecho "SPLIT FLAG: <$THEFLAG>"
 
 	local RES=$THEFLAG;
 	for i in $__FLAGSEPS; do
 		RES=$(echo $RES | sed "s/$i/ /g");
 	done
-	errecho "SPLIT FLAG RES: <$RES>"
 	echo $RES;
 }
 
@@ -165,7 +160,6 @@ _ismatch()
 	return 1;
 }
 
-errecho ABOUT BINOPT
 
 binopt() # [ --rem <documentation...> ] <flag> <bash var> <default-value> <value-if-flag-given> "$@"
 # called in the form:
@@ -179,28 +173,17 @@ binopt() # [ --rem <documentation...> ] <flag> <bash var> <default-value> <value
 {
 	eval $(_processRem "$@");
 
-	errecho binopt ALL: "<$@>"
-
 	setvar FLAG "$1"
 	setvar VAR "$2"
-
-	errecho FLAG: $FLAG
-	errecho VAR: $VAR
 
 	setvar DEFAULT_VALUE "$3"
 	setvar OTHER_VALUE "$4"
 
-	errecho DEFAULT: $DEFAULT_VALUE;
-	errecho OTHER: $OTHER_VALUE;
-	errecho COUNT: $#
 	shift 4;
-
-	errecho POST SHIFT
 
 	local ARGS=
 	local FLAGSPLIT=$(_splitFlag $FLAG);
 
-	errecho VARVAL: "<${!VAR}>"
 
 	if null ${!VAR}; then
 		EVAL="$VAR=\"$DEFAULT_VALUE\""
@@ -234,13 +217,8 @@ boolopt() # [ --rem <documentation...> ] <flag> <bash var> "$@"
 	setvar VAR "$2"
 	shift 2;
 	
-	errecho FLAG: $FLAG
-	errecho VAR: $VAR
-
 	binopt "$FLAG" "$VAR" false true "$@"
 }
-
-errecho ABOUT VALOPT
 
 valopt() # [ --rem <documentation...> ] <flag> <bash var> "$@"
 # called in the form:
@@ -283,8 +261,6 @@ Usage() # no args.
 	>&2 cat<<<$OPTIONS
 }
 
-errecho ABOUT CHKARGCOUNT
-
 __MAXARGS=9999 # arbitrary but large - upper limit
 
 chkargcount() # [-l] <lower-limit> <upper-limit> "$@"
@@ -325,15 +301,12 @@ chkargcount() # [-l] <lower-limit> <upper-limit> "$@"
 	fi
 }
 
-errecho ABOUT AUTOARG
 # do autoparsing of help flags.
 if ! $UTS_NOAUTOARGS; then 
 	UTS_HELPFLAG=${UTS_HELPFLAG:-"--hh"} # final default...
-errecho HELPFLAG: $UTS_HELPFLAG ALL:"<$@>"
     eval $(boolopt $UTS_HELPFLAG __DO_HELP "$@");
 fi
 
-errecho ABOUT PROCESS REM
 
 _processHelp() 
 # print usage if help has been requested on the command line.
@@ -345,29 +318,20 @@ _processHelp()
 	fi
 }
 
-errecho ABOUT SVREM
 
 _svRem()
 {
-	errecho "arg3: <$3>"
-	errecho "arg3: <$(arg $3)>"
 	local -n remsave=$(arg $1);
 
 	local rem=$(arg $2)
-	errecho $(fnname)
-	errecho rem: $rem;
 
 	if test $rem = $__REMFLAG; then
 		remsave=$(arg $3)
-	errecho remsave: $remsave
-	errecho end $(fnname)
 		return 0;
 	fi
 
 	return 1;
 }
-
-errecho ABOUT BOPT
 
 
 function bopt() # <name>
@@ -375,21 +339,10 @@ function bopt() # <name>
 # see also boolopt.
 # nb: --rem cannot be used - todo.
 {
-	errecho $(fnname)
-
 	local remstring;
-	for i in "$@"; do errecho "arg:<$i>"; done
 	_svRem remstring "$@";
 	local remused=$?;
-	if test $remused; 
-		then 
-			shift 2; 
-			errecho rem is used
-	fi
-
-	errecho $(fnname)
-	errecho remstring: $remstring
-	errecho remused: $remused
+	if test $remused; then shift 2; fi
 
 	local flags=$(arg $1);
 	shift;
@@ -404,20 +357,27 @@ function bopt() # <name>
 	fi
 }
 
-errecho ABOUT VOPT
-
 function vopt() # <name>
 # short form value opt -  <name> forms both the flag and the var used to show value if set.
 # see also valopt.
 # nb: --rem cannot be used - todo.
 {
-	local varname=$(arg $1);
+	local remstring;
+	_svRem remstring "$@";
+	local remused=$?;
+	if test $remused; then shift 2; fi
+
+	local flags=$(arg $1);
 	shift;
 
+	local varname=$(_lastFlag $flags);
 	varname=$(_rmDashes $varname);
-	local flag=$(_addDashes $varname);
 
-	valopt $flag $varname "$@";
+	if test $remused; then
+		valopt --rem "$remstring" $flags $varname "$@";
+	else
+		valopt $flags $varname "$@";
+	fi
 }
 
 optset() # <name>
