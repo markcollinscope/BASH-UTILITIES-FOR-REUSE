@@ -396,25 +396,27 @@ doSometimes() # [-d] do the action specified as "$@" - on 'occasion'# BETA
     return 1;
 }
 
-arg.env() # <var> [-d <default>] [-v <var-name>]# BETA
+#arg.env() # <var> [-d <default>] [-v <var-name>]# BETA
 # check if <var> is null. if so error unless
 # -d <default> set - in which case use <default>.
 # if '-v <var-name>' is used, set local script varaible <var-name> to <var> value.
-{
-    eval $(valopt -d DEFAULT_OPT "$@");
-    eval $(valopt -v ALTVAR_OPT "$@");
-
-    local VAR=$1
-	vbvar VAR
-
-    local VARNULL=false; if null ${!VAR}; then VARNULL=true; fi
-    local DEFAULTNULL=false; if null $DEFAULT_OPT; then DEFAULTNULL=true; fi
-    local ALTVARNULL=false; if null $ALTVAR_OPT; then ALTVARNULL=true; fi
-
-	if $VARNULL && $DEFAULTNULL; then errecho "$(fnname -l 2): $VAR is not set, and no default provided" ; exiterr -k; fi
-    if $VARNULL && ! $DEFAULTNULL; then eval $VAR=$DEFAULT_OPT; fi
-    if ! $ALTVARNULL; then eval $ALTVAR_OPT=${!VAR}; fi
-}
+#{
+#	white true; do
+#		if test "$1" == "-d; then
+#    eval $(valopt -d DEFAULT_OPT "$@");
+#    eval $(valopt -v ALTVAR_OPT "$@");
+#
+#    local VAR=$1
+#	vbvar VAR
+#
+#    local VARNULL=false; if null ${!VAR}; then VARNULL=true; fi
+#    local DEFAULTNULL=false; if null $DEFAULT_OPT; then DEFAULTNULL=true; fi
+#    local ALTVARNULL=false; if null $ALTVAR_OPT; then ALTVARNULL=true; fi
+#
+#	if $VARNULL && $DEFAULTNULL; then errecho "$(fnname -l 2): $VAR is not set, and no default provided" ; exiterr -k; fi
+#    if $VARNULL && ! $DEFAULTNULL; then eval $VAR=$DEFAULT_OPT; fi
+#    if ! $ALTVARNULL; then eval $ALTVAR_OPT=${!VAR}; fi
+#}
 
 getarg() # <num> <...args> # tbd deprecate.
 # echo-return the <num>'th argument in <...args> (i.e. $<num>) nb: uses shift.
@@ -443,11 +445,15 @@ arg.at() # <num> <...args> # BETA
 
 arg()
 {
-	eval $(valopt -m __MSG "$@");
+	local __MSG;
+	if test "$1" == "-m"; then
+		__MSG="$2";
+		shift 2;
+	fi
 
 	local ARG=$1
 
-	if test $ARG = 'env'; then shift; arg.env "$@"; return 0; fi
+	#if test $ARG = 'env'; then shift; arg.env "$@"; return 0; fi
 	if test $ARG = 'at'; then shift; arg.at "$@"; return 0; fi
 
 	local CALLER=$(fnname -l 1);

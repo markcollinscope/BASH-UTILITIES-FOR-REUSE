@@ -1,9 +1,14 @@
 
 . utils_core.shi 
+echo INCLUDE
+errecho INCLUDE
 . ./uo.shi
 
+errecho START
 USAGE=usage
 eval $(bopt --rem 'global z opt' -z:--zopt "$@");
+echo z: $z;
+errecho zopt: $zopt;
 errifopt "$@";
 
 _testopt()
@@ -11,7 +16,9 @@ _testopt()
 	eval $(binopt "-a|--aaa" _A false true "$@")
 	eval $(boolopt --rem 'hello world, you all ok?' -b:--bbb _B "$@")
 	eval $(boolopt  -c:--ccc _C "$@")
-	eval $(valopt --rem 'val o pt .....' --val val "$@")
+	errecho H1
+	eval $(valopt --rem 'val o pt .....' -v:--val val "$@")
+	errecho H2
 	errecho "$@" 
 }
 
@@ -62,13 +69,13 @@ errecho X: true
 errecho 
 
 errecho 4VAL: $val;
-run _testopt  1 --val 999 2 3 -a -b --aaa --ccc -c 4 5
+run _testopt  1 --val 991 2 3 -a -b --aaa --ccc -c 4 5
 errecho val: $val
-errecho X: 999
+errecho X: 991
 errecho 
 
 errecho 5VAL: $val;
 run _testopt  1 -v 999000 2 3 -a -b --aaa --ccc -c 4 5
 errecho val: $val
-errecho X: 999
+errecho X: 999000
 errecho 
