@@ -3,6 +3,7 @@
 . ./uo.shi
 
 USAGE=usage
+eval $(bopt --rem 'global y opt' -y:--yopt "$@");
 eval $(bopt --rem 'global z opt' -z:--zopt "$@");
 eval $(vopt --rem 'global v opt' -v:--vopt "$@");
 errifopt "$@";
@@ -13,6 +14,10 @@ if optset --zopt; then
 else
 	errecho zopt Not set;
 fi
+errecho
+errecho FWD: $(optboolfwd $yopt yopt $zopt zopt)
+errecho
+
 
 if optset --vopt; then
 	errecho vopt: $vopt;
@@ -25,6 +30,7 @@ _testopt()
 	eval $(binopt "-a|--aaa" _A false true "$@")
 	eval $(boolopt --rem 'hello world, you all ok?' -b:--bbb _B "$@")
 	eval $(boolopt  -c:--ccc _C "$@")
+
 	eval $(valopt --rem 'val o pt .....' -v:--val val "$@")
 	errecho "ARGS NOW: $@" 
 }

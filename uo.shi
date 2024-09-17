@@ -82,7 +82,7 @@ _lastFlag()
 	_echoFlag $LAST
 }
 
-_rmDashes() # <flag> # TBD: as var (longest).
+_asVar() # <flag> # TBD: as var (longest).
 # echo return the <flag> given without leading '-'s
 # e.g. '--optone' would become 'optone'
 {
@@ -90,12 +90,12 @@ _rmDashes() # <flag> # TBD: as var (longest).
 	echo "$flag" | sed 's/-*//g';
 }
 
-_addDashes() # <flag> (with or wihout dashes) # as flag (all combined).
+_asFlag() # <flag> (with or wihout dashes) # as flag (all combined).
 # echo return <flag> with - or -- prefix. 
 # <flag> with existing - or -- returned unchanged.
 {
 	local flag=$(arg $1);
-	flag=$(_rmDashes $flag);
+	flag=$(_asVar $flag);
 	local len=${#flag};
 
 	if test $len == "1"; then
@@ -348,7 +348,7 @@ function bopt() # <name>
 	shift;
 
 	local varname=$(_lastFlag $flags)
-	varname=$(_rmDashes $varname);
+	varname=$(_asVar $varname);
 
 	if test $remused; then
 		boolopt --rem "$remstring" $flags $varname "$@";
@@ -371,7 +371,7 @@ function vopt() # <name>
 	shift;
 
 	local varname=$(_lastFlag $flags);
-	varname=$(_rmDashes $varname);
+	varname=$(_asVar $varname);
 
 	if test $remused; then
 		valopt --rem "$remstring" $flags $varname "$@";
@@ -384,7 +384,7 @@ optset() # <name>
 # is option <name> set to true (if bool option), or non null (if value option)
 {
 	local opt=$(arg $1);
-	opt=$(_rmDashes $opt);
+	opt=$(_asVar $opt);
 	local val=${!opt};
 
 	if null "$val" ; then return 1; fi
@@ -393,6 +393,30 @@ optset() # <name>
 	return 0;
 }
 
+_iseven() # tbd. move this.
+{
+	local num=$(arg $1);
+    return $((num % 2 != 0))
+}
+
+optboolfwd() # <reffwdstring>> <fwdboolname> [<fwdboolflag>]
+{
+	local n=$#;
+
+	if ! _iseven $n; then errfnecho "uneven number of args ($n), bye..."; exiterr -k; fi
+
+	local i;
+	local res=
+	for ((i=1; i<$n; i+=2)); do
+		local bval=${!i};
+		local j=$((i+1))
+		local bflag=${!j};
+		bflag=$(_asFlag $bflag)
+
+		if $bval; then res=$(concat -s $res $bflag); fi
+	done
+	echo $res;
+}
 
 errifopt() # "$@"
 # exit with error if there are options (-*) present (or left after boolopt, valopt processing)  in "$@" 
