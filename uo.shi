@@ -424,9 +424,14 @@ optvalfwd() # <valvar> <valflag> [ ]<valvar> <valflag> ] ...
 	vflag=$(_asFlag $vflag);
 
 	local vval=$2;
+	local res=$3;
 
-	local res=
-	if ! test -z $vval; then res=$(concat -s $vflag $vval); fi
+	if ! test -z $res; then 
+		shift 2;
+		res="$@";
+	fi
+
+	if ! test -z $vval; then res=$(concat -s "$res" $vflag $vval); fi
 	echo $res;
 }
 

@@ -17,7 +17,11 @@ else
 fi
 errecho
 errecho FWD: $(optboolfwd yopt $yopt zopt $zopt)
-errecho FWD: $(optvalfwd vopt $vopt) $(optvalfwd vvopt $vvopt);
+declare -g VFWD=
+VFWD=$(optvalfwd vopt $vopt) 
+VFWD=$(optvalfwd vvopt $vvopt $VFWD);
+
+errecho FWD: $VFWD;
 errecho
 
 
