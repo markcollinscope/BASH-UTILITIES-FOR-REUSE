@@ -47,8 +47,63 @@ fi
 __USAGE_FILE=$(tmpFile);
 rm -f $__USAGE_FILE;
 
-__DOCFLAG="--rem"
+__REMFLAG="--rem"
 __OPTIONS="Options:"
+
+__FLAGSEPS="| % :"
+
+_splitFlag()
+{
+	local THEFLAG=$(arg $1);
+
+	local RES=$THEFLAG;
+	for i in $__FLAGSEPS; do
+		RES=$(echo $RES | sed "s/$i/ /g");
+	done
+	echo $RES;
+}
+
+_echoFlag()
+{
+	local FLAG=$(arg $1);
+	local SPLITFLAG=$(_splitFlag $FLAG);
+	echo $SPLITFLAG | sed 's/ /|/g'
+}
+
+_lastFlag()
+{
+	local FLAG=$(arg $1);
+	local SPLITFLAG=$(_splitFlag $FLAG);
+
+	local LAST=
+	for f in $SPLITFLAG; do
+		LAST=$f;
+	done
+	_echoFlag $LAST
+}
+
+_asVar() # <flag> # TBD: as var (longest).
+# echo return the <flag> given without leading '-'s
+# e.g. '--optone' would become 'optone'
+{
+	local flag=$(arg $1)
+	echo "$flag" | sed 's/-*//g';
+}
+
+_asFlag() # <flag> (with or wihout dashes) # as flag (all combined).
+# echo return <flag> with - or -- prefix. 
+# <flag> with existing - or -- returned unchanged.
+{
+	local flag=$(arg $1);
+	flag=$(_asVar $flag);
+	local len=${#flag};
+
+	if test $len == "1"; then
+		echo $(concat '-' $flag);
+	else
+		echo $(concat '--' $flag);
+	fi
+}
 
 _addOptRem()
 {
@@ -59,7 +114,7 @@ _addOptRem()
 		echo $__OPTIONS > $__USAGE_FILE;
 	fi
 
-	echo "$FLG $TXT" >> $__USAGE_FILE;
+	echo $(_echoFlag "$FLG") "$TXT" >> $__USAGE_FILE;
 }
 
 _processRem() 
@@ -67,7 +122,7 @@ _processRem()
 	local USEDOC="$1"
 	local RET=
 
-	if test "$USEDOC" = "$__DOCFLAG"; then
+	if test "$USEDOC" = "$__REMFLAG"; then
 		setvar TEXT "$2";
 		setvar FLAG "$3";
 		_addOptRem "$FLAG" "$TEXT";
@@ -92,12 +147,27 @@ getOptUsage() # [-n]
 	fi
 }
 
+_ismatch()
+{
+	local VAL=$(arg $1);
+	shift;
+
+	for match in "$@"; do 
+		if test $match == $VAL; then
+			return 0;
+		fi
+	done
+	return 1;
+}
+
+
 binopt() # [ --rem <documentation...> ] <flag> <bash var> <default-value> <value-if-flag-given> "$@"
 # called in the form:
-# eval $(binopt --rem <documentation...' -a AVARIABLE 99 101 "$@")
+# eval $(binopt --rem '<documentation...' -a AVARIABLE 99 101 "$@")
 # where: 	<flag> (-a) is the flag to be processed on the including script.
 #			<bash-var> (AVARIABLE) - the bash var to set set to either <default-value> or <other-value>
-#			<defaul-value> - <bash-var> is set to this value if <flag> is not present.
+#			<default-value> - <bash-var> is set to this value if <flag> is not present 
+#			  (nb. a pre-existing value will not be overriden by the <default-value> - only NULL ("") values are replaced.
 #			<value-if-flag-given> - <bash-var> is set to this value if <flag> is present
 # --rem is optional. If given <documentation...> will be added to Usage of containing script.
 {
@@ -105,15 +175,22 @@ binopt() # [ --rem <documentation...> ] <flag> <bash var> <default-value> <value
 
 	setvar FLAG "$1"
 	setvar VAR "$2"
+
 	setvar DEFAULT_VALUE "$3"
 	setvar OTHER_VALUE "$4"
+
 	shift 4;
 
 	local ARGS=
+	local FLAGSPLIT=$(_splitFlag $FLAG);
 
-	EVAL="$VAR=\"$DEFAULT_VALUE\""
+
+	if null ${!VAR}; then
+		EVAL="$VAR=\"$DEFAULT_VALUE\""
+	fi
+
 	while ! null "$1"; do
-		if test "$1" = "$FLAG"; then
+		if _ismatch "$1" $FLAGSPLIT; then
 			EVAL="$VAR=\"$OTHER_VALUE\""
 		else
 			ARGS="$ARGS \"$1\"";
@@ -121,13 +198,13 @@ binopt() # [ --rem <documentation...> ] <flag> <bash var> <default-value> <value
 		shift;
 	done
 
-
 	echo "set -- $ARGS; $EVAL"
 }
 
+
 boolopt() # [ --rem <documentation...> ] <flag> <bash var> "$@"
 # called in the form:
-# eval $(boolopt --rem <documentation...'> -a AVARIABLE "$@")
+# eval $(boolopt --rem <documentation...> -a AVARIABLE "$@")
 # where: 	<flag> (-a) is the flag to be processed on the including script.
 #			<bash-var> (AVARIABLE) - the bash var to set set to either 'true' or 'false'
 # --rem is optional. If given <documentation...> will be added to Usage of containing script.
@@ -139,13 +216,13 @@ boolopt() # [ --rem <documentation...> ] <flag> <bash var> "$@"
 	setvar FLAG "$1"
 	setvar VAR "$2"
 	shift 2;
-
+	
 	binopt "$FLAG" "$VAR" false true "$@"
 }
 
 valopt() # [ --rem <documentation...> ] <flag> <bash var> "$@"
 # called in the form:
-# eval $(valopt --rem 'documentation...' -a AVARIABLE "$@")
+# eval $(valopt --rem "documentation..." -a AVARIABLE "$@")
 # where: 	<flag> (-a) is the flag to be processed on the including script.
 #			<bash-var> (AVARIABLE) - the bash var to set set to either <default-value> or <other-value>
 # --rem is optional. If given <documentation...> will be added to Usage of containing script.
@@ -160,8 +237,10 @@ valopt() # [ --rem <documentation...> ] <flag> <bash var> "$@"
 	local ARGS=
 	local EVAL=
 
+	local FLAGSPLIT=$(_splitFlag $FLAG);
+
 	while ! test -z "$1"; do
-		if test "$1" = "$FLAG"; then
+		if _ismatch "$1" $FLAGSPLIT; then
 			EVAL="$VAR=\"$2\""
 			shift 2;
 		else
@@ -182,38 +261,38 @@ Usage() # no args.
 	>&2 cat<<<$OPTIONS
 }
 
-_MAXARGS=9999 # arbitrary but large - upper limit
+__MAXARGS=9999 # arbitrary but large - upper limit
 
 chkargcount() # [-l] <lower-limit> <upper-limit> "$@"
 # check argument count in "$@" is between <lower-limit> and <upper-limit> inclusive - if not,  error with exit.
 # [-l] - lower limit only required, no upper limit.
 {
-	LOWERONLY=false; 
+	_LOWERONLY=false; 
 	if test "$1" = "-l"; then 
-		LOWERONLY=true; 
+		_LOWERONLY=true; 
 		shift; 
 	fi
-	setvar LOWERLIMIT $1;
+	setvar _LOWERLIMIT $1;
 	shift;
 
-	if ! $LOWERONLY; then 
-		setvar UPPERLIMIT $1; 
+	if ! $_LOWERONLY; then 
+		setvar _UPPERLIMIT $1; 
 		shift; 
 	else 
-		UPPERLIMIT=$_MAXARGS; 
+		_UPPERLIMIT=$__MAXARGS; 
 	fi
-	chkarg UPPERLIMIT
+	chkarg _UPPERLIMIT
 
 	local COUNT=$(count "$@");
 
-	if (( $COUNT < $LOWERLIMIT )) || (( $COUNT > $UPPERLIMIT)); then
+	if (( $COUNT < $_LOWERLIMIT )) || (( $COUNT > $_UPPERLIMIT)); then
 		local MSG="Incorrect number of arguments - "
-		if $LOWERONLY; then 
-			MSG=$(concat "$MSG" "$COUNT arguments given - at least: $LOWERLIMIT are required")
-		elif (( $LOWERLIMIT == $UPPERLIMIT )); then
-			MSG=$(concat "$MSG" "$COUNT arguments given - expected $LOWERLIMIT");
+		if $_LOWERONLY; then 
+			MSG=$(concat "$MSG" "$COUNT arguments given - at least: $_LOWERLIMIT are required")
+		elif (( $_LOWERLIMIT == $_UPPERLIMIT )); then
+			MSG=$(concat "$MSG" "$COUNT arguments given - expected $_LOWERLIMIT");
 		else
-			MSG=$(concat "$MSG" "expected (between): $LOWERLIMIT and $UPPERLIMIT - got $COUNT");
+			MSG=$(concat "$MSG" "expected (between): $_LOWERLIMIT and $_UPPERLIMIT - got $COUNT");
 		fi
 		errecho "$MSG"
 
@@ -228,6 +307,7 @@ if ! $UTS_NOAUTOARGS; then
     eval $(boolopt $UTS_HELPFLAG __DO_HELP "$@");
 fi
 
+
 _processHelp() 
 # print usage if help has been requested on the command line.
 {
@@ -238,27 +318,19 @@ _processHelp()
 	fi
 }
 
-flagDashRm() # <flag>
-# echo return the <flag> given without leading '-'s
-# e.g. '--optone' would become 'optone'
-{
-	local flag=$(arg $1)
-	echo "$flag" | sed 's/^-*//g';
-}
 
-flagDashAdd() # <flag> (with or wihout dashes)
-# echo return <flag> with - or -- prefix. 
-# <flag> with existing - or -- returned unchanged.
+_svRem()
 {
-	local flag=$(arg $1);
-	flag=$(flagDashRm $flag);
-	local len=${#flag};
+	local -n remsave=$(arg $1);
 
-	if test $len == "1"; then
-		echo $(concat '-' $flag);
-	else
-		echo $(concat '--' $flag);
+	local rem=$(arg $2)
+
+	if test $rem = $__REMFLAG; then
+		remsave=$(arg $3)
+		return 0;
 	fi
+
+	return 1;
 }
 
 
@@ -267,13 +339,22 @@ function bopt() # <name>
 # see also boolopt.
 # nb: --rem cannot be used - todo.
 {
-	local varname=$(arg $1);
+	local remstring;
+	_svRem remstring "$@";
+	local remused=$?;
+	if test $remused; then shift 2; fi
+
+	local flags=$(arg $1);
 	shift;
 
-	varname=$(flagDashRm $varname);
-	local flag=$(flagDashAdd $varname);
+	local varname=$(_lastFlag $flags)
+	varname=$(_asVar $varname);
 
-	boolopt $flag $varname "$@";
+	if test $remused; then
+		boolopt --rem "$remstring" $flags $varname "$@";
+	else
+		boolopt $flags $varname "$@";
+	fi
 }
 
 function vopt() # <name>
@@ -281,20 +362,29 @@ function vopt() # <name>
 # see also valopt.
 # nb: --rem cannot be used - todo.
 {
-	local varname=$(arg $1);
+	local remstring;
+	_svRem remstring "$@";
+	local remused=$?;
+	if test $remused; then shift 2; fi
+
+	local flags=$(arg $1);
 	shift;
 
-	varname=$(flagDashRm $varname);
-	local flag=$(flagDashAdd $varname);
+	local varname=$(_lastFlag $flags);
+	varname=$(_asVar $varname);
 
-	valopt $flag $varname "$@";
+	if test $remused; then
+		valopt --rem "$remstring" $flags $varname "$@";
+	else
+		valopt $flags $varname "$@";
+	fi
 }
 
 optset() # <name>
 # is option <name> set to true (if bool option), or non null (if value option)
 {
 	local opt=$(arg $1);
-	opt=$(flagDashRm $opt);
+	opt=$(_asVar $opt);
 	local val=${!opt};
 
 	if null "$val" ; then return 1; fi
@@ -303,6 +393,47 @@ optset() # <name>
 	return 0;
 }
 
+_iseven() # tbd. move this.
+{
+	local num=$(arg $1);
+    return $((num % 2 != 0))
+}
+
+optboolfwd() # <bvar> <bflag> [ ]<bvar> <bflag> ] ...
+{
+	local n=$#;
+
+	if ! _iseven $n; then errfnecho "uneven number of args ($n), bye..."; exiterr -k; fi
+
+	local i;
+	local res=
+	for ((i=1; i<$n; i+=2)); do
+		local bflag=${!i};
+		local j=$((i+1))
+		local bval=${!j};
+
+		bflag=$(_asFlag $bflag)
+		if $bval; then res=$(concat -s $res $bflag); fi
+	done
+	echo $res;
+}
+
+optvalfwd() # <valvar> <valflag> [ ]<valvar> <valflag> ] ...
+{
+	local vflag=$(arg $1);
+	vflag=$(_asFlag $vflag);
+
+	local vval=$2;
+	local res=$3;
+
+	if ! test -z $res; then 
+		shift 2;
+		res="$@";
+	fi
+
+	if ! test -z $vval; then res=$(concat -s "$res" $vflag $vval); fi
+	echo $res;
+}
 
 errifopt() # "$@"
 # exit with error if there are options (-*) present (or left after boolopt, valopt processing)  in "$@" 
