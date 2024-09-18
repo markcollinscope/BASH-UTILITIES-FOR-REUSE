@@ -6,6 +6,7 @@ USAGE=usage
 eval $(bopt --rem 'global y opt' -y:--yopt "$@");
 eval $(bopt --rem 'global z opt' -z:--zopt "$@");
 eval $(vopt --rem 'global v opt' -v:--vopt "$@");
+eval $(vopt --rem 'global vv opt' --vv:--vvopt "$@");
 errifopt "$@";
 
 errecho "CMD LINE-Z: <$zopt>"
@@ -15,7 +16,8 @@ else
 	errecho zopt Not set;
 fi
 errecho
-errecho FWD: $(optboolfwd $yopt yopt $zopt zopt)
+errecho FWD: $(optboolfwd yopt $yopt zopt $zopt)
+errecho FWD: $(optvalfwd vopt $vopt) $(optvalfwd vvopt $vvopt);
 errecho
 
 

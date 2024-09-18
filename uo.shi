@@ -399,7 +399,7 @@ _iseven() # tbd. move this.
     return $((num % 2 != 0))
 }
 
-optboolfwd() # <reffwdstring>> <fwdboolname> [<fwdboolflag>]
+optboolfwd() # <bvar> <bflag> [ ]<bvar> <bflag> ] ...
 {
 	local n=$#;
 
@@ -408,13 +408,25 @@ optboolfwd() # <reffwdstring>> <fwdboolname> [<fwdboolflag>]
 	local i;
 	local res=
 	for ((i=1; i<$n; i+=2)); do
-		local bval=${!i};
+		local bflag=${!i};
 		local j=$((i+1))
-		local bflag=${!j};
-		bflag=$(_asFlag $bflag)
+		local bval=${!j};
 
+		bflag=$(_asFlag $bflag)
 		if $bval; then res=$(concat -s $res $bflag); fi
 	done
+	echo $res;
+}
+
+optvalfwd() # <valvar> <valflag> [ ]<valvar> <valflag> ] ...
+{
+	local vflag=$(arg $1);
+	vflag=$(_asFlag $vflag);
+
+	local vval=$2;
+
+	local res=
+	if ! test -z $vval; then res=$(concat -s $vflag $vval); fi
 	echo $res;
 }
 
