@@ -35,24 +35,7 @@ ee()
     echo $* >&2;
 }
 
-mapfn() # for test.
-{
-    local flag=$1
-    local -n mapfnref=$2;
-
-    echo "Debug: flag = $flag"
-    echo "Debug: mapfnref = ${mapfnref[@]}"  # Display the contents of the referenced array
-
-    if test "$flag"="--len"; then
-        ee option is len.
-        mapfnlen mapfnref
-    else
-        ee error on flag
-    fi;
-}
-
-
-mapfnfull()
+mapfn()
 {
     local flag=$1
     shift
