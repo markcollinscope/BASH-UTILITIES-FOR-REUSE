@@ -1,0 +1,75 @@
+vb()
+{
+	echo "calling: <$@>" >&2;
+
+	eval "$@";
+}
+
+if false; then
+
+dollarat()
+{
+	echo '"$@"'
+}
+
+efn()
+{
+	echo efn 	>&2
+	echo "$@" 	
+}
+
+testfn()
+{
+	local fn=$1;
+	shift;
+
+	echo $fn $(dollarat)
+}
+
+testfn2()
+{
+	local fn=$1;
+	shift;
+
+	echo $(eval $fn $(dollarat));
+}
+
+vb testfn efn 1 2 3 4 5 # not good.
+vb testfn2 efn 1 2 3 4 5 # is good.
+fi
+
+args.lessthan()
+{
+	local n=$1;
+	shift;
+
+	if test $# -gt $n ; then
+		echo "error - arg count <$#> is more than <$n>" >&2;
+		return 1;
+	else
+		echo "arg count ok <$#> is less than <$n>";
+		return 0;
+	fi
+}
+
+if false; then
+vb args.lessthan 4 1 2 3;
+vb args.lessthan 4 1 2 3 4 5 6
+fi
+
+### THIS WORKS!
+args.check()
+{
+	echo 'eval args.lessthan 4 "$@"'
+}
+
+
+myfn()
+{
+	# desired ...
+	echo myfn:
+	$(args.check);
+	echo end myfn
+}
+
+myfn 1 2 3 4 5
