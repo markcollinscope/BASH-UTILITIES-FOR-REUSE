@@ -47,27 +47,43 @@ fi
 __USAGE_FILE=$(tmpFile);
 rm -f $__USAGE_FILE;
 
-__REMFLAG="--rem"
-__OPTIONS="Options:"
-
-__FLAGSEPS="| % :"
+readonly __REMFLAG="--rem"
+readonly __OPTIONS="Options:"
 
 _splitFlag()
 {
-	local THEFLAG=$(arg $1);
+	readonly __FLAGSEPS="| :"
 
+	local THEFLAG=$(arg $1);
 	local RES=$THEFLAG;
+
 	for i in $__FLAGSEPS; do
 		RES=$(echo $RES | sed "s/$i/ /g");
 	done
+	# issue todo: if flag is '-e' - echo will assume it applies to it (e.g. echo -e ...).
 	echo $RES;
 }
 
 _echoFlag()
 {
-	local FLAG=$(arg $1);
-	local SPLITFLAG=$(_splitFlag $FLAG);
-	echo $SPLITFLAG | sed 's/ /|/g'
+	errfnecho "ECHOFLAG - START: " $*
+	
+	errfnecho START: $*
+	errfnecho ARG1: $1
+
+	errfnecho ECHO-ARG-1: $(arg $1)
+	local THEFLAG=$(arg $1);
+	errfnecho THEFLAG: $THEFLAG
+	
+	local SPLITFLAG=$(_splitFlag $THEFLAG);
+	
+	errfnecho "ECHOFLAG - SPLIT: <" $SPLITFLAG ">"
+	
+	local RES=$(echo $SPLITFLAG | sed 's/ /|/g');
+	
+	errfnecho "ECHOFLAG - RES: <" $RES ">";
+	
+	echo $RES
 }
 
 _lastFlag()
@@ -82,7 +98,7 @@ _lastFlag()
 	_echoFlag $LAST
 }
 
-_asVar() # <flag> # TBD: as var (longest).
+_asVar()
 # echo return the <flag> given without leading '-'s
 # e.g. '--optone' would become 'optone'
 {
@@ -90,7 +106,7 @@ _asVar() # <flag> # TBD: as var (longest).
 	echo "$flag" | sed 's/-*//g';
 }
 
-_asFlag() # <flag> (with or wihout dashes) # as flag (all combined).
+_asFlag() ## <flag> (with or wihout dashes) as flag (all combined).
 # echo return <flag> with - or -- prefix. 
 # <flag> with existing - or -- returned unchanged.
 {
@@ -173,8 +189,13 @@ binopt() # [ --rem <documentation...> ] <flag> <bash var> <default-value> <value
 {
 	eval $(_processRem "$@");
 
+	local FLAG VAR DEFAULT_VALUE OTHER_VALUE;
+
 	setvar FLAG "$1"
 	setvar VAR "$2"
+
+	errfnecho $FLAG 
+	errfnecho $VAR
 
 	setvar DEFAULT_VALUE "$3"
 	setvar OTHER_VALUE "$4"
@@ -211,8 +232,10 @@ boolopt() # [ --rem <documentation...> ] <flag> <bash var> "$@"
 # 
 # AVARIABLE is set to true if <flag> is present on the script call command line.
 {
+	errecho ": $*";
 	eval $(_processRem "$@");
 	
+	errecho $(fnname): $*;
 	setvar FLAG "$1"
 	setvar VAR "$2"
 	shift 2;
@@ -227,7 +250,6 @@ valopt() # [ --rem <documentation...> ] <flag> <bash var> "$@"
 #			<bash-var> (AVARIABLE) - the bash var to set set to either <default-value> or <other-value>
 # --rem is optional. If given <documentation...> will be added to Usage of containing script.
 {
-
 	eval $(_processRem "$@");
 
 	setvar FLAG "$1"
@@ -325,7 +347,7 @@ _svRem()
 
 	local rem=$(arg $2)
 
-	if test $rem = $__REMFLAG; then
+	if test "$rem" == "$__REMFLAG"; then
 		remsave=$(arg $3)
 		return 0;
 	fi

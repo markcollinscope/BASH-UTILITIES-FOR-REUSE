@@ -1,0 +1,34 @@
+[_echoFlag ()]: ECHOFLAG - START:  -e
+todo: 
+[_echoFlag ()]: START: -e
+todo: 
+[_echoFlag ()]: ARG1: -e
+todo: 
+[arg ()]: -e
+todo: 
+[arg ()]: -e
+todo: 
+[arg ()]: ABOUT TO NULL CHECK - THEARG: -e
+todo: 
+[arg ()]: ABOUT TO RETURN - THEARG: -e
+todo: 
+[_echoFlag ()]: ECHO-ARG-1:
+todo: 
+[arg ()]: -e
+todo: 
+[arg ()]: -e
+todo: 
+[arg ()]: ABOUT TO NULL CHECK - THEARG: -e
+todo: 
+[arg ()]: ABOUT TO RETURN - THEARG: -e
+todo: 
+[_echoFlag ()]: THEFLAG:
+todo: 
+[arg ()]: 
+todo: 
+[arg ()]: 
+todo: 
+[arg ()]: ABOUT TO NULL CHECK - THEARG:
+todo: 
+[arg ()]: arg undefined in <_splitFlag> 
+

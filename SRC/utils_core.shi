@@ -24,7 +24,6 @@ nostderr()
 	exec 2> /dev/null; 
 }
 
-
 null() # <...args>
 # if any args are supplied return true (0), else return false (1); uses test -z
 # e.g. < if null "$@"; then ... fi >
@@ -36,11 +35,9 @@ clone() # oldfn newfn
 {
 	local oldfn=$1, newfn=$2;
 	#	if null $oldfn || null $newfn; then  echo null value to clone; exit 1; fi
-$(declare -f $oldfn | grep -v $oldfn)
+	$(declare -f $oldfn | grep -v $oldfn)
 	echo $local;
 }
-
-clone clone newclone
 
 isdir() # <name>
 # return true (0)  if <name> is a directory, false (1) otherwise.
@@ -106,9 +103,9 @@ errfnecho() # <...args>
 errifnull() # [ -m <msg> ] "$@"
 # report error and exit if "$@" is null. nb: options removed before 'null' evaluation.
 {
-	eval $(valopt -m MESSAGE "$@");
+	eval $(valopt -m __MESSAGE "$@");
 	if null "$@"; then 
-		local MSG="($script) $MESSAGE (null value found)"
+		local MSG="($script) $__MESSAGE (null value found)"
 		errfnecho "$MSG"
 		exiterr -k;
 	fi
@@ -361,7 +358,7 @@ privar() # <var-name> [<value>] - get/set a privar - a name encoded 'private var
 		echo ${!PVARNAME}
 	else
 		evalvb $PVARNAME=$VAL
-    	fi
+    fi
 }
 
 append() # [-s] <var> <appendage> - append <appendage> to <var> - changes <var>.# BETA
@@ -426,47 +423,52 @@ getarg() # <num> <...args> # tbd deprecate.
 	echo $1;
 }
 
-arg.at() # <num> <...args> # BETA
+# arg.at() # <num> <...args> # BETA
 # echo-return the <num>'th argument in <...args> (i.e. $<num>).
 # error if <num> > <number of ...args>
-{
-	local pos=$1; shift;
-	if test -z "$pos"; then echo "arg.at arg1 null error" >&2; exiterr -k; fi
+# {
+# 	local pos=$1; shift;
+# 	if test -z "$pos"; then echo "arg.at arg1 null error" >&2; exiterr -k; fi
 
-	local args="$@"
-	local nelements=$#
+# 	local args="$@"
+# 	local nelements=$#
 
-	if test "$pos" -gt "$nelements"; then
-		errfnecho "seeking <$pos th> arg in <$args> - sadly there are only <$nelements> elements,so it is adieu, dear friend";
-		exiterr -k;
-	fi 
+# 	if test "$pos" -gt "$nelements"; then
+# 		errfnecho "seeking <$pos th> arg in <$args> - sadly there are only <$nelements> elements,so it is adieu, dear friend";
+# 		exiterr -k;
+# 	fi 
 
-	shift $((pos-1));
-	echo $1;
-}
+# 	shift $((pos-1));
+# 	echo $1;
+# }
 
 arg()
 {
-	local __MSG;
+	errfnecho $*
+
+	local MSG;
 	if test "$1" == "-m"; then
-		__MSG="$2";
+		MSG="$2";
 		shift 2;
 	fi
 
-	local ARG=$1
+	errfnecho $*
+	local THEARG=$1
 
 	#if test $ARG = 'env'; then shift; arg.env "$@"; return 0; fi
-	if test $ARG = 'at'; then shift; arg.at "$@"; return 0; fi
+	#if test "$ARG" = 'at'; then shift; arg.at "$@"; return 0; fi
 
-	local CALLER=$(fnname -l 1);
+	local CALLER=$(fnname -l 2);
 
-	if null $ARG; then 
-		if ! null $__MSG; then __MSG=$(concat " : " "$__MSG"); fi
-		errfnecho "arg undefined in <$CALLER>: $__MSG";
+	errfnecho ABOUT TO NULL CHECK - THEARG: $THEARG
+	if null "$THEARG"; then 
+		if ! null $MSG; then MSG=$(concat " : " "$MSG"); fi
+		errfnecho "arg undefined in <$CALLER> $MSG";
 		exiterr -k; 
 	fi
 
-	echo $*;
+	errfnecho ABOUT TO RETURN - THEARG: "$THEARG"
+	echo "$THEARG"
 }
 
 isfd()
