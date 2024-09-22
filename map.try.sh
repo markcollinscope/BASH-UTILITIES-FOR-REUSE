@@ -26,6 +26,7 @@ mapfn()
     local -n mapfnref=$1;
 
     echo "Debug: flag = <$flag>"
+    echo "Debug: mapfnref = ${mapfnref[@]}"  # Display the contents of the referenced array
 
     # if test "$flag" == "--len"; then ### QUOTES MAKE NO DIFFERENCE!
     # == - double equals vs = single equals on test x = y - seems to make no difference either!
@@ -58,13 +59,16 @@ echo
 
 # keys only:
 # Debug: flag = <--keys>
+# Debug: mapfnref = strife world
 # is keys
 # wife hello
 
 # len only:
 # Debug: flag = <--len>
+# Debug: mapfnref = strife world
 # is len
 # 2
+
 
 
 
