@@ -10,7 +10,6 @@ str.notnull() # ???
 
 function str.whitespace()
 {
-
 	local input=$1;
 	local output=$(sed 's/ //g'); 
 	test $input = $output; 

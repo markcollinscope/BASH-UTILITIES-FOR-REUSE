@@ -1,8 +1,40 @@
-. utils.shi
+# UTS CHECK CAT NULL UTS.ARG FNNAME STACK
 
-__UTS_FLAGS=
+uts.exit() { exit ${1:-0}; }
+uts.err() { echo $* >&2; }
+	
+uts.fnname() # [-l <call-fn-level>] (clone).
+{
+	local flag=$1;
+	local level=$2;
 
-# uts.flag()
+	local fnlevel=1;
+	if test "$flag" = "-l"; then 
+		if test -z "$level"; then uts.err "[fnname -l] NO LEVEL PROVIDED]"; uts.exit 1; fi
+		fnlevel=$level; 
+	fi
+	echo "${FUNCNAME[$fnlevel]}"
+}
+
+uts.stack() 
+{
+	local cnt=1;
+	local stack="stack trace:\n"
+
+	local fnname='-----'
+	while ! test -z "$fnname"; do
+		stack=$(uts.cat $stack '\n' $fnname);
+		cnt=$((cnt+1))
+		fnname=$(uts.fnname -l $cnt);
+	done
+	echo $stack;
+}
+
+uts.abort()
+{
+	echo 'abort called:
+	exit 1;
+}
 
 uts.cat()
 {
@@ -41,94 +73,12 @@ uts.arg() # --noerrwhite todo
 	echo $value;
 }
 
-uts.mknullfn todo
-
-uts.flag() { todo 'what was this about'; }
-
 uts.optset()
 {
 	local opt=$(uts.arg $1);
 	local value=$(uts.arg $2);
 
 	test $opt == $value;
-}
-
-uts.mknullfn()
-{
-	local fnname=$(uts.arg $1);
-
-	eval $"
-		$fnname()
-		{
-			;
-		}
-	";
-}
-
-uts.const()
-{
-	todo maybe;
-
-	local name=$(uts.arg $1);
-	local fn=$(uts.fnname);
-	echo $name;
-}
-
-uts.mknullfn uts.doc
-
-uts.doc --fn uts.fnname 
-		--note 'print the current fn name'; \
-		--valopt -l num 'print the fn name given number of levels up the call stack, e.g. num=1 - current fn...'
-
-uts.fnname() # [-l <call-fn-level>] (clone).
-{
-	local ARG_FLAG=$1;
-	local ARG_LEVEL=$2;
-	local FN_LEVEL=1;
-
-	if test "$ARG_FLAG" = "-l"; then 
-		if test -z "$ARG_LEVEL"; then errfnecho "[fnname -l NO LEVEL PROVIDED]"; exiterr -k; fi
-		FN_LEVEL=$ARG_LEVEL; 
-	fi
-	echo "${FUNCNAME[$FN_LEVEL]}"
-}
-
-uts.err()
-{
-	echo $* > &2;
-}
-
-	
-uts.doc uts.stack --synopsis 'return call stack as string.'
-uts.stack() 
-{
-	local cnt=1;
-	local stack="stack trace:\n"
-
-	while ! test -z "$fnname"; do
-		stack=$(uts.cat $stack '\n' $fnname);
-		cnt=$((cnt+1))
-		fnname=$(uts.fnname -l $cnt);
-	done
-	echo $stack;
-}
-
-uts.abort()
-{
-	local fnstring="caller: $(uts.fnname -l 2), caller-of-caller $(uts.fnname -l 3)";
-	local line="-------------------------"
-
-	uts.err
-	uts.err $line
-	uts.err "error (non recoverable) aborting execution: "
-	uts.err $fnstring;
-	uts.err $line
-	if ! 
-	uts.err $*
-	uts.err $line
-	uts.err
-
-	kill -9 0;
 }
 
 uts.rmdash()

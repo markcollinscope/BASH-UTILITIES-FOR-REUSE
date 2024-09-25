@@ -1,3 +1,5 @@
+# UTS CHECK ARG
+
 function arg.zero()
 {
 	test $# = 0;
@@ -41,61 +43,3 @@ function arg.nargs
 		exiterr -k;
 	fi
 }
-
-fn.join()
-{
-	arg.count.assert 2 2;
-	local fn=$(arg $1)
-	local subfn=$(arg $2)
-
-	local joinchar=".";
-	concat $fn $joinchar $subfn;
-}
-
-function fn.exists()
-{
-	test $(type -t $1) = function
-}
-
-
-if tst.active; then
-	function test.fn.exists()
-	{
-		local fnname='nonexistantfn'
-		fn.exists $fnnamme
-		assertSame $? 1;
-
-		local otherfn='fn.exists';
-		fn.exists $otherfn;
-		assertSame $? 0;
-	}
-fi
-
-
-function fn()  # combine fn.
-{
-	local subfn=$1;
-	local fn=$(concat 'fn' '.' $subfn);
-	
-	if fn.exists $fn; then
-		shift;
-		$fn "$@";
-	else
-		uts.abort "No such function: <fn $subfn>"; # tbd - test mode?
-	fi
-}
-
-if tst.active; then
-	fn._hello()
-	{
-		echo hello;
-	}
-
-	function fn.shtest()
-	{
-		local result=$(fn _hello);
-		assertSame $result hello
-	}
-fi
-
-
