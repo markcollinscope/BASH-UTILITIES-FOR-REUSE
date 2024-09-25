@@ -31,13 +31,6 @@ null() # <...args>
 	if test -z "$*"; then return 0; else return 1; fi 
 }; 
 
-clone() # oldfn newfn
-{
-	local oldfn=$1, newfn=$2;
-	#	if null $oldfn || null $newfn; then  echo null value to clone; exit 1; fi
-	$(declare -f $oldfn | grep -v $oldfn)
-	echo $local;
-}
 
 isdir() # <name>
 # return true (0)  if <name> is a directory, false (1) otherwise.

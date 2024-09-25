@@ -72,7 +72,7 @@ _echoFlag()
 	local RES=$(echo $SPLITFLAG | sed 's/ /|/g');
 	
 	vbecho "ECHOFLAG - RES: <" $RES ">";
-	echo $RES
+	printf '%s\n' $RES
 }
 
 _lastFlag()
