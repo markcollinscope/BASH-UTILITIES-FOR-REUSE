@@ -444,15 +444,12 @@ getarg() # <num> <...args> # tbd deprecate.
 
 arg()
 {
-	errfnecho $*
-
 	local MSG;
 	if test "$1" == "-m"; then
 		MSG="$2";
 		shift 2;
 	fi
 
-	errfnecho $*
 	local THEARG=$1
 
 	#if test $ARG = 'env'; then shift; arg.env "$@"; return 0; fi
@@ -460,14 +457,12 @@ arg()
 
 	local CALLER=$(fnname -l 2);
 
-	errfnecho ABOUT TO NULL CHECK - THEARG: $THEARG
 	if null "$THEARG"; then 
 		if ! null $MSG; then MSG=$(concat " : " "$MSG"); fi
 		errfnecho "arg undefined in <$CALLER> $MSG";
 		exiterr -k; 
 	fi
 
-	errfnecho ABOUT TO RETURN - THEARG: "$THEARG"
 	echo "$THEARG"
 }
 

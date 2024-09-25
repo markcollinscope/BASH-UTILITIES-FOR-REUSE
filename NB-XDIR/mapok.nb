@@ -1,0 +1,59 @@
+vb()
+{
+	echo "$@"
+	eval "$@"
+}
+
+map.init()
+{
+	local -n mp=$1;
+	shift;
+
+	for ((k=1; k<$#; k=k+2)); do
+		local v=$((k+1));
+		local key=${!k};
+		local value=${!v}
+
+		mp[$key]=$value;
+		echo k: $key, v: ${mp[$key]}
+	done
+}
+
+map.len()
+{
+	local -n tmap=$1;
+	local len=${#tmap[@]};
+	echo $len;
+	return 0;
+}
+
+map.echo()
+{
+	local -n am=$1;
+
+	local i;
+	local ks=("${!am[@]}");
+
+	for i in "${ks[@]}"; do
+		echo "key: $i" 
+		echo "value: ${am[$i]}"
+	done
+	return 0;
+}
+
+map()
+{
+	if test $1 == --init; then
+		shift; map.init "$@"; return 0;
+
+	elif test $1 == --len; then
+		shift; map.len "$@"; return 0;
+
+	elif test $1 == --echo; then
+		shift; map.echo "$@"; return 0;
+	fi
+}
+
+vb map --init amap K1 111 K2 222 K3 333
+vb map --len amap
+vb map --echo amap
