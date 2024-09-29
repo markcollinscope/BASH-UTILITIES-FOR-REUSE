@@ -1,0 +1,184 @@
+#!/bin/bash
+
+# THIS STUFF SEEMS TO WORK!
+
+uts.global.msg()
+{
+	echo "__MESSAGE";
+}
+
+
+uts.err.msg()
+{
+	local flag=$1;
+	local -n globmsg=$(uts.privar.msg);
+
+	if test $flag == "--set"; then
+		shift;
+		local msg="$@"
+		globmsg=$msg;
+	elif test $flag == "--clear"; then
+		globmsg="";
+	else
+		echo $globmsg;
+	fi
+	return 0;
+}
+
+uts.arg()
+{
+	echo "$@";
+}
+
+caller()
+{
+	echo afunction
+}
+
+uts.err()
+{
+	echo $* >&2;
+}
+
+uts.abort()
+{
+	exit 1;
+}
+
+#---- replace above-------
+
+uts.iseven()
+{ 
+	local fncall="$@";
+	local abort=false;
+
+	if test $1 = '--assert'; then
+		abort=true;
+		shift;
+	fi
+
+	local caller=$(caller);
+    local num=$(uts.arg $1);
+
+	local iseven=true;
+    if ((num % 2 != 0)); then
+		iseven=false;
+	fi
+
+
+	if ! $iseven && $abort; then
+		uts.err "iseven: non even value passed, goodbye <$fncall>" >&2;
+		uts.abort;
+	elif ! $iseven; then
+		return 1;
+	fi
+	return 0;
+}
+
+_map.init()
+{
+	local -n mapref=$(uts.arg $1)
+	shift
+
+	local nargs=$#;
+	uts.iseven --assert $nargs;
+
+	for ((i=1; i<$nargs; i+=2)); do
+		local key=${!i};
+		local valindex=$((i+1));
+		local value=${!valindex}
+
+		mapref[$key]=$value;
+	done
+	return 0;
+}
+
+_map.len()
+{
+    local -n m=$1;
+    echo "${#m[@]}";
+}
+
+_map.keys()
+{
+    local -n m=$1
+    echo "${!m[@]}"
+}
+
+_map.vals()
+{
+    local -n m=$1;
+    echo "${m[@]}";
+}
+
+ee()
+{
+    local debug=false;
+    if $debug; then 
+      echo $* >&2;
+    fi
+}
+
+uts.map()
+{
+    local flag=$1
+    shift
+    local -n mref=$1;
+
+    if test $flag = "--len"; then
+        _map.len mref;
+        return 0;
+    fi
+
+    if test $flag == "--keys"; then
+       _map.keys mref;
+       return 0;
+    fi
+
+    if test $flag == "--vals"; then
+       _map.vals mref;
+       return 0;
+    fi
+
+    if test $flag == "--init"; then 
+		shift;
+	fi
+
+	_map.init mref "$@";
+	return;
+}
+
+if test "$1" == '--testmap'; then
+# no indent
+
+_test()
+{
+	echo keys:
+	uts.map --keys MP;
+	echo expected: today, wife, hello
+	echo
+
+	echo vals:
+	uts.map --vals MP;
+	echo expected: world, strife, tues
+	echo
+
+	echo len:
+	uts.map --len MP
+	echo expected: 3
+	echo
+}
+
+declare -g -A MP;
+simple=false;
+if $simple; then
+	MP[hello]=world;
+	MP[wife]=strife
+	MP[today]=tues
+	_test;
+else
+	uts.map --init MP hello world wife strife today tues
+	_test;
+fi
+
+fi # end test.
