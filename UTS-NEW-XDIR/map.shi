@@ -1,0 +1,147 @@
+#!/bin/bash
+
+# THIS STUFF SEEMS TO WORK!
+
+todo test --init. including error exit abort.
+
+uts.arg()
+{
+	echo $*;
+}
+
+caller()
+{
+	echo afunction
+}
+
+uts.err()
+{
+	echo $* >&2;
+}
+
+uts.abort()
+{
+	exit 1;
+}
+
+#---- replace above-------
+
+uts.iseven()
+{ 
+	local abort=false;
+	if test $1 = '--assert'; then
+		abort=true;
+		shift;
+	fi
+
+	local caller=$(caller);
+    local num=$(uts.arg $1);
+
+	local iseven=false;
+    if ((num % 2 != 0)); then
+		iseven=true;
+	fi
+
+	if ! $iseven && $abort; then
+		uts.err 'iseven: non even value passed, goodbye' >&2;
+		uts.abort;
+	elif ! $iseven; then
+		return 1;
+	fi
+	return 0;
+}
+
+_map.init()
+{
+    local -n m=$1;
+	shift;
+
+	local nargs=$#;
+	uts.iseven --assert $nargs;
+
+	for ((i=0; i<$nargs; i+=2));
+		local key=${!i};
+		local valindex=$((i+1));
+		local value=${!valindex}
+
+		m[$key]=$value;
+	done
+	return 0;
+}
+
+_map.len()
+{
+    local -n m=$1;
+    echo "${#m[@]}";
+}
+
+_map.keys()
+{
+    local -n m=$1
+    echo "${!m[@]}"
+}
+
+_map.vals()
+{
+    local -n m=$1;
+    echo "${m[@]}";
+}
+
+ee()
+{
+    local debug=false;
+    if $debug; then 
+      echo $* >&2;
+    fi
+}
+
+uts.map()
+{
+    local flag=$1
+    shift
+    local -n _mapref=$1;
+
+    if test $flag = "--len"; then
+        _map.len _mapref;
+        return;
+    fi
+
+    if test $flag == "--keys"; then
+       _map.keys _mapref;
+       return;
+    fi
+
+    if test $flag == "--vals"; then
+       _map.vals _mapref;
+       return;
+    fi
+
+    if test $flag == "--init" || test -z "$flag"; then
+		shift;
+		_map.init "$@";
+		return;
+	fi
+
+	uts.err "error - unknow flag or directive given <$flag>";
+    uts.abort;
+}
+
+declare -g -A mp;
+mp[hello]=world;
+mp[wife]=strife
+mp[today]=tues
+
+echo keys:
+uts.map --keys mp;
+echo expected: today, wife, hello
+echo
+
+echo vals:
+uts.map --vals mp;
+echo expected: world, strife, tues
+echo
+
+echo len:
+uts.map --len mp
+echo expected: 3
+echo
