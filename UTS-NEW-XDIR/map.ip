@@ -119,6 +119,8 @@ ee()
     fi
 }
 
+usemap=false;
+if $usemap; then
 uts.map()
 {
     local flag=$1
@@ -147,6 +149,69 @@ uts.map()
 	_map.init mref "$@";
 	return;
 }
+else
+_isfn()
+{
+	test  -f $1
+}
+_rmflags()
+{
+	echo $* | sed 's/-//g';
+}
+_mkfn()
+{
+	echo "_$1.$2";
+}
+uts.delegate()
+{
+	local delegatefn=$(uts.arg $1);
+	shift
+
+	local oflag=$(utys.arg $2);
+	shift;
+
+	flag=$(_rmflags $oflag);
+	local fn=$(_mkfn $delegatefn $flag);
+
+	if _isfn $fn; then
+		$fn "$@";
+		return;
+	fi
+
+	uts.err "no function to delegate to: <$delegatefn> <$oflag>"
+	uts.abort;
+}
+
+uts.map()
+{
+    local flag=$1
+    shift
+    local -n mref=$1;
+
+    if test $flag = "--len"; then
+        _map.len mref;
+        return 0;
+    fi
+
+    if test $flag == "--keys"; then
+       _map.keys mref;
+       return 0;
+    fi
+
+    if test $flag == "--vals"; then
+       _map.vals mref;
+       return 0;
+    fi
+
+    if test $flag == "--init"; then 
+		shift;
+	fi
+
+	_map.init mref "$@";
+	return;
+}
+fi
+	
 
 if test "$1" == '--testmap'; then
 # no indent
