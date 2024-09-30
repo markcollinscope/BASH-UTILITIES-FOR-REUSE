@@ -2,6 +2,7 @@
 
 . utils.shi
 
+
 if ! test "$(pwd)" = "$(gitroot)"; then
 	errecho 'not in git root directory for utils'
 	exiterr;
