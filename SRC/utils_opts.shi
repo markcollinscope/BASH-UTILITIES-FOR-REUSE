@@ -54,7 +54,6 @@ _splitFlag()
 {
 	readonly __FLAGSEPS="| :"
 
-	vbstack
 	local THEFLAG=$(arg $1);
 	local RES=$THEFLAG;
 
