@@ -54,6 +54,7 @@ _splitFlag()
 {
 	readonly __FLAGSEPS="| :"
 
+	vbstack
 	local THEFLAG=$(arg $1);
 	local RES=$THEFLAG;
 
@@ -67,12 +68,14 @@ _splitFlag()
 _echoFlag()
 {
 	local THEFLAG=$(arg $1);
+	vbecho "ECHOFLAG - THEFLAG: <"$THEFLAG">";
+	vbstack
 	local SPLITFLAG=$(_splitFlag $THEFLAG);
 	
 	local RES=$(echo $SPLITFLAG | sed 's/ /|/g');
 	
-	vbecho "ECHOFLAG - RES: <" $RES ">";
-	printf '%s\n' $RES
+	vbecho "ECHOFLAG - RES: <"$RES">";
+	echo $RES
 }
 
 _lastFlag()
