@@ -89,7 +89,7 @@ _lastFlag()
 	_echoFlag $LAST
 }
 
-_asVar()
+optAsVar()
 # echo return the <flag> given without leading '-'s
 # e.g. '--optone' would become 'optone'
 {
@@ -97,12 +97,12 @@ _asVar()
 	echo "$flag" | sed 's/-*//g';
 }
 
-_asFlag() ## <flag> (with or wihout dashes) as flag (all combined).
+optAsFlag() ## <flag> (with or wihout dashes) as flag (all combined).
 # echo return <flag> with - or -- prefix. 
 # <flag> with existing - or -- returned unchanged.
 {
 	local flag=$(arg $1);
-	flag=$(_asVar $flag);
+	flag=$(optAsVar $flag);
 	local len=${#flag};
 
 	if test $len == "1"; then
@@ -356,7 +356,7 @@ function bopt() # <name>
 	shift;
 
 	local varname=$(_lastFlag $flags)
-	varname=$(_asVar $varname);
+	varname=$(optAsVar $varname);
 
 	if test $remused; then
 		boolopt --rem "$remstring" $flags $varname "$@";
@@ -379,7 +379,7 @@ function vopt() # <name>
 	shift;
 
 	local varname=$(_lastFlag $flags);
-	varname=$(_asVar $varname);
+	varname=$(optAsVar $varname);
 
 	if test $remused; then
 		valopt --rem "$remstring" $flags $varname "$@";
@@ -392,7 +392,7 @@ optset() # <name>
 # is option <name> set to true (if bool option), or non null (if value option)
 {
 	local opt=$(arg $1);
-	opt=$(_asVar $opt);
+	opt=$(optAsVar $opt);
 	local val=${!opt};
 
 	if null "$val" ; then return 1; fi
@@ -420,16 +420,16 @@ optboolfwd() # <bvar> <bflag> [ ]<bvar> <bflag> ] ...
 		local j=$((i+1))
 		local bval=${!j};
 
-		bflag=$(_asFlag $bflag)
+		bflag=$(optAsFlag $bflag)
 		if $bval; then res=$(concat -s $res $bflag); fi
 	done
 	echo $res;
 }
 
-optvalfwd() # <valvar> <valflag> [ ]<valvar> <valflag> ] ...
+optvalfwd() # <valflag> <valvar>  ]<valvar> <valflag> ] ...
 {
 	local vflag=$(arg $1);
-	vflag=$(_asFlag $vflag);
+	vflag=$(optAsFlag $vflag);
 
 	local vval=$2;
 	local res=$3;

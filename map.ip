@@ -1,0 +1,196 @@
+#!/bin/bash
+
+# THIS STUFF SEEMS TO WORK!
+
+caller()
+{
+	echo afunction
+}
+
+uts.arg() { echo "$@"; }
+
+uts.err()
+{
+	echo $* >&2;
+}
+
+uts.abort()
+{
+	exit 1;
+}
+
+#---- replace above-------
+
+uts.iseven()
+{ 
+	local fncall="$@";
+	local abort=false;
+
+	if test $1 = '--assert'; then
+		abort=true;
+		shift;
+	fi
+
+	local caller=$(caller);
+    local num=$(uts.arg $1);
+
+	local iseven=true;
+    if ((num % 2 != 0)); then
+		iseven=false;
+	fi
+
+
+	if ! $iseven && $abort; then
+		uts.err "iseven: non even value passed, goodbye <$fncall>" >&2;
+		uts.abort;
+	elif ! $iseven; then
+		return 1;
+	fi
+	return 0;
+}
+
+_arr.init()
+{
+	local -n arrref=$(uts.arg $1);
+	shift;
+	$arrre=("$@");
+}
+
+_arr.len()
+{
+	local -n arrref=$(uts.arg $1);
+	echo ${#arrref};
+}
+
+_arr.at()
+{
+	local -n arrref=$(uts.arg $1);
+	local arrname=$1;
+	local pos=$(uts.arg $2);
+	local val=$3;
+
+	local len=$(_arr.len arrref);
+	if ((len > pos)); then
+		uts.err "array access outside range of array <$arrname> - len: $len, position: $pos"
+		uts.abort;
+	fi
+
+	if test -z $val; then
+		echo arrref[$pos];
+		return 0;
+	else
+		arrref[$pos]=$val;
+		return 0;
+	fi
+}
+
+uts.arr()
+{
+    local flag=$(uts.arg $1);
+    local -n aref=$(uts.arg $2);
+	local val=$3;
+
+    if test $flag = "--len"; then
+        _arr.len aref;
+	elif test $flag == "--at"; then
+		_arr.at aref $val;
+    elif test $flag == "--init"; then 
+		shift;
+	fi
+
+	_arr.init mref "$@";
+	return;
+}
+
+TEST HERE!
+
+_map.init()
+{
+	local -n mapref=$(uts.arg $1)
+	shift
+
+	local nargs=$#;
+	uts.iseven --assert $nargs;
+
+	for ((i=1; i<$nargs; i+=2)); do
+		local key=${!i};
+		local valindex=$((i+1));
+		local value=${!valindex}
+
+		mapref[$key]=$value;
+	done
+	return 0;
+}
+
+_map.len()
+{
+    local -n m=$1;
+    echo "${#m[@]}";
+}
+
+_map.keys()
+{
+    local -n m=$1
+    echo "${!m[@]}"
+}
+
+_map.vals()
+{
+    local -n m=$1;
+    echo "${m[@]}";
+}
+
+uts.map()
+{
+    local flag=$1
+    shift
+    local -n mref=$1;
+
+    if test $flag = "--len"; then
+        _map.len mref;
+        return 0;
+    fi
+
+    if test $flag == "--keys"; then
+       _map.keys mref;
+       return 0;
+    fi
+
+    if test $flag == "--vals"; then
+       _map.vals mref;
+       return 0;
+    fi
+
+    if test $flag == "--init"; then 
+		shift;
+	fi
+
+	_map.init mref "$@";
+	return;
+}
+
+if test "$1" == '--testmap'; then
+
+	_test()
+	{
+		echo keys:
+		uts.map --keys MP;
+		echo expected: today, wife, hello
+		echo
+
+		echo vals:
+		uts.map --vals MP;
+		echo expected: world, strife, tues
+		echo
+
+		echo len:
+		uts.map --len MP
+		echo expected: 3
+		echo
+	}
+
+	declare -g -A MP;
+	uts.map --init MP hello world wife strife today tues
+	_test;
+
+fi # end test.
