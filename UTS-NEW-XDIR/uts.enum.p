@@ -1,6 +1,8 @@
 #/bin/bash
 
-const()
+uts.
+
+uts.const()
 {
     local name=$1;
     local val=$2;
@@ -13,23 +15,28 @@ const()
     eval $tpl;
 }
 
-enum.fruit()
+uts.flag()
 {
     local flag=$1;
 
-    if test $flag == '--valid'; then
-        local val=$2;             # must have.
-        for i in $(enum.fruit);
-            if test $i == $val; then
-                return 0;
-            fi
-        done
+    if test $flag == '--flag'; then
+        # strip - or -- from this, if needed.
+        # add - or -- onto this.
+        echo result;
+    elif test $flag == '--var'; then
+        # add - or -- to this, if needed.
+        # strip - or -- from this.
+        echo result;
     else
-        echo apples oranges pears;
+        local name=$1;
+        local useflag=${2:-name};
+        useflag=(uts.flag --flag $useflag);
+
+        uts.const $name $useflag;
     fi
 }
 
-enum()
+uts.enum()
 {
     local name=$1;
     shift;
@@ -40,7 +47,7 @@ enum()
 		{
 		    local flag=$1;
 		
-		    if test $flag == '--includes' '--holds'
+		    if test $flag == '--legal'
 		        local val=$2;             # must have.
 		        for i in $(enum.$name);
 		            if test $i == $val; then
@@ -57,12 +64,13 @@ enum()
     eval $tpl;
 }
 
-const apple;
-const orange;
-const pair;
+uts.const Apple;
+uts.const Banana;
+uts.const Kiwi;
 
-enum fruit $(apple) $(orange) $(pair)
+uts.enum Fruit $(Apple) $(Banana) $(Kiwi);
 
 avalue=$(orange);
 
-if ! enum.fruit --includse $avalue; then echo 'error in assignment'; fi
+if ! Fruit --legal; then echo 'error in assignment'; fi
+

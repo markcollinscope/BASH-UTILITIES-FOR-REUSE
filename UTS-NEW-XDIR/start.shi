@@ -1,0 +1,89 @@
+# /bin/bash
+
+_abort()
+{
+    echo "aborting - as per instruction in ${FUNCNAME[2]} or ${FUNCNAME[3]}" >&2;
+    exit 1;
+}
+
+_echo()
+{
+    echo "$@";
+}
+
+_err()
+{
+    local abort=false;
+    if test "$1" = "-x"; then
+        abort=true;
+        shift;
+    fi
+    echo "$@" >&2;
+    if $abort; then _abort; fi
+}
+
+_dbg()
+{
+    _err "${FUNCNAME[2]}: $@";
+}
+
+_clone()
+{
+    local fromfn=$1;
+    local tofn=$2;
+
+    if test -z "$fromfn" || test -z "$tofn" || ! test $(type -t $fromfn) = "function"; then
+        _err -x "${FUNCNAME[1]: argument passing ($1, $2) or no such function error - bye!";
+    fi
+    
+    local newbody=$(declare -f $fromfn | grep -v $fromfn);
+    
+    local newfntpl=$"
+        $tofn()
+        $newbody;
+    ";
+
+    eval $newfntpl;
+}
+
+_arg()
+{
+    if test -z "$1"; then
+        _abort; 
+    fi
+}
+
+# (Core)
+# null
+# errecho (fnecho ...)
+# errifnull
+# callFnIfExists
+# exiterr -k
+# exitok
+# fnname
+# no
+# ne
+# getarg
+# isNum
+
+
+
+# (FD):
+# tmpFile
+
+
+# evalerr
+# isTerminalOutput
+# setcol
+
+# append (?)
+
+# Other:
+# io.no
+# io.ne
+# io.none
+
+# win.clear
+# win.curpos
+
+
