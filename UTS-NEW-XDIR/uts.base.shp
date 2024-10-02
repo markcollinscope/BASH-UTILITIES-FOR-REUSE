@@ -1,0 +1,226 @@
+# /bin/bash
+
+# clone candidates.
+# null errecho (fnecho ...) errifnull callFnIfExists exiterr -k exitok fnname no ne getarg isNum
+# tmpFile evalerr isTerminalOutput setcol append (?) io.no io.ne io.none win.clear win.curpos
+
+# LEVEL 0 FNS
+
+## io.inline
+_stdout() { echo '>&1'; }
+_stderr() { echo '>&2';}
+###
+
+_strict()
+{
+    set -u;
+}
+_strict;
+
+_exit()
+{
+    exit $*;
+}
+
+### ERR
+_err()
+{
+    local abort=false;
+    if test "$1" = "--abort"; then
+        abort=true;
+        shift;
+    fi
+    $(_stderr) echo "$@";
+    $abort && _abort;
+}
+
+readonly __ERRFN;
+_err.fn() 
+{ 
+    if test "$1" == '-C'; then
+        __ERRFN:-'undefined fn';
+        return 0;
+    fi
+    local level=2; 
+    if ! test -z $1; then level=$1; fi; 
+    __ERRFN=${FUNCNAME[$level]; 
+}
+_err.fn -C;
+
+_abort()
+{
+    echo "<${__ERRFN}>: $*" $(_stderr);
+    _exit 1;
+}
+
+### IO basic output, etc.
+_io.echo()
+{
+    echo "$@";
+}
+
+readonly __DEBUG=true;
+_dbg()
+{
+    $__DEBUG && _err "${FUNCNAME[2]}: $@";
+}
+
+_fn.mk.clone()
+{
+    local fromfn=$1;
+    local tofn=$2;
+
+    if test -z "$fromfn" || test -z "$tofn" || ! test $(type -t $fromfn) = "function"; then
+        _err --abort "${FUNCNAME[1]: argument passing (1: <$1>, 2: <$2>) or no such function error';
+    fi
+    
+    local newbody=$(declare -f $fromfn | grep -v $fromfn);
+    
+    local tpl=$"
+        $tofn()
+        $newbody;
+    ";
+
+    eval $tpl
+}
+
+### ERR CHECKING AS ass (ASSERT). ALSO POTENTIAL FOR 'CONSTANT ERR MSGS - LATER INTERNATIONALISATION...
+__ass.err.nws() { echo 'error - whitespace not allowed in args/params'; }
+__ass.nws()
+{
+    local readonly whitespace=' ';
+    for i in "$@"; do
+        local rmwhite=$(echo $i | sed "s/whitespace//g");
+        if ! test "$i" = "$rmwhite"; then _abort $(__ass.err.nws); fi
+    done
+}
+
+_fn.mk.null() 
+{ 
+    $(ass.nws);
+    local fn=$(_fn.arg $1);
+
+    eval "
+        $fn() { : ; }
+    "
+}
+
+_fn.null NB.FOR.INLINE
+
+NB.FOR.INLINE
+_ass.nws()
+{
+    echo eval "
+        _err.fn 2 ; 
+        \$(_ass.nws) \"$@\" ; 
+        _err.fn -C ;
+    ";
+}
+
+NB.FOR.INLINE
+_fn.args.forall()
+{
+    $(_ass.nws);
+
+    local fn=(_fn.arg $1);
+    _echo "eval $fn $@";
+}
+
+_fn.arg()
+{   
+    $(_ass.nws);
+
+    local arg="$1";
+    _errf
+    test -z $arg && _abort;
+}
+
+_str.match()
+{
+    $(_ass.nws);
+
+    local v1=$(_fn.arg $1);
+    local v2=$(_fn.arg $2);
+    test $v1 = $v2;
+}
+
+_sed.subst()
+{
+    $(_ass.nws);
+
+    local sedexpr=$(_fn.arg $1);
+    local in=$(_fn.arg $2);
+    echo $in | sed "$sedexpr";
+}
+
+_str.subst()
+{
+    local str=$(_fn.arg $1);
+    local exp=$(_fn.arg $2);
+
+    local sedstr=$(_sed.subst $exp $str);
+    echo $sedstr;
+}
+
+_str.len()
+{
+    $(_ass.nws);
+
+    local in=$(_fn.arg $1);
+    echo ${#in};
+}
+
+_str.cat()
+{
+    $(_ass.nws);
+
+    local res;
+    for i in "$@"; do res="$res ' ' $I"; done;
+    echo $res;
+}
+
+_flag.prefix()
+{
+    $(_ass.nws);
+
+    local in=$(_fn.arg $1);
+    if test $(_str.len $in) = '1'; then 
+        echo '-'
+    else
+        echo '--';
+    fi
+}
+
+_flag()
+{
+    $(_ass.nws);
+
+    local flag=$(_fn.arg $1);
+    local in=$(_fn.arg $2);
+    local rmdash=$(_str.subst $in 's/^-*//g');
+
+    case "$flag" in
+
+        --prefix)
+            _flag.prefix $in;
+            return;
+        ;;
+
+        --is)
+            ! test $rmdash = $in;
+            return;
+
+        ;;
+
+        --rmdash)
+            echo $rmdash;
+            return;
+        ;;
+
+        --withdash)
+            echo $in$(_flag --prefix $in);
+            return;
+        ;;
+
+    esac;
+}
