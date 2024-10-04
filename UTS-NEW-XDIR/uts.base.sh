@@ -73,7 +73,42 @@ _fn.caller()
     _fn.name 3;
 }
 
-_fn.ws()
+declare -g __ARGS_ERRFN="";
+_args.errfn()
+{
+    local flag=$1;
+    
+    if test $flag == '--isnull'; then 
+        test -z $__ARGS_ERRFN;
+        return;
+
+    elif test $flag == '--clear'; then
+        __ARGS_ERRFN=$2;
+        return 0;
+        
+    elif test $flag == '--set' && _args.errfn --isnull; then
+        __ARGS_ERRFN=$2;
+        return 0;
+    
+    elif test $flag == '--set' && _args.errfn --isnull; then
+        # do nothing.
+        return 0;
+
+    elif test $flag == '--get' && ! _args.errfn --isnull; then
+        _io.echo $__ARGS_ERRFN;
+        return 0;
+
+    elif test $flag == '--get' && _args.errfn --isnull; then
+        _io.err "$(fn.name): cannot get args when fn is not set";
+        _sys.abort;
+    fi
+    
+    _io.err "$(fn.name): unknown flag <$flag>";
+    _sys.abort;
+}
+###
+
+_args.ws()
 {
     for i in "$@"; do 
         local in="$i";
@@ -89,7 +124,6 @@ _fn.ws()
 
 _fn.arg()
 {   
-    _io.err $(_fn.caller);
     local arg="$1";
     _fn.ws $arg
     
