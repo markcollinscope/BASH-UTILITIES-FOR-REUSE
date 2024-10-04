@@ -6,104 +6,128 @@
 
 # LEVEL 0 FNS
 
-## io.inline
-_stdout() { echo '>&1'; }
-_stderr() { echo '>&2';}
-###
+# purely for uts debugging.
+readonly __DEBUG=true;
+_dbg()
+{
+    $__DEBUG && _io.err "${FUNCNAME[2]}: $@";
+}
 
-_strict()
+## basic sys stuff.
+_sys.strict()
 {
     set -u;
 }
-_strict;
+_sys.strict;
 
-_exit()
+_sys.exit()
 {
-    exit $*;
+    local exitval=${1:-0};
+    exit $exitval;
 }
 
-### ERR
-_err()
+_sys.abort()
+{
+    echo "aborting...." >&2;
+    _sys.exit 1;
+}
+
+### IO basics
+_io.echo()
+{
+    echo "$@";
+}
+
+_io.stdout() { echo '>&1'; }
+_io.stderr() { echo '>&2';}
+
+_io.err()
 {
     local abort=false;
     if test "$1" = "--abort"; then
         abort=true;
         shift;
     fi
-    $(_stderr) echo "$@";
-    $abort && _abort;
+    $(_io.stderr) echo "$@";
+    $abort && _sys.abort;
 }
 
-readonly __ERRFN;
-_err.fn() 
-{ 
-    if test "$1" == '-C'; then
-        __ERRFN:-'undefined fn';
-        return 0;
+
+### FN MANIPULATION/CREATION.
+_fn.name()
+{
+    local level=${1:-1};
+    level=$((level + 1)));
+
+    _io.echo "${FUNCNAME[$level]}";
+}
+
+_fn.caller()
+{
+    _fn.name 3;
+}
+
+_fn.ws()
+{
+    for i in "$@"; do 
+        local in="$i";
+        local out=$(_io.echo "$in" | sed 's/ //');
+        if ! test "$in" == "$out"; then
+            local caller=$(fn.name 2)
+            _io.err "$caller: whitespace in args - no allowed";
+            _sys.abort;
+        fi 
+    done
+    return 0;
+}
+
+_fn.arg()
+{   
+    if test -z "$1"; then
+        local caller=$(_fn.name 2);
+        _io.err "$caller: empty arg value";
+        _sys.abort;
     fi
-    local level=2; 
-    if ! test -z $1; then level=$1; fi; 
-    __ERRFN=${FUNCNAME[$level]; 
-}
-_err.fn -C;
 
-_abort()
-{
-    echo "<${__ERRFN}>: $*" $(_stderr);
-    _exit 1;
+    _fn.ws "$1";
+
+    _io.echo $arg;
 }
 
-### IO basic output, etc.
-_io.echo()
+_fn.clone()
 {
-    echo "$@";
-}
+    local fromfn=$(_fn.arg $1);
+    local tofn=$(_fn.arg $2);
 
-readonly __DEBUG=true;
-_dbg()
-{
-    $__DEBUG && _err "${FUNCNAME[2]}: $@";
-}
-
-_fn.mk.clone()
-{
-    local fromfn=$1;
-    local tofn=$2;
-
-    if test -z "$fromfn" || test -z "$tofn" || ! test $(type -t $fromfn) = "function"; then
-        _err --abort "${FUNCNAME[1]: argument passing (1: <$1>, 2: <$2>) or no such function error';
+    if ! test $(type -t $fromfn) = "function"; then
+        _io.err.fn $(fn.name);
+        _io.err "attemps to clone non function <$fromfn>";
+        _sys.abort;
     fi
     
-    local newbody=$(declare -f $fromfn | grep -v $fromfn);
+    local clonebody=$(declare -f $fromfn | grep -v $fromfn);
     
-    local tpl=$"
+    local tpl="
         $tofn()
-        $newbody;
+        $clonebody
     ";
 
     eval $tpl
 }
 
-### ERR CHECKING AS ass (ASSERT). ALSO POTENTIAL FOR 'CONSTANT ERR MSGS - LATER INTERNATIONALISATION...
+### ASSERTIONs for error checking.
+# std msg.
+
 __ass.err.nws() { echo 'error - whitespace not allowed in args/params'; }
-__ass.nws()
+_ass.nws()
 {
     local readonly whitespace=' ';
     for i in "$@"; do
         local rmwhite=$(echo $i | sed "s/whitespace//g");
-        if ! test "$i" = "$rmwhite"; then _abort $(__ass.err.nws); fi
+        if ! test "$i" = "$rmwhite"; then _sys.abort $(__ass.err.nws); fi
     done
 }
 
-_fn.mk.null() 
-{ 
-    $(ass.nws);
-    local fn=$(_fn.arg $1);
-
-    eval "
-        $fn() { : ; }
-    "
-}
 
 _fn.null NB.FOR.INLINE
 
@@ -111,11 +135,13 @@ NB.FOR.INLINE
 _ass.nws()
 {
     echo eval "
-        _err.fn 2 ; 
+        _io.err.fn 2 ; 
         \$(_ass.nws) \"$@\" ; 
-        _err.fn -C ;
+        _io.err.fn -C ;
     ";
 }
+
+exit;
 
 NB.FOR.INLINE
 _fn.args.forall()
@@ -124,15 +150,6 @@ _fn.args.forall()
 
     local fn=(_fn.arg $1);
     _echo "eval $fn $@";
-}
-
-_fn.arg()
-{   
-    $(_ass.nws);
-
-    local arg="$1";
-    _errf
-    test -z $arg && _abort;
 }
 
 _str.match()
