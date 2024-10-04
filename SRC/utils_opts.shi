@@ -426,7 +426,7 @@ optboolfwd() # <bvar> <bflag> [ ]<bvar> <bflag> ] ...
 	echo $res;
 }
 
-optvalfwd() # <valflag> <valvar>  ]<valvar> <valflag> ] ...
+optvalfwd() # <valflag> <valvar> 
 {
 	local vflag=$(arg $1);
 	vflag=$(optAsFlag $vflag);
