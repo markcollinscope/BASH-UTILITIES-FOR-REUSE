@@ -52,7 +52,6 @@ _io.err()
     $abort && _sys.abort;
 }
 
-
 ### FN MANIPULATION/CREATION.
 _fn.name()
 {
@@ -90,7 +89,6 @@ _fn.arg()
     fi
 
     _fn.ws "$1";
-
     _io.echo $arg;
 }
 
@@ -117,7 +115,6 @@ _fn.clone()
 
 ### ASSERTIONs for error checking.
 # std msg.
-
 __ass.err.nws() { echo 'error - whitespace not allowed in args/params'; }
 _ass.nws()
 {
