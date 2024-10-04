@@ -10,7 +10,7 @@
 readonly __DEBUG=true;
 _dbg()
 {
-    $__DEBUG && _io.err "${FUNCNAME[2]}: $@";
+    $__DEBUG && _io.err "${FUNCNAME[2]},${FUNCNAME[1]}: $@";
 }
 
 ## basic sys stuff.
@@ -23,13 +23,15 @@ _sys.strict;
 _sys.exit()
 {
     local exitval=${1:-0};
+    _dbg exiting
     exit $exitval;
+    _dbg still here.
 }
 
 _sys.abort()
 {
     echo "aborting...." >&2;
-    _sys.exit 1;
+    kill 0;
 }
 
 ### IO basics
@@ -38,9 +40,6 @@ _io.echo()
     echo "$@";
 }
 
-_io.stdout() { echo '>&1'; }
-_io.stderr() { echo '>&2';}
-
 _io.err()
 {
     local abort=false;
@@ -48,17 +47,25 @@ _io.err()
         abort=true;
         shift;
     fi
-    $(_io.stderr) echo "$@";
+    echo "$@" >&2;
     $abort && _sys.abort;
 }
 
 ### FN MANIPULATION/CREATION.
 _fn.name()
 {
-    local level=${1:-1};
-    level=$((level + 1)));
-
+    local level=${1:-'0'};
     _io.echo "${FUNCNAME[$level]}";
+}
+
+_fn.stack()
+{
+    local nlevels=${1:-6}
+    local res="";
+    for ((i=2;i<nlevels;i++)) do
+        res=$res' '$(_fn.name i);
+    done
+    _io.echo $res;
 }
 
 _fn.caller()
@@ -72,8 +79,8 @@ _fn.ws()
         local in="$i";
         local out=$(_io.echo "$in" | sed 's/ //');
         if ! test "$in" == "$out"; then
-            local caller=$(fn.name 2)
-            _io.err "$caller: whitespace in args - no allowed";
+            _io.err "Call Stack: "$(_fn.stack);
+            _io.err "Error there is whitespace in a function call arg (value: <$in>) - this is explicitly not permitted.";
             _sys.abort;
         fi 
     done
@@ -82,14 +89,18 @@ _fn.ws()
 
 _fn.arg()
 {   
-    if test -z "$1"; then
-        local caller=$(_fn.name 2);
+    _io.err $(_fn.caller);
+    local arg="$1";
+    _fn.ws $arg
+    
+    if test -z "$arg"; then
+        local caller=$(_fn.caller);
         _io.err "$caller: empty arg value";
         _sys.abort;
     fi
 
     _fn.ws "$1";
-    _io.echo $arg;
+    _io.echo $1;
 }
 
 _fn.clone()
@@ -113,128 +124,14 @@ _fn.clone()
     eval $tpl
 }
 
-### ASSERTIONs for error checking.
-# std msg.
-__ass.err.nws() { echo 'error - whitespace not allowed in args/params'; }
-_ass.nws()
+# null arg, ws arg, abort msgs, ...
+
+egfn()
 {
-    local readonly whitespace=' ';
-    for i in "$@"; do
-        local rmwhite=$(echo $i | sed "s/whitespace//g");
-        if ! test "$i" = "$rmwhite"; then _sys.abort $(__ass.err.nws); fi
-    done
+    local a1=$(_fn.arg "$1");
+    local a2=$(_fn.arg ${2-'default'});
+
+    _io.echo $a1 $a2
 }
 
-
-_fn.null NB.FOR.INLINE
-
-NB.FOR.INLINE
-_ass.nws()
-{
-    echo eval "
-        _io.err.fn 2 ; 
-        \$(_ass.nws) \"$@\" ; 
-        _io.err.fn -C ;
-    ";
-}
-
-exit;
-
-NB.FOR.INLINE
-_fn.args.forall()
-{
-    $(_ass.nws);
-
-    local fn=(_fn.arg $1);
-    _echo "eval $fn $@";
-}
-
-_str.match()
-{
-    $(_ass.nws);
-
-    local v1=$(_fn.arg $1);
-    local v2=$(_fn.arg $2);
-    test $v1 = $v2;
-}
-
-_sed.subst()
-{
-    $(_ass.nws);
-
-    local sedexpr=$(_fn.arg $1);
-    local in=$(_fn.arg $2);
-    echo $in | sed "$sedexpr";
-}
-
-_str.subst()
-{
-    local str=$(_fn.arg $1);
-    local exp=$(_fn.arg $2);
-
-    local sedstr=$(_sed.subst $exp $str);
-    echo $sedstr;
-}
-
-_str.len()
-{
-    $(_ass.nws);
-
-    local in=$(_fn.arg $1);
-    echo ${#in};
-}
-
-_str.cat()
-{
-    $(_ass.nws);
-
-    local res;
-    for i in "$@"; do res="$res ' ' $I"; done;
-    echo $res;
-}
-
-_flag.prefix()
-{
-    $(_ass.nws);
-
-    local in=$(_fn.arg $1);
-    if test $(_str.len $in) = '1'; then 
-        echo '-'
-    else
-        echo '--';
-    fi
-}
-
-_flag()
-{
-    $(_ass.nws);
-
-    local flag=$(_fn.arg $1);
-    local in=$(_fn.arg $2);
-    local rmdash=$(_str.subst $in 's/^-*//g');
-
-    case "$flag" in
-
-        --prefix)
-            _flag.prefix $in;
-            return;
-        ;;
-
-        --is)
-            ! test $rmdash = $in;
-            return;
-
-        ;;
-
-        --rmdash)
-            echo $rmdash;
-            return;
-        ;;
-
-        --withdash)
-            echo $in$(_flag --prefix $in);
-            return;
-        ;;
-
-    esac;
-}
+egfn 'ws ws' hithere;
