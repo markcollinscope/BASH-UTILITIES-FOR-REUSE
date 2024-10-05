@@ -10,7 +10,7 @@
 readonly __DEBUG=true;
 _dbg()
 {
-    $__DEBUG && _io.err "${FUNCNAME[2]},${FUNCNAME[1]}: $@";
+    $__DEBUG && _io.err "<${FUNCNAME[2]}>,<${FUNCNAME[1]}>: $@";
 }
 
 ## basic sys stuff.
@@ -43,7 +43,9 @@ _io.echo()
 _io.err()
 {
     local abort=false;
-    if test "$1" = "--abort"; then
+    local flag=${1:-""};
+
+    if test "$flag" = "--abort"; then
         abort=true;
         shift;
     fi
@@ -54,7 +56,7 @@ _io.err()
 ### FN MANIPULATION/CREATION.
 _fn.name()
 {
-    local level=${1:-'0'};
+    local level=${1:-1};
     _io.echo "${FUNCNAME[$level]}";
 }
 
@@ -85,7 +87,7 @@ _args.errfn()
     elif test $flag == '--clear'; then
         __ARGS_ERRFN=$2;
         return 0;
-        
+
     elif test $flag == '--set' && _args.errfn --isnull; then
         __ARGS_ERRFN=$2;
         return 0;
@@ -99,11 +101,11 @@ _args.errfn()
         return 0;
 
     elif test $flag == '--get' && _args.errfn --isnull; then
-        _io.err "$(fn.name): cannot get args when fn is not set";
+        _io.err "$(_fn.name): cannot get args when fn is not set";
         _sys.abort;
     fi
     
-    _io.err "$(fn.name): unknown flag <$flag>";
+    _io.err "$(_fn.name): unknown flag <$flag>";
     _sys.abort;
 }
 ###
@@ -114,18 +116,25 @@ _args.ws()
         local in="$i";
         local out=$(_io.echo "$in" | sed 's/ //');
         if ! test "$in" == "$out"; then
+            _io.err "Error in Function: <$(_args.errfn --get)>";
+            _io.err "Illigal whitespace in a function call argument (value: <$in>)";
+            _io.err
             _io.err "Call Stack: "$(_fn.stack);
-            _io.err "Error there is whitespace in a function call arg (value: <$in>) - this is explicitly not permitted.";
+            _io.err
             _sys.abort;
         fi 
     done
     return 0;
 }
 
-_fn.arg()
+_arg()
 {   
+	_dbg here1
+    _args.errfn --set $(_fn.caller)
+	_dbg here2
+
     local arg="$1";
-    _fn.ws $arg
+    _args.ws $arg
     
     if test -z "$arg"; then
         local caller=$(_fn.caller);
@@ -133,18 +142,21 @@ _fn.arg()
         _sys.abort;
     fi
 
-    _fn.ws "$1";
+    _args.ws "$1";
     _io.echo $1;
+
+    _args.errfn --clear;
 }
 
+
+# more advance _fn stuff.
 _fn.clone()
 {
-    local fromfn=$(_fn.arg $1);
-    local tofn=$(_fn.arg $2);
+    local fromfn=$(_arg $1);
+    local tofn=$(_arg $2);
 
     if ! test $(type -t $fromfn) = "function"; then
-        _io.err.fn $(fn.name);
-        _io.err "attemps to clone non function <$fromfn>";
+        _io.err "$(_fn.name): attemps to clone non existant function <$fromfn>";
         _sys.abort;
     fi
     
@@ -159,11 +171,18 @@ _fn.clone()
 }
 
 # null arg, ws arg, abort msgs, ...
+#
+
+nb:() { :; }
+
+nb: below makes a difference. no err. with set -u, there is an error. 
+nb: but with below also fn.error.
+set +u
 
 egfn()
 {
-    local a1=$(_fn.arg "$1");
-    local a2=$(_fn.arg ${2-'default'});
+    local a1=$(_arg $1);
+    local a2=$(_arg ${2-'default'});
 
     _io.echo $a1 $a2
 }
