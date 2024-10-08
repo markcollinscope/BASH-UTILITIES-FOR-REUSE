@@ -7,14 +7,15 @@
 # LEVEL 0 FNS
 # purely for uts debugging.
 
+nb:() { : ; }
+
 if $___UTS_ECHO_INTERCEPT; then
 
 	___REALECHO=$(which echo);
 
 	_sys.echo()
 	{
-		echo -n "sys.echo" >&2;
-		echo "$@";
+		$___REALECHO "$@";
 	}
 
 	echo() 
@@ -29,7 +30,7 @@ if $___UTS_ECHO_INTERCEPT; then
 
 fi
 
-_sys.err()	  { if ! test -z "$@"; then echo $* >&2; fi return 0; }
+_sys.err()	  { if ! test -z "$@"; then echo $* >&2; fi; return 0; }
 
 _sys.abort()
 {
@@ -45,7 +46,7 @@ _sys.abort()
 
 
 _sys.ertn()	  { echo "$@"; }
-_sys.rtn()	  { echo "eval \"return $1\""; }
+_sys.rtn()	  { echo "eval return $1"; }
 
 _sys.out()	  { echo "$@"; }
 
@@ -73,16 +74,18 @@ _sys.const()
 }
 
 _sys.const ErrStackSz 5;
+echo STACK: $(_sys.ErrStackSz)
 
 _sys.stack()  
 {
-	local n={1:-$(_sys.ErrStackSz)};
+	local ss=$(_sys.ErrStackSz);
+	local n=${1:-$ss}
 
 	local res=""
 	for ((i=2; i<$n; i++)); do 
 		res="$FUNCNAME[$i] "' '"$res";
 	done; 
-	sys.ertn $res;
+	_sys.ertn $res;
 }
 
 _sys.assert.err() 
@@ -99,30 +102,30 @@ _sys.assert.err()
 
 _sys.declared()
 {
-	local var=$1;
+	local var=$1; _sys.assert $var;
+
 	_sys.none declare -p $var
 }
 
 _sys.env()
 {
-	local envvarname=$1;
-	local value=$2;
+	local envvarname=$1; _sys.assert $envvarname;
+	local value=${2:-""};
 
 	if ! _sys.declared $envvarname; then
 
 		nb: 'declare global readonly var - initialise to fn-arg(2):value.'
 		_sys.eval "readonly $envvarname=$value";
-		return 0;
+		$(_sys.rtn);
 
 	else 
 
 		nb: 'variable is declared. if not assigned a value already (i.e. in env) - initialised to fn-arg(2):value.'
 		local -n evar=$envvar;
 		evar=${$evar:-$value};
-		return 0;
+		$(_sys.rtn);
 
 	fi
-	return 0;
 }
 
 _sys.env UTS_NO_DEBUG false;
@@ -135,18 +138,20 @@ $(_sys.Debug) && dbg()
 
 ## basic sys stuff.
 
-_sys.assert.unreachable.code()
+_sys.assert.unreachable()
 {
 	local fn=${FUNCNAME[1]};
 	local fncaller=${FUNCNAME[2]};
+
     _sys.abort "$fn (called by $fncaller): assertion violation due to executing 'unreachable code'";
 }
 
 
 _sys.sed()
 {
-	local pattern=$1;
+	local pattern=$1; _sys.assert $pattern;
 	shift;
+
 	local values="$@";
 
 	$(echo $values | sed "s/$pattern//g");
@@ -154,11 +159,11 @@ _sys.sed()
 
 _sys.match()
 {
-	local pattern=$1;
-	local value=$2;
-	local sedvalue=$(_sys.sed $pattern $value);
+	local pattern=$1; _sys.assert $pattern;
+	local value=$2; _sys.assert $value;
 
-	! test $value = $sedvalue;
+	local sedvalue=$(_sys.sed $pattern $value);
+	! test "$value" = "$sedvalue";
 }
 
 _sys.assert.nows()
@@ -192,28 +197,36 @@ _sys.assert.mutually.exclusive()
 
 _sys.strict() # [--on|--off]
 {
-	local setopt='-u'; nb: strict on.
 	local flag=${1:-'--on'};
 
 	if test --on = "$flag"; then
-
-
-    set -u;
+		set -u;
+		return;
+	elif test --off = "$flag"; then
+		set +u;
+		return;
+	elif test $# = '0'; then
+		set -u;
+		return;
+	fi
+	_sys.abort "${FUNCNAME[1]}: unknown argument error <$@>";
 }
-_sys.strict;
+_sys.strict --on;
+_sys.strict --off
+_sys.strict --on;
+_sys.strict
 
 _sys.exit()
 {
     local exitval=${1:-0};
-    dbg exiting
     exit $exitval;
 
-	_sys.assert.unreachable.code;
+	_sys.assert.unreachable;
 }
 
 ### IO basics
-_io.out() { echo "$@"; }
-_io.echo() { _io.out $*; }
+_sys.out() { echo "$@"; }
+_io.echo() { _sys.out $*; }
 
 _io.err() # [--abort]
 {
@@ -234,7 +247,7 @@ _fn.name()
     local level=${1:-1};
 
 	level=$((level+1));
-    _io.out "${FUNCNAME[$level]}";
+    _sys.out "${FUNCNAME[$level]}";
 }
 
 _io.stack()
@@ -256,32 +269,35 @@ _fn.caller()
     _fn.name 2;
 }
 
-declare -g __ARGS_ERRFN="";
-_args.errfn()
+if false; then
+declare -g __sys.argS_ERRFN="";
+_sys.args.errfn()
 {
     local flag=$1;
     
     if test $flag == '--isnull'; then 
-        test -z $__ARGS_ERRFN;
+        test -z $__sys.argS_ERRFN;
+
+
         return;
 
     elif test $flag == '--clear'; then
-        __ARGS_ERRFN=$2;
+        __sys.argS_ERRFN=$2;
         return 0;
 
-    elif test $flag == '--set' && _args.errfn --isnull; then
-        __ARGS_ERRFN=$2;
+    elif test $flag == '--set' && _sys.args.errfn --isnull; then
+        __sys.argS_ERRFN=$2;
         return 0;
     
-    elif test $flag == '--set' && _args.errfn --isnull; then
+    elif test $flag == '--set' && _sys.args.errfn --isnull; then
         # do nothing.
         return 0;
 
-    elif test $flag == '--get' && ! _args.errfn --isnull; then
-        _io.out $__ARGS_ERRFN;
+    elif test $flag == '--get' && ! _sys.args.errfn --isnull; then
+        _sys.out $__sys.argS_ERRFN;
         return 0;
 
-    elif test $flag == '--get' && _args.errfn --isnull; then
+    elif test $flag == '--get' && _sys.args.errfn --isnull; then
         _io.err "$(_fn.name): cannot get args when fn is not set";
         _sys.abort;
     fi
@@ -289,6 +305,7 @@ _args.errfn()
     _io.err "$(_fn.name): unknown flag <$flag>";
     _sys.abort;
 }
+fi
 ###
 
 ## std sed filters.
@@ -297,32 +314,11 @@ _sed.rmws()
 	sed 's/ //g';
 }
 
-_args.ws()
-{
-    for i in "$@"; do 
-        local in="$i";
-		local out=$(_io.out "$in" | _sed.rmws);
-        if ! test "$in" == "$out"; then
-			local msg="
-				Error in Function: <$(_args.errfn --get)>
-				Illigal whitespace in a function call argument (value: <$in>)";
-            _io.err
-            _io.err "Call Stack: "$(_fn.stack);
-            _io.err
-            _sys.abort;
-        fi 
-    done
-    return 0;
-}
-
-_arg()
+_sys.arg()
 {   
-	dbg here1
-    _args.errfn --set $(_fn.caller)
-	dbg here2
+	_sys.assert.nows "$@";
 
     local arg="$1";
-    _args.ws $arg
     
     if test -z "$arg"; then
         local caller=$(_fn.caller);
@@ -330,18 +326,18 @@ _arg()
         _sys.abort;
     fi
 
-    _args.ws "$1";
-    _io.out $1;
+    _sys.args.ws "$1";
+    _sys.out $1;
 
-    _args.errfn --clear;
+    _sys.args.errfn --clear;
 }
 
 
 # more advance _fn stuff.
 _fn.clone()
 {
-    local fromfn=$(_arg $1);
-    local tofn=$(_arg $2);
+    local fromfn=$(_sys.arg $1);
+    local tofn=$(_sys.arg $2);
 
     if ! test $(type -t $fromfn) = "function"; then
         _io.err "$(_fn.name): attemps to clone non existant function <$fromfn>";
@@ -370,10 +366,10 @@ set +u
 
 egfn()
 {
-    local a1=$(_arg $1);
-    local a2=$(_arg ${2-'default'});
+    local a1=$(_sys.arg $1);
+    local a2=$(_sys.arg ${2-'default'});
 
-    _io.out $a1 $a2
+    _sys.out $a1 $a2
 }
 
 egfn 'ws ws' hithere;
