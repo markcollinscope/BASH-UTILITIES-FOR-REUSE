@@ -8,12 +8,24 @@
 
 # purely for uts debugging.
 readonly __DEBUG=true;
-_dbg()
+dbg()
 {
     $__DEBUG && _io.err "<${FUNCNAME[2]}>,<${FUNCNAME[1]}>: $@";
 }
 
 ## basic sys stuff.
+_sys.abort()
+{
+    echo "system aborting (likely programming error) - bye!" >&2;
+    kill 0;
+}
+
+_sys.unreachable()
+{
+    echo "system - unreachable code error - it was reached!" >&2;
+	_sys.abort;
+}
+
 _sys.strict()
 {
     set -u;
@@ -23,24 +35,17 @@ _sys.strict;
 _sys.exit()
 {
     local exitval=${1:-0};
-    _dbg exiting
+    dbg exiting
     exit $exitval;
-    _dbg still here.
-}
 
-_sys.abort()
-{
-    echo "aborting...." >&2;
-    kill 0;
+	_sys.unreachable;
 }
 
 ### IO basics
-_io.echo()
-{
-    echo "$@";
-}
+_io.out() { echo "$@"; }
+_io.echo() { _io.out $*; }
 
-_io.err()
+_io.err() # [--abort]
 {
     local abort=false;
     local flag=${1:-""};
@@ -50,29 +55,35 @@ _io.err()
         shift;
     fi
     echo "$@" >&2;
-    $abort && _sys.abort;
+    $abort && _io.stack && _sys.abort;
 }
 
 ### FN MANIPULATION/CREATION.
 _fn.name()
 {
     local level=${1:-1};
-    _io.echo "${FUNCNAME[$level]}";
+
+	level=$((level+1));
+    _io.out "${FUNCNAME[$level]}";
 }
 
-_fn.stack()
+_io.stack()
 {
-    local nlevels=${1:-6}
+    local nlevels=${1:-10}
     local res="";
     for ((i=2;i<nlevels;i++)) do
-        res=$res' '$(_fn.name i);
+		local fnname=$(_fn.name i);
+		if ! test -z "$fnname"; then
+			res=$res' '$fnname;
+		fi
     done
-    _io.echo $res;
+    _io.err $res;
+	return 0;
 }
 
 _fn.caller()
 {
-    _fn.name 3;
+    _fn.name 2;
 }
 
 declare -g __ARGS_ERRFN="";
@@ -97,7 +108,7 @@ _args.errfn()
         return 0;
 
     elif test $flag == '--get' && ! _args.errfn --isnull; then
-        _io.echo $__ARGS_ERRFN;
+        _io.out $__ARGS_ERRFN;
         return 0;
 
     elif test $flag == '--get' && _args.errfn --isnull; then
@@ -110,14 +121,21 @@ _args.errfn()
 }
 ###
 
+## std sed filters.
+_sed.rmws()
+{
+	sed 's/ //g';
+}
+
 _args.ws()
 {
     for i in "$@"; do 
         local in="$i";
-        local out=$(_io.echo "$in" | sed 's/ //');
+		local out=$(_io.out "$in" | _sed.rmws);
         if ! test "$in" == "$out"; then
-            _io.err "Error in Function: <$(_args.errfn --get)>";
-            _io.err "Illigal whitespace in a function call argument (value: <$in>)";
+			local msg="
+				Error in Function: <$(_args.errfn --get)>
+				Illigal whitespace in a function call argument (value: <$in>)";
             _io.err
             _io.err "Call Stack: "$(_fn.stack);
             _io.err
@@ -129,9 +147,9 @@ _args.ws()
 
 _arg()
 {   
-	_dbg here1
+	dbg here1
     _args.errfn --set $(_fn.caller)
-	_dbg here2
+	dbg here2
 
     local arg="$1";
     _args.ws $arg
@@ -143,7 +161,7 @@ _arg()
     fi
 
     _args.ws "$1";
-    _io.echo $1;
+    _io.out $1;
 
     _args.errfn --clear;
 }
@@ -184,7 +202,7 @@ egfn()
     local a1=$(_arg $1);
     local a2=$(_arg ${2-'default'});
 
-    _io.echo $a1 $a2
+    _io.out $a1 $a2
 }
 
 egfn 'ws ws' hithere;

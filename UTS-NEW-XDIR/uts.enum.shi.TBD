@@ -1,6 +1,17 @@
 #/bin/bash
-
-uts.
+#
+# enum function <base>
+# - enum() <name> <item-list>
+#	- no whitespace
+#	- create 'named' enum [ fn <name>() ]
+#	- <name>() - default - echo values.
+#	- <name.is> => abort if <item> not in enum <name>.
+#	- <name.is> --ret <item> => return is <item> in enum <name>.
+#	
+# - later:
+#	--doc - desciption of enum.
+#	--mod - module for enum.
+#	?
 
 uts.const()
 {
@@ -43,34 +54,37 @@ uts.enum()
     local vals="$@";
 
     local tpl="
-		enum.$name()
+		$name()
 		{
-		    local flag=$1;
+		    local flag=\$1;
 		
-		    if test $flag == '--legal'
-		        local val=$2;             # must have.
+		    if test \$flag == '--chk'
+		        local val=\$2;
 		        for i in $(enum.$name);
-		            if test $i == $val; then
+		            if test \$i == \$val; then
 		                return 0;
 		            fi
 		        done
                 return 1;
 		    else
-		        echo "$@";
+		        echo \"$@\";
+				return 0;
 		    fi
+			return 1;
 		}
-    "
-
-    eval $tpl;
+    ";
+    echo $tpl;
 }
+
 
 uts.const Apple;
 uts.const Banana;
 uts.const Kiwi;
+uts.const Orange;
 
-uts.enum Fruit $(Apple) $(Banana) $(Kiwi);
+# uts.enum Fruit $(Apple) $(Banana) $(Kiwi);
 
-avalue=$(orange);
+avalue=$(Orange);
 
-if ! Fruit --legal; then echo 'error in assignment'; fi
+if ! Fruit --chk $avalue; then echo 'error in assignment'; fi
 

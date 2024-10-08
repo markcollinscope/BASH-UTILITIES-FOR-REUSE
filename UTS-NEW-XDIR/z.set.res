@@ -1,4 +1,3 @@
-# demons
 declare -g -a arr=('one two three' four five 'six seven');
 
 count() { echo $#; }
@@ -16,5 +15,8 @@ echo expected-result: 7
 
 set -- $(e)
 count "$@"
-echo expected-result: 
+echo expected-result:  7
 
+echo
+echo 'shows 1. that set -- works with a full inline arrays expansion: set -- "$|{arr[@]}"'
+echo 'shows 2. that echo-ing the result of full expansion from a function does not maintain spaces - i.e. loses internal arr structure.
