@@ -5,29 +5,199 @@
 # tmpFile evalerr isTerminalOutput setcol append (?) io.no io.ne io.none win.clear win.curpos
 
 # LEVEL 0 FNS
-
 # purely for uts debugging.
-readonly __DEBUG=true;
-dbg()
-{
-    $__DEBUG && _io.err "<${FUNCNAME[2]}>,<${FUNCNAME[1]}>: $@";
-}
 
-## basic sys stuff.
+if $___UTS_ECHO_INTERCEPT; then
+
+	___REALECHO=$(which echo);
+
+	_sys.echo()
+	{
+		echo -n "sys.echo" >&2;
+		echo "$@";
+	}
+
+	echo() 
+	{
+		if test "$1" = '--real'; then
+			shift;
+			$___REALECHO "$@";
+			return 0;
+		fi
+		_sys.echo "$@";
+	}
+
+fi
+
+_sys.err()	  { if ! test -z "$@"; then echo $* >&2; fi return 0; }
+
 _sys.abort()
 {
-    echo "system aborting (likely programming error) - bye!" >&2;
+	_sys.err "
+		$*
+		$${FUNCNAME[1]}>: programming error (likely).
+
+		Terminating Now.
+	";
+
     kill 0;
 }
 
-_sys.unreachable()
+
+_sys.ertn()	  { echo "$@"; }
+_sys.rtn()	  { echo "eval \"return $1\""; }
+
+_sys.out()	  { echo "$@"; }
+
+_sys.no()	  { "$@" >/dev/null; }
+_sys.ne()	  { "$@" 2>/dev/null; }
+_sys.none()	  { "$@" >/dev/null 2>/dev/null; }
+_sys.null()	  { test -z "$@"; }
+_sys.eval()	  { eval "$@"; }
+
+_sys.assert() { test -z "$@" && _sys.assert.err "value(s) cannot be null"; }
+
+_sys.const()
 {
-    echo "system - unreachable code error - it was reached!" >&2;
-	_sys.abort;
+	local name=$1; _sys.assert $name;
+	local value=${2:-$name}
+
+	local tpl="
+		_sys.$name() 
+		{
+			_sys.ertn $value;
+			$(_sys.rtn 0);
+		}
+	"
+	_sys.eval $tpl;
 }
 
-_sys.strict()
+_sys.const ErrStackSz 5;
+
+_sys.stack()  
 {
+	local n={1:-$(_sys.ErrStackSz)};
+
+	local res=""
+	for ((i=2; i<$n; i++)); do 
+		res="$FUNCNAME[$i] "' '"$res";
+	done; 
+	sys.ertn $res;
+}
+
+_sys.assert.err() 
+{ 
+	local ssz=$(_sys.ErrStackSz);
+
+	_sys.abort "
+		Assertion error [$@].
+		Cannot continue.
+
+		Call stack [max <$ssz> fns shown]: [$(_sys.stack)].
+	";
+}
+
+_sys.declared()
+{
+	local var=$1;
+	_sys.none declare -p $var
+}
+
+_sys.env()
+{
+	local envvarname=$1;
+	local value=$2;
+
+	if ! _sys.declared $envvarname; then
+
+		nb: 'declare global readonly var - initialise to fn-arg(2):value.'
+		_sys.eval "readonly $envvarname=$value";
+		return 0;
+
+	else 
+
+		nb: 'variable is declared. if not assigned a value already (i.e. in env) - initialised to fn-arg(2):value.'
+		local -n evar=$envvar;
+		evar=${$evar:-$value};
+		return 0;
+
+	fi
+	return 0;
+}
+
+_sys.env UTS_NO_DEBUG false;
+_sys.const Debug true;
+
+$(_sys.Debug) && dbg()
+{
+	$(_sys.Debug) && _sys.err "<${FUNCNAME[2]}>,<${FUNCNAME[1]}>: $@";
+}
+
+## basic sys stuff.
+
+_sys.assert.unreachable.code()
+{
+	local fn=${FUNCNAME[1]};
+	local fncaller=${FUNCNAME[2]};
+    _sys.abort "$fn (called by $fncaller): assertion violation due to executing 'unreachable code'";
+}
+
+
+_sys.sed()
+{
+	local pattern=$1;
+	shift;
+	local values="$@";
+
+	$(echo $values | sed "s/$pattern//g");
+}
+
+_sys.match()
+{
+	local pattern=$1;
+	local value=$2;
+	local sedvalue=$(_sys.sed $pattern $value);
+
+	! test $value = $sedvalue;
+}
+
+_sys.assert.nows()
+{
+	local count=0;
+	local fn=${FUNCNAME[1]};
+	local fncaller=${FUNCNAME[2]}:
+
+	for i in "$@"; do 
+		count=$((count+1));
+		if _sys.match ' ' $i || _sys.match '\t' $i; then
+
+			_sys.abort "
+				<$fn> [called by: <$fncaller>]: assertion error - whitespace detected in argument with value:<$i>.
+				[nb: this is argument \$<$count> to function:<$fn> and likely to calling function:<$fncaller>].
+
+			";
+
+		fi 
+	done
+	return 0;
+}
+
+_sys.assert.mutually.exclusive()
+{
+	_sys.assert.nows "$@";
+
+	local testvar=$1;
+	local rest=$*;
+}
+
+_sys.strict() # [--on|--off]
+{
+	local setopt='-u'; nb: strict on.
+	local flag=${1:-'--on'};
+
+	if test --on = "$flag"; then
+
+
     set -u;
 }
 _sys.strict;
@@ -38,7 +208,7 @@ _sys.exit()
     dbg exiting
     exit $exitval;
 
-	_sys.unreachable;
+	_sys.assert.unreachable.code;
 }
 
 ### IO basics
@@ -195,6 +365,7 @@ nb:() { :; }
 
 nb: below makes a difference. no err. with set -u, there is an error. 
 nb: but with below also fn.error.
+
 set +u
 
 egfn()
