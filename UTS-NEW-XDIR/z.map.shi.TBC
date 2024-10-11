@@ -2,77 +2,127 @@
 
 # THIS STUFF SEEMS TO WORK!
 
-caller()
+
+fn.return()
 {
-	echo afunction
+	echo "eval return $1";
 }
 
-uts.arg() { echo "$@"; }
+fn.echo()
+{
+	echo $*;
+}
 
-uts.err()
+fn.name()
+{
+	local l=${1:-1};
+	echo ${FUNCNAME[$l]};
+}
+
+fn.caller()
+{
+	fn.name 3;
+}
+
+arg() { echo "$@"; }
+
+err()
 {
 	echo $* >&2;
 }
 
-uts.abort()
+__abort()
 {
-	exit 1;
+	kill -9 0;
 }
 
-#---- replace above-------
+__match()
+{
+	local matchin=$(arg $1);
+	shift;
 
-uts.iseven()
+	for i in "$@"; do 
+		if test $matchin = $i; then 
+			$(fn.return 0);
+		fi
+	done
+	return 1;
+}
+
+___args()
+{
+	for i in "$@"; do
+		local sedi=$(echo $i | sed 's/ /xxx/');
+		if ! test "$sedi" = "$i"; then 
+			err "$(fn.caller) null space in arg"
+			__abort;
+		fi
+	done
+}
+
+__args()
+{
+	echo 'eval ___args "$@"'
+}
+
+flg.abort()
+{
+	echo '--assert --abort --ass'
+}
+
+int.even()
 { 
+	$(__args)
 	local fncall="$@";
 	local abort=false;
 
-	if test $1 = '--assert'; then
+	if __match $1 $(flg.abort); then
 		abort=true;
 		shift;
 	fi
 
-	local caller=$(caller);
-    local num=$(uts.arg $1);
+	local fncaller=$(fn.caller);
+    local num=$(arg $1);
 
 	local iseven=true;
     if ((num % 2 != 0)); then
 		iseven=false;
 	fi
 
+	err iseven: $iseven, abort: $abort.
 
-	if ! $iseven && $abort; then
-		uts.err "iseven: non even value passed, goodbye <$fncall>" >&2;
-		uts.abort;
-	elif ! $iseven; then
-		return 1;
-	fi
+	! $iseven && $abort && ( err "$(fn.name): non even value passed, goodbye <$fncall>" >&2 ; __abort; );
+	! $iseven && return 1;
 	return 0;
 }
 
+nb:() { :; }
+nb: above tested.
+
 _arr.init()
 {
-	local -n arrref=$(uts.arg $1);
+	local -n arrref=$(arg $1);
 	shift;
-	$arrre=("$@");
+	arrref=("$@");
 }
 
 _arr.len()
 {
-	local -n arrref=$(uts.arg $1);
+	local -n arrref=$(arg $1);
 	echo ${#arrref};
 }
 
 _arr.at()
 {
-	local -n arrref=$(uts.arg $1);
+	local -n arrref=$(arg $1);
 	local arrname=$1;
-	local pos=$(uts.arg $2);
+	local pos=$(arg $2);
 	local val=$3;
 
 	local len=$(_arr.len arrref);
 	if ((len > pos)); then
-		uts.err "array access outside range of array <$arrname> - len: $len, position: $pos"
-		uts.abort;
+		err "array access outside range of array <$arrname> - len: $len, position: $pos"
+		__abort;
 	fi
 
 	if test -z $val; then
@@ -86,8 +136,8 @@ _arr.at()
 
 uts.arr()
 {
-    local flag=$(uts.arg $1);
-    local -n aref=$(uts.arg $2);
+    local flag=$(arg $1);
+    local -n aref=$(arg $2);
 	local val=$3;
 
     if test $flag = "--len"; then
@@ -106,11 +156,11 @@ TEST HERE!
 
 _map.init()
 {
-	local -n mapref=$(uts.arg $1)
+	local -n mapref=$(arg $1)
 	shift
 
 	local nargs=$#;
-	uts.iseven --assert $nargs;
+	int.even --assert $nargs;
 
 	for ((i=1; i<$nargs; i+=2)); do
 		local key=${!i};
